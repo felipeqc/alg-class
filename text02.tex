@@ -1,0 +1,166 @@
+\newpage
+
+\section{Prerequisites}
+
+\begin{itemize}
+
+\item \textbf{Algorithm:} A step-by-step procedure for solving a certain \emph{problem}, e.g., ``sorting $n$ numbers'', ``find the closest coffee shop to your position''.
+
+\item \textbf{Quality Criteria:} termination,  correctness, speed, memory, simplicity, generality, randomization, approximation Quality.
+
+\item \textbf{Data Structure:} An organization of data such that certain operations can be handled efficiently. Ex: lists, heaps, etc.
+
+\item \textbf{Quality Criteria:} memory, preprocessing time, query time, update time, simplicity
+
+\end{itemize}
+
+To evaluate the performance, we require a model.
+
+
+\subsection{Random Access Model}
+
+Memory consists of a sequence of cells, with an address ${addr} \in \mathbb{N}$. There are registers that can hold data, where operations may be performed. We assume the word size if polynomially bounded in $\log n$.
+
+In this model, an algorithm is a numbered sequence of basic operations. The input of size $m$ for the algorithm is stored in memory $\{0, \ldots, m-1\}$. We have the following basic operations:
+
+\begin{enumerate}
+\item \textbf{load($i$, $j$):} Loads the content the memory cell with address stored in register $i$ into register $R_j$.
+\item \textbf{store($i$, $j$):} Stores the content of register $i$ into the memory cell addressed by register $R_j$.
+\item \textbf{assign($i$, $C$):} Stores $C$ into register $R_i$.
+\item \textbf{increment/decrement($i$):} Increases/decreases value at $R_i$ by 1.
+\item \textbf{op($i$, $j$, $k$):} Stores $R_i {op} R_j$ into $R_k$. ${op} \in \{+, \times, 0, \div, \mod, \wedge, \vee, \ldots\}$.
+\item \textbf{jump($i$):} Jumps to operation $i$ in the algorithm.
+\item \textbf{jump\_if($i$, $j$):} Jumps to operation $i$ in the algorithm if $R_j = 0$.
+\end{enumerate}
+
+\begin{algorithm}[h]
+\begin{lstlisting}
+assign(1, n) %*\quad*) -- 1
+assign(2, 0) %*\quad*) -- 1
+decrement(1) %*\quad*) -- n
+load(1,3) %*\quad*) -- n
+*(3,3,3) %*\quad*) -- n
++(3,2,2) %*\quad*) -- n
+jump_if(8,1) %*\quad*) -- n
+jump(2) %*\quad*) -- n-1
+store(2,0) %*\quad*) -- 1
+\end{lstlisting}
+\caption{Add the squares of the first $n$ numbers in memory. The time complexity is $6n +2$.}
+\end{algorithm}
+
+\textbf{Cost Model}: Every basic operation takes one time unit to execute.
+
+\begin{mydefinition}[Time Complexity]
+The time complexity/runtime of algorithm $A$ for input $I$, $T_A(I)$, is the number of basic operations performed by $A$ on $I$.
+\end{mydefinition}
+
+With this definition of time complexity, we can compare speeds using natural functions.
+
+\begin{mydefinition}[Worst-case]
+The worst-case complexity $T_A^{wc}(n)$ of algorithm $A$ is equal to $\max\{I_A(I) | I \in I_n\}$.
+\end{mydefinition}
+
+\begin{mydefinition}[Best-case]
+The best-case complexity $T_A^{wc}(n)$ of algorithm $A$ is equal to $\min\{I_A(I) | I \in I_n\}$.
+\end{mydefinition}
+
+\begin{mydefinition}[Average-case]
+The average-case complexity $T_A^{wc}(n)$ of algorithm $A$ is equal to $\frac{1}{|I_n|} \sum\limits_{I \in I_N} T_A(I)$.
+\end{mydefinition}
+
+\subsection{O-notation}
+
+\begin{mydefinition}
+Let $f: \mathbb{N} \rightarrow \mathbb{R}_+$ be a function, then:
+
+$$O(f(n)) = \{g: \mathbb{N}\rightarrow \mathbb{R}_+: \exists c>0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0: g(n) \le c \cdot f(n)\}$$
+
+$$\Omega(f(n)) = \{g: \mathbb{N}\rightarrow \mathbb{R}_+: \exists c>0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0: g(n) \ge c \cdot f(n)\}$$
+
+$$\Theta(f(n)) = O(f(n))\cap \Omega(f(n))$$
+
+$$o(f(n)) = \{g: \mathbb{N}\rightarrow \mathbb{R}_+: \forall c>0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0: g(n) \le c \cdot f(n)\}$$
+
+$$\omega(f(n)) = \{g: \mathbb{N}\rightarrow \mathbb{R}_+: \forall c>0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0: g(n) \ge c \cdot f(n)\}$$
+
+\end{mydefinition}
+
+Observation:
+\begin{itemize}
+\item $g \in O(f) \approx ``g \le f''$,
+\item $g \in \Omega(f) \approx ``g \ge f''$,
+\item $g \in \Theta(f) \approx ``g = f''$,
+\item $g \in o(f) \approx ``g < f''$,
+\item $g \in \omega(f) \approx ``g > f''$.
+\end{itemize}
+
+\begin{mylemma}
+Let $p(n) = \sum\limits_{i=0}^k a_i \cdot n^i$ with $a_k > 0$. Then $p(n) \in \theta(n^k)$.
+\end{mylemma}
+\begin{proof}
+\begin{enumerate}
+\item (Show that $p \in O(n^k)$).
+
+$$p(n) = \sum\limits_{i=0}^k a_i \cdot n^i \le \sum\limits_{i=0}^k |a_i| \cdot n^i
+\le \sum\limits_{i=0}^k |a_i| \cdot n^k \le \left ( \sum\limits_{i=0}^k |a_i| \right )\cdot n^k \le c \cdot n^k$$
+
+\item (Show that $p \in \Omega(n^k)$).
+
+$$p(n) \ge a_k \cdot n^k - \sum\limits_{i=0}^{k-1} |a_i| \cdot n^i \ge
+a_k \cdot n^k - n^{k-1} \cdot \sum\limits_{i=0}^{k-1} |a_i| =
+\frac{a_k}{2} n^k +  \frac{a_k}{2} n^k - A \cdot n^{k-1} = \frac{a_k}{2} n^k + n^{k-1}(\frac{a_k}{2} n - A) \ge $$
+
+\end{enumerate}
+\end{proof}
+
+\begin{mylemma}
+If $L := \lim_{n \rightarrow \infty} \frac{f(n)}{g(n)}$ exists, then:
+
+If $L = 0$ then $f(n) \in o(g(n))$. If $L \in (0, \infty)$ then $f(n) \in \Theta(g(n))$. If $L = \infty$ then $f(n) \in \omega(g(n))$.
+\end{mylemma}
+\begin{proof}
+{\color{red} HOMEWORK!}
+\end{proof}
+
+
+\begin{mylemma}
+$n \log(n) \in o(n^{1+\epsilon}$ for any $\epsilon > 0$.
+\end{mylemma}
+\begin{proof}
+$\lim_{n \rightarrow \infty} \frac{n \log n}{n^{1+\epsilon}} =
+\lim_{n \rightarrow \infty} \frac{\log n}{n^{\epsilon}} =
+\lim_{n \rightarrow \infty} \frac{\frac{1}{n}}{\epsilon \cdot n^{\epsilon - 1}} =
+\lim_{n \rightarrow \infty} \frac{1}{\epsilon \cdot n^{\epsilon}} = 0.$
+\end{proof}
+
+\begin{algorithm}
+\begin{lstlisting}
+Bubble_sort()
+Input: a[1], ..., a[n]
+Output: Sorted sequence
+For i from 1 to n-1 do
+    max_index = i
+    For j from i+1 to n do
+        if a[j] > a[max_index]
+        then max_index = j
+    end do
+    if i != max_index then
+        swap(a[i], a[max_index])
+end do
+\end{lstlisting}
+\end{algorithm}
+
+We compile this pseudocode to the machine model. This leads to the following cost model:
+
+\begin{itemize}
+\item cost(basic operation) = 1
+\item cost(\textbf{if} A \textbf{then} B \textbf{else} C) = cost (A) + max\{cost(B), cost(C)\}
+\item cost(\textbf{while} A \textbf{do} B) = (cost(A) + cost(B)) $\cdot$ iterations of the loop
+\end{itemize}
+
+Example. The cost of Bubble Sort is:
+
+\begin{align*}
+&\sum\limits_{i=0}^{n-1} (1 + (\sum\limits_{j=i+1}^n 3) + 3) = \sum\limits_{i=0}^{n-1} 4 + 3 \cdot \sum\limits_{j=i+1}^n 3 = \\
+&= 4n + 3 \sum\limits_{i=0}^{n-1} (n-i) = 4n + 3 \sum\limits_{i=1}^{n} i = \ldots = \Theta(n^2) \\
+\end{align*}

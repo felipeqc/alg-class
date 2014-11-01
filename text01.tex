@@ -1,0 +1,126 @@
+\section{Stable Matching}
+
+Discussed by Gale, Shapley in 1962 (context of job markets): This problem is also related the allocation of workers in hospitals.
+
+Each company a strict preference over applicants. Applicant has a strict preference over companies.
+
+Is there a solution that is self-enforcing?
+
+\begin{mydefinition}[Self-enforcing]
+A matching is self-enforcing if for every applicant A and company C, such that A is not assigned to C, either:
+\begin{itemize}
+\item C prefers every one of its accepted applicants over A, or 
+\item A prefers his current situation over working for C.
+\end{itemize}
+\end{mydefinition}
+
+
+
+\section{Formal Model}
+
+\begin{itemize}
+\item Set X of man, 	$n = |X|$
+
+\item Set Y of woman,	$m = |Y|$
+
+\item Each $x \in X$ has a strict preference order $>_x$ over $Y$.
+
+\item Each $y \in Y$ has a strict preference order $>_y$ over $X$.
+
+\item Matching $M \subseteq X \times Y$ is a set of ordered pairs such that
+every agent appears in at most one pair.
+\end{itemize}
+
+A blocking pair $(x,y)$ is a pair such that either $x$ or $y$ prefers some other person than its current match. A stable matching does not have blocking pairs.
+
+\textbf{Problem:} Does there always exist a stable matching? Can we compute it in polynomial time?
+
+Note: There may be solutions that are unfair, that is, they satisfy only one side (companies or workers).
+
+\section{Deferred Acceptance Algorithm}
+
+\textbf{Main idea}: Starts with an empty set of edges.
+
+\begin{algorithmic}[1]
+    \State{Initially, all $x \in X$ and all $y \in Y$ are free.}
+    \While{$\exists$ free man $x$ that has not proposed to all women}
+        \State{Let $y$ be the highest-ranked proposed women for $x$ that he hasn't proposed to
+}
+        \State{$x$ proposes to $y$}
+        \If{$y$ is free}
+            \State{$(x,y)$ gets engaged}
+        \Else
+            \State{$y$ currently engaged to $x'$}
+            \If{$x >_y x'$}
+                \State{$(x,y)$ gets engaged and $x'$ becomes free}
+            \EndIf
+        \EndIf
+    \EndWhile
+\end{algorithmic}
+
+\begin{theorem}
+The DA algorithm terminates after $n \cdot m$ iterations.
+\end{theorem}
+\begin{proof}
+Some straightforward properties:
+\begin{enumerate}
+\item If $y$ becomes engaged, she will be matched in the end. The engagement partners are improving with respect to her preference $>_y$ over time.
+\item $x$ proposes in decreasing order of $>_x$.
+Thus, number of iterations is upper bounded by $n \cdot m$.
+\end{enumerate}
+
+Let $y >_x y'$ and $x >_y x'$. By contradiction, suppose in the final matching there is a BP, that is, we have a matching $M=\{(x,y'), (x', y)\}$.
+
+- Note that $y >_x y'$, so by algorithm, $x$ proposed to $y$.
+
+- Then $x$ proposed to $y'$, but $x$ becomes free afterwards.
+
+- $y$ had a better engaged partner $x' >_y x$.
+
+Contradiction.
+\end{proof}
+
+\subsection{Formalisms}
+
+\begin{enumerate}
+
+\item Woman $y$ is a \emph{valid partner} for a man $x$ if there exists a SM $M$ with $(x,y) \in M$.
+
+\item Valid partner $y$ is the \emph{best valid partner} for man $x$ if for every valid partner $y' \neq y$, we have that $y >_x y'$.
+
+\item Similar for \emph{worst valid partner}.
+\end{enumerate}
+
+\textbf{Notation:} $y = best(x)$ and $best(x) = x$ if $x$ has no valid partner.
+
+We define the optimal matching as follows:
+
+$$M^+ = \{ (x, best(x) | x \in X \wedge best(x) \neq x\}$$
+
+\begin{theorem}
+Every execution of the DA algorithm results in $M^+$.
+\end{theorem}
+\begin{proof}
+Contradiction. Assume there is an execution $E$ of the DA algorithm resulting in a SM $M$, where some man is not matched to his best valid partner. This means that this man was rejected by a better valid partner during $E$.
+
+Consider the first time that this happens, i.e., a man $x$ is rejected by a valid partner.
+
+We have $(x',y)$, with $x' >_y x$.
+
+\begin{enumerate}
+\item $x$ proposed in decreasing order of preference, $y$ is ${best}(x)$.
+\item $y$ rejects $x$, so $y$ is engaged to $x'$, with $x' >_y x$.
+\item There exists Sm M with $(x,y) \in M$. Let $(x', y') \in M$.
+\item Since rejection by $y$ was first in $E$, then $x'$ is not rejected by any valid partner when engaged to $y$. Since $y'$ is a valid partner of $x'$, $y >_x y'$. Then $(x', y)$ is a BP for $M$. But we assumed that $M$ is stable! Contradiction.
+\end{enumerate}
+\end{proof}
+
+\begin{theorem}
+In $M^+$, every woman is matched to her worst valid partner (if any).
+\end{theorem}
+\begin{proof}
+Suppose $(x,y) \in M^+$ such that $x$ is not the worst valid partner of $y$.
+Then there exists an SM $M'$ with $(x', y) \in M'$ and $x >_y x'$.
+In $M'$ we have $(x, y') \in M'$. $y = {best}(x)$ and $y'$ is a valid partner for $x$. So $y >_x y'$. Then $(x,y)$ is a BP in $M'$. Contradiction.
+Similar if $x$ is unmatched in $M'$.
+\end{proof}

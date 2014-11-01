@@ -1,0 +1,167 @@
+\section{Basic Data Structures}
+
+\noindent \textbf{Goal:} Store ordered sequences $a_1, \ldots, a_k$ of elements.
+
+\subsection{(Static) Array}
+
+We can store elements in a contiguous region of memory. Element $a_i$ can be accessed in constant time.
+
+\begin{itemize}
+\item \textbf{(+)} Access to $i^{th}$ element
+\item \textbf{(-)} Insert, delete
+\end{itemize}
+
+\subsection{Linked Lists}
+
+\noindent Each \emph{item} contains:
+\begin{enumerate}
+\item An element $e$
+\item Pointer to next item in the sequence
+\item Pointer to the previous item in the sequence
+\end{enumerate}
+
+\noindent We also allocate a \emph{dummy item/head} that contains:
+\begin{enumerate}
+\item Stores $\bot$ (\emph{nil})
+\item Next pointer points to first element
+\item Prev pointer points to last elements
+\end{enumerate}
+
+A pointer to the \emph{head} item is used as a starting point for the operations (passed by parameter). We have the following operations:
+
+\begin{itemize}
+\item \emph{first\_element(h), last\_element(h), is\_empty(h)}: $\Theta(1)$
+\item \emph{splice(a,b,t)}: Cuts entire sub-list $[a,b]$ and puts it between $t$ and $t'$. $\Theta(1)$
+\item \emph{insert\_after(v, a)}: Takes element $v$ and inserts it after $a$. $\Theta(1)$
+\item \emph{remove(a)}: Removes $a$ from its list. $\Theta(1)$
+\item \emph{size of list}: It depends, since elements of sublists cannot be easily counted!
+\item \emph{find(h, x)}: Is $x$ an element of the list? Returns pointer to the item that contains $x$, or $h$ if $x \notin $ list.
+\end{itemize}
+
+\begin{algorithm}
+\begin{lstlisting}
+insert_after(v,a):
+    Create a list L with one item i, storing v.
+    splice(v, v, a)
+    Delete L.
+\end{lstlisting}
+\begin{lstlisting}
+remove(a):
+    Create empty list L with head h.
+    splice(a, a, h)
+    Delete L.
+\end{lstlisting}
+\begin{lstlisting}[mathescape]
+find1(h,x):
+    cur $\gets$ h->next
+    while cur->e != x do
+        if (run ==h) then break
+        run $\gets$ cur->next
+    end do
+    return cur
+\end{lstlisting}
+\begin{lstlisting}[mathescape]
+find2(h,x) [Sentinel Search]:
+    (h->e) $\gets$ x
+    cur $\gets$ h->next
+    while cur->e != x do
+        cur $\gets$ cur->next
+    end do
+    h->e $\gets \bot$
+    return cur
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+\subsection{Unbounded Arrays}
+
+We want to support
+\begin{itemize}
+\item Operator []: quick access to $i^{th}$ element
+\item push\_back(v): append v to array
+\item pop\_back(): Remove last element
+\item size(): Returns number of elements
+\end{itemize}
+
+\noindent \textbf{Idea:} Static array of size $w$ for storing $n$ elements, with $w \ge n$. To fix the problem of having a limited array, we do a reallocation. We move all elements to a new array that is twice as large. Whenever $n \le \frac{w}{4}$ starts to be the common case, we reallocate the array to half size.
+
+The problem is that push and pop can take:
+\begin{itemize}
+\item $\Theta(1)$ if no alloc is needed (good case)
+\item $\Theta(n)$ if alloc is needed (bad case)
+\end{itemize}
+
+However, a bad case is preceded by roughly $n$ good cases to happen. In other words, the bad case is amortized by the good case. The following lemma shows that push-/pop-back operations have constant \emph{amortized} worst-case complexity.
+
+\begin{mylemma}
+A sequence of $m$ push-/pop-backs takes $\Theta(m)$ time.
+\end{mylemma}
+\begin{proof}[Proof (Bank Account Method)]
+For any push-back we pay 2 tokens to a bank account. For any pop-back, we pay 1 token. We show that for a reallocation, we have enough tokens on the account to pay for moving the elements.
+
+By induction. We initialize an empty array with $w=1$. $a_0$ adds 2. For the first reallocation, we have enough tokens to pay for the move.
+
+After a reallocation, it holds that $n = w/2$. The next reallocation happens if (1) $n = w$ or if $n = w/4$. If $n=w$, we must have performed $w/2$ push-backs.
+So, the bank account has at least $w$ tokens. enough for the $w$ movesin the next reallocation. If $n = w/4$, then we have $w/4$ pop-backs, each paying 1 token. So, the bank account has at least $w/4$ tokens. That is enough to pay for the move.
+\end{proof}
+
+\newpage
+
+\subsection{Stacks, Queues, Deques}
+
+\noindent Stacks support:
+\begin{itemize}
+\item push\_back(v)
+\item pop\_back()
+\item last()
+\item size()
+\end{itemize}
+
+\noindent Queues support:
+\begin{itemize}
+\item push\_back(v)
+\item pop\_front()
+\item first()
+\item size()
+\end{itemize}
+
+\noindent Queues support:
+\begin{itemize}
+\item push\_back(v)/push\_front(v)
+\item pop\_front()/pop\_front()
+\item first()/last()
+\item size()
+\end{itemize}
+
+\noindent Lists (with restricted splice) can do all that in $\Theta(1)$.
+
+\bigskip \noindent Stacks can be implemented with unbounded arrays.
+
+\bigskip \noindent Queues can be implemented with circular arrays of fixed size $w$, using two pointers \emph{head} and \emph{tail}. Range $[h, t-1]$ stores the entries. Array is empty if $h = t$, and the size $n$ is given by $n = (t - h + w) \mod w$. We do reallocation as usual, by checking the size. This also works for deques.
+
+\subsection{Basic Probability}
+
+\textbf{Probability space $S$}: finite set with probabilities $P_s$ for $s \in S$, such that ${\sum_{s \in S} P_s = 1}$.
+
+\noindent \textbf{Uniform probability space:} S is uniform if $\forall s \in S, P_s = 1/|S|$.
+
+\noindent \textbf{Event:} $E \subseteq S$. ${prob}(E) \triangleq \sum_{S \in E} P_S$. If $S$ is uniform, ${prob}(E) = \frac{|E|}{|S|}$.
+
+\noindent \textbf{Random Variables:} $X: S \rightarrow \mathbb{R}$
+\begin{itemize}
+\item can be composed: $X+Y, X\cdot Y, \ldots$
+\item can be used for events: ${prob}(X \ge 5)$
+\item indicator variables: $X: S \rightarrow \{0, 1\}$
+\end{itemize}
+
+\noindent \textbf{Expected Value:} $E[X] = \sum_{P_s X(s)} = \sum_{z \in \mathbb{R}} z \cdot {prob}(X = z)$.
+
+\noindent \textbf{Linearity of expectation:} $E[X + Y] = E[X] + E[Y]$.
+
+Variables $X_1,\ldots,X_k$ are independent if $\forall x_1,\ldots,x_k \in S$, ${prob}(X_1 = x_1 \wedge \cdots \wedge X_k = x_k) = \prod_{1 \le i \le k} {prob}(X_i = x_i)$.
+
+\bigskip \noindent If $X$ and $Y$ are independent, then $E[X \cdot Y] = E[X] \cdot E[Y]$.
+
+\bigskip \noindent \textbf{Markov Inequality:} For a non-negative $X$ and $x > 1$, ${prob}(X \ge k E[X]) \le 1/c$. 
+
