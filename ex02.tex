@@ -1,0 +1,283 @@
+\documentclass{article}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+
+\title{Exercise 02 - Algorithms and Data Structures}
+\author{Felipe Cerqueira (2547787) \quad David Swasey}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+\section{Exercise 1 (10 pts)}
+
+\noindent a) Prove the statement from the lecture: If for two functions $f, g: \mathbb{N} \rightarrow \mathbb{R}$, the value $L := \lim_{n \rightarrow \infty} \frac{f(n)}{g(n)} \in [0, \infty)$ exists, then
+
+\begin{itemize}
+\item if $L = 0$, then $f(n) \in o(g(n))$.
+\item if $L \in (0, \infty)$, then $f(n) \in \Theta(g(n))$.
+\item if $L = \infty$, then $f(n) \in \omega(g(n))$.
+\end{itemize}
+
+\bigskip \noindent \textbf{Answer:}
+
+We can prove with using the formal definition of limit. The definitions we use for O-notation assume that $f$ and $g$ are positive functions.
+
+\begin{itemize}
+\item 1) \textbf{If $L = 0$, then $f(n) \in o(g(n))$.}
+
+By definition of limit at infinity:
+
+$$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0, \left | \frac{f(n)}{g(n)} - L \right | < c$$
+
+Since $L=0$ and the functions are positive, this implies that:
+
+$$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0, f(n) \le c \cdot g(n)$$
+
+Thus, $f(n) = o(g(n))$.
+
+\bigskip
+
+\item 2) if $L \in (0, \infty)$, then $f(n) \in \Theta(g(n))$.
+
+By definition of limit at infinity:
+
+$$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0, \left | \frac{f(n)}{g(n)} - L \right | < c$$
+
+Thus:
+
+$$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0,  \left | \frac{f(n) - L \cdot g(n)}{g(n)} \right | < c$$
+
+This leads to two possible solutions. First:
+
+$$f(n) \le (c + L) \cdot g(n)$$
+
+Here, $\exists c' > 0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0$, $f(n) \le c' g(n)$.
+That is, $f(n) = O(g(n))$.
+
+\bigskip And as a second solution we have:
+
+$$f(n) \ge (L - c) \cdot g(n)$$
+
+Here $\exists c', 0 < c' < L, \exists n_0 \in \mathbb{N}, \forall n \ge n_0$, $f(n) \ge c' g(n)$. That is, $f(n) = \Omega(g(n))$.
+
+\bigskip
+\item 3) if $L = \infty$, then $f(n) \in \omega(g(n))$.
+
+
+\end{itemize}
+
+\noindent b) Give an example of two (non-negative) functions $f,g$ with $f \in \Theta(g)$, but $\lim_{n \rightarrow \infty}\frac{f(n)}{g(n)}$ does not exist.
+
+%We can use $f(n) = \frac{1}{n}$ and $g(n) = n$. $\lim_{n \rightarrow \infty} \frac{\frac{1}{n}}{n} = 0$.
+
+\bigskip \noindent \textbf{Answer:}
+
+\noindent c) Prove the following rules for O-notation:
+\begin{itemize}
+\item \textbf{For any positive constant} $c$, $c \cdot f(n) = \Theta(f(n))$.
+
+Let $c$ be any positive constant. Note that $\forall n, c f(n) \le c f(n)$. Then $\exists c' = c > 0$ and $\exists n_0 = 0$, such that $\forall n \ge n_0$, $c\cdot f(n) \le c' \cdot f(n)$. So $c f(n) = O(f(n))$.
+
+Likewise, $\forall n, c f(n) \ge c f(n)$. Then $\exists c' = c > 0$ and $\exists n_0 = 0$, such that $\forall n \ge n_0$, $c\cdot f(n) \ge c' \cdot f(n)$. So $c f(n) = \Omega(f(n))$.
+
+
+
+\item $\mathbf{f(n) + g(n) = \Omega(f(n))}$.
+
+Since $g(n) \ge 0$, then $f(n) + g(n) \ge 1 \cdot f(n)$. Thus, $\exists c = 1 > 0$ and $\exists n_0 = 0$, such that $\forall n \ge n_0, g(n) + f(n) \ge c \cdot f(n)$.
+
+\item If $\mathbf{g(n) = O(f(n))}$, then $\mathbf{f(n) + g(n) = O(f(n))}$.
+
+Assume that $\exists c > 0$ and $\exists n_0 \in 
+\mathbb{N}$, such that $\forall n \ge n_0$, $g(n) \le c \cdot f(n)$.
+Then, $\forall n \ge n_0$, $f(n) + g(n) \le f(n) + c \cdot f(n) = (c+1) \cdot f(n)$.
+
+Therefore, $\exists c' = (c+1)$ and $\exists n_0 \in 
+\mathbb{N}$, such that $\forall n \ge n_0$, $f(n) + g(n) \le c' \cdot f(n)$. That is, $f(n) + g(n) = O(f(n))$.
+
+
+\item $O(f(n)) \cdot O(g(n)) = O(f(n) \cdot g(n))$.
+
+Consider any $y(n) = O(f(n))$ and any $y' = O(g(n))$.
+
+We know that $\exists c > 0$ and $\exists n_0 \in 
+\mathbb{N}$, such that $\forall n \ge n_0$, $y(n) \le c \cdot f(n)$.
+
+Similarly, $\exists c' > 0$ and $\exists n_0' \in 
+\mathbb{N}$, such that $\forall n \ge n_0'$, $y'(n) \le c' \cdot g(n)$.
+
+Let $n_0'' = n_0 + n_0'$.
+
+Then $\forall n \ge n_0''$,
+
+$$y(n) \le c \cdot f(n)$$
+
+$$y'(n) \le c' \cdot g(n)$$
+
+That is,
+
+$$y(n) \cdot y'(n) \le c \cdot c' \cdot f(n) \cdot g(n)$$
+
+Therefore, $\exists c'' = c \cdot c' > 0$ and $\exists n_0'' \in 
+\mathbb{N}$, such that $\forall n \ge n_0''$, $y(n)\cdot y'(n) \le c'' \cdot f(n) \cdot g(n)$. It follows that $O(f(n)) \cdot O(g(n)) = O(f(n) \cdot g(n))$.
+
+\end{itemize}
+
+\bigskip \noindent \textbf{Answer:}
+
+\noindent d) Show that $a^n = o(b^n)$ and $\log_a n = \Theta (\log_b n)$ for any $1 < a < b$.
+
+\bigskip \noindent \textbf{Answer:}
+
+For the first case, note that $\lim_{n \rightarrow \infty}\frac{a^n}{b^n} = \lim_{n \rightarrow \infty}\left (\frac{a}{b} \right )^n = 0$, since $a/b < 1$. Thus, by the theorem from the lecture, $a^n = o(b^n)$.
+
+For the other function:
+
+$$\lim_{n \rightarrow \infty}\frac{log_a n}{log_b n} = \lim_{n \rightarrow \infty}\frac{\log_b n}{\log_b a \cdot \log_b n} = \lim_{n \rightarrow \infty} \log_a b \in (0,\infty)$$
+
+By the theorem from the lecture, $log_a n = \Theta(\log_b n)$.
+
+\section{Exercise 2 (10 pts)}
+
+With incomplete lists, some agents may remain single in a stable matching. We show that all stable matchings match the same set of agents. More formally, consider any instance of stable matchings with incomplete lists and show the following statement:
+
+For two stable matchings $M$ and $M'$, man $x$ is matched in $M$ if and only if $x$ is matched in $M'$. Similarly, woman $y$ is matched in $M$ if and only if $y$ is matched in $M'$.
+
+\bigskip \noindent \textbf{Answer:}
+
+By contradiction. Without loss of generality, assume that some node $x_0$ is matched in $M$, but not matched in $M'$. Let $(x_0, y_0) \in M$ be the corresponding edge. We can show that given these assumptions, the graph $G$ is not finite.
+
+The intuition behind the proof is that the absence of an edge in either $M$ or $M'$ can only be explained by the existence of a more preferred vertex outside the set we are analyzing. This would make the graph be indefinitely large, so it cannot be true.
+
+\begin{mylemma}
+For every $i \in \mathbb{N}$, the graph $G$ contains vertices $x_i$ and $y_i$, where $(x_i, y_i)$ is in $M$ but not in $M'$, and where $(x_{i+1}, y_i)$ is in $M'$ but not in $M$.
+\end{mylemma}
+\begin{proof}
+By strong induction on $i$. Note that $(x_0, y_0)$ is in $M$ and not in $M'$.
+
+By IH, assume that for every $i \le j$, the graph $G$ contains vertices $x_i$ and $y_i$, where $(x_i, y_i)$ is in $M$ but not in $M'$, and where $(x_{i+1}, y_i)$ is in $M'$ but not in $M$.
+
+Because $M'$ is stable, $\forall i \le j, (x_i, y_i) \notin M'$ implies the existence of a vertex $x_{j+1}$ that is preferred by $y_j$ over every $x_i$, and that $(x_{j+1}, y_j) \in M'$.
+
+Because $M$ is stable, since $y_j$ prefers $x_{j+1}$, and since $\forall i, (x_{i+1}, y_i) \notin M$, then there is a vertex $y_{j+1}$ that is preferred by $x_{j+1}$ over every $y_i$, and ${(x_{j+1}, y_{j+1}) \in M}$.
+\end{proof}
+
+\noindent By the previous lemma, $G$ is not finite. Contradiction.
+
+\section{Exercise 3 (10 pts)}
+
+In an instance of stable matching with incomplete lists, a \emph{maximum matching} $M^*$ is a matching with maximum number of non-forbidden pairs. We denote by $|M^*|$ the number of pairs in $M^*$ and by $|M|$ the number of pairs in any stable matching $M$. Show that $|M| \ge |M^*|/2$, i.e., every stable matching has at least half the number of pairs of a maximum matching.
+
+\bigskip \noindent \textbf{Answer:}
+
+Because every maximal matching has at least $|M^*|/2$ edges (known result from graph theory), it is sufficient to prove
+that any stable matching $M$ is also maximal (with respect to the set of non-forbidden edges).
+
+\begin{mydefinition}
+A matching M of a graph G is maximal if every edge in G has a non-empty intersection with at least one edge in M.
+\end{mydefinition}
+
+\begin{mylemma}
+Every stable matching M is a maximal matching.
+\end{mylemma}
+\begin{proof}
+Let $M$ be a stable matching. By contradiction, assume $M$ is not maximal, i.e., that there is a non-forbidden edge $(x,y)$ in the graph such that neither $x$ nor $y$ are matched in $M$. Because this edge is non-forbidden, $x$ and $y$ would prefer to be paired than staying alone, i.e., $(x,y)$ is a blocking pair with respect to $M$. Thus, $M$ cannot be a stable matching. Contradiction.
+\end{proof}
+
+\section{Exercise 4 (10 pts)}
+
+Suppose the preference lists of one side, say the women, are private information of the agents. The main question in this exercise is: Can a woman $y$ end up better by lying about her preferences? Suppose $x \succ_y x'$, but both $x$ and $x'$ are low on $y$'s list. Now instead of the real list $\succ_y$, in the beginning $y$ reports a false list $\succ_y'$. Can she switch the order of $x$ and $x'$ such that running the DA algorithm with $\succ_y'$ assigns her to a better man $x''$ with $x'' \succ_y x$? Resolve this question in one of the following two ways:
+
+\begin{itemize}
+\item Give a proof that, for any set of preference lists, switching the order of a pair on the list cannot improve a woman's partner in the DA algorithm; or
+\item Give an example of a set of preference lists for which there is a switch that would improve the partner of a woman who switched preferences.
+\end{itemize}
+
+\bigskip \noindent \textbf{Answer:}
+
+$$A \succ_X B \succ_X C$$
+$$B \succ_Y A \succ_Y C$$ 
+$$A \succ_Z B \succ_Z C$$
+
+$$Y \succ_A X \succ_A Z$$
+$$X \succ_B Y \succ_B Z$$ 
+$$X \succ_C Y \succ_C Z$$
+
+If a woman lies about her preference, she can reject a man that she does not like much (which in turn won't propose again to her). This way, in the future rounds, she may be picked by a man that she likes more. For example:
+
+\bigskip
+\noindent X proposes to A. A accepts. \\
+\noindent Z proposes to A. A accepts and drops X (even though A prefers X). \\
+\noindent X proposes to B. B accepts. \\
+\noindent Y proposes to B. B rejects. (B prefers X) \\
+\noindent Y proposes to A. A accepts. (now A gets a better partner) \\
+\noindent ...
+
+\section{Exercise 5 (10 pts)}
+
+Consider a different way to construct a stable matching. Start with the empty matching $M = \emptyset$ and do the following: Pick an arbitrary blocking pair $(x, y)$ and resolve it by adding $(x, y)$ to $M$ and deleting any existing pairs $(x, \cdot)$ and $(\cdot, y)$ from $M$. Repeat until no blocking pair exists. Does this algorithm compute a stable matching? Resolve the question in one of the following two ways:
+
+\begin{enumerate}
+\item Give a proof that, for any set of preference lists and any sequence of blocking pair resolutions, the algorithm always terminates.
+\item Give an example of a set of preference lists and a sequence of blocking pair resolutions such that the algorithm does not terminate.
+\end{enumerate}
+
+
+\bigskip \noindent \textbf{Answer:}
+
+This algorithm is correct and terminates, because every time an arbitrary blocking pair is resolved, there is an order behind this selection. When $(x,y)$ is matched, both $x$ is matched to a strictly higher-ranked $y >_x y'$, for some $y'$, and $y$ is matched to a strictly higher-ranked $x >_y x'$, for some $x'$.
+Because for each vertex there is a finite number of higher-ranked vertices to be paired with, the algorithm will eventually terminate.
+
+\end{document}

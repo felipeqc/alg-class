@@ -1,0 +1,168 @@
+\documentclass{article}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+
+\title{Exercise 01 - Algorithms and Data Structures}
+\author{Felipe Cerqueira (2547787) \quad David Swasey}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00?
+
+\section{Exercise 1 (10 pts)}
+
+For stable matching with incomplete lists, each man $x \in X$ has a strict list $\succ_x$ over a subset of the women $\mathcal{Y}$, i.e., $\succ_x$ is possibly incomplete. Similarly, a woman $y \in \mathcal{Y}$ might not rank all men in $\mathcal{X}$. Pairs $(x,y)$ where $x$ does not tank $y$ or $y$ does not rank $x$ are forbidden.
+
+Equivalently, we may think of this scenario as $\succ_x$ being a complete strict preference list over $\mathcal{Y} \cup \{x\}$. If $x \succ_y y$, this means $x$ prefers to stay alone rather than be matched to $y$. Similarly, each $y \in \mathcal{Y}$ has a list $\succ_y$ over $\mathcal{X} \cup \{y\}$.
+
+Using this formulation, the definitions of blocking pair and stable matching can directly be generalized. Show that there is always a stable matching and how to compute it efficiently, even when we have incomplete lists.
+
+\bigskip \noindent \textbf{Answer:}
+
+The algorithm and proofs are exactly the same ones seen in class, except for the fact that $x$ is also part of the preference relation $\succ_x$. That is, $x$ is simply seen as another possible match. For any allowed match $y^{ok} \in \mathcal{Y}$, and for any forbidden match $y^{not} \in \mathcal{Y}$, it is the case that $y^{ok} \succ_x x \succ_x y^{not}$. Basically, $x$ acts as a dummy pair that prevents forbidden pairs being picked.
+
+After we execute the algorithm, self-links $(x,x)$ in the solution represent nodes that should remain unmatched.
+
+\section{Exercise 2 (10 pts)}
+
+With incomplete lists, some agents may remain single in a stable matching. We show that all stable matchings match the same set of agents. More formally, consider any instance of stable matchings with incomplete lists and show the following statement:
+
+For two stable matchings $M$ and $M'$, man $x$ is matched in $M$ if and only if $x$ is matched in $M'$. Similarly, woman $y$ is matched in $M$ if and only if $y$ is matched in $M'$.
+
+\bigskip \noindent \textbf{Answer:}
+
+By contradiction. Without loss of generality, assume that some node $x_0$ is matched in $M$, but not matched in $M'$. Let $(x_0, y_0) \in M$ be the corresponding edge. We can show that given these assumptions, the graph $G$ is not finite.
+
+The intuition behind the proof is that the absence of an edge in either $M$ or $M'$ can only be explained by the existence of a more preferred vertex outside the set we are analyzing. This would make the graph be indefinitely large, so it cannot be true.
+
+\begin{mylemma}
+For every $i \in \mathbb{N}$, the graph $G$ contains vertices $x_i$ and $y_i$, where $(x_i, y_i)$ is in $M$ but not in $M'$, and where $(x_{i+1}, y_i)$ is in $M'$ but not in $M$.
+\end{mylemma}
+\begin{proof}
+By strong induction on $i$. Note that $(x_0, y_0)$ is in $M$ and not in $M'$.
+
+By IH, assume that for every $i \le j$, the graph $G$ contains vertices $x_i$ and $y_i$, where $(x_i, y_i)$ is in $M$ but not in $M'$, and where $(x_{i+1}, y_i)$ is in $M'$ but not in $M$.
+
+Because $M'$ is stable, $\forall i \le j, (x_i, y_i) \notin M'$ implies the existence of a vertex $x_{j+1}$ that is preferred by $y_j$ over every $x_i$, and that $(x_{j+1}, y_j) \in M'$.
+
+Because $M$ is stable, since $y_j$ prefers $x_{j+1}$, and since $\forall i, (x_{i+1}, y_i) \notin M$, then there is a vertex $y_{j+1}$ that is preferred by $x_{j+1}$ over every $y_i$, and ${(x_{j+1}, y_{j+1}) \in M}$.
+\end{proof}
+
+\noindent By the previous lemma, $G$ is not finite. Contradiction.
+
+\section{Exercise 3 (10 pts)}
+
+In an instance of stable matching with incomplete lists, a \emph{maximum matching} $M^*$ is a matching with maximum number of non-forbidden pairs. We denote by $|M^*|$ the number of pairs in $M^*$ and by $|M|$ the number of pairs in any stable matching $M$. Show that $|M| \ge |M^*|/2$, i.e., every stable matching has at least half the number of pairs of a maximum matching.
+
+\bigskip \noindent \textbf{Answer:}
+
+Because every maximal matching has at least $|M^*|/2$ edges (known result from graph theory), it is sufficient to prove
+that any stable matching $M$ is also maximal (with respect to the set of non-forbidden edges).
+
+\begin{mydefinition}
+A matching M of a graph G is maximal if every edge in G has a non-empty intersection with at least one edge in M.
+\end{mydefinition}
+
+\begin{mylemma}
+Every stable matching M is a maximal matching.
+\end{mylemma}
+\begin{proof}
+Let $M$ be a stable matching. By contradiction, assume $M$ is not maximal, i.e., that there is a non-forbidden edge $(x,y)$ in the graph such that neither $x$ nor $y$ are matched in $M$. Because this edge is non-forbidden, $x$ and $y$ would prefer to be paired than staying alone, i.e., $(x,y)$ is a blocking pair with respect to $M$. Thus, $M$ cannot be a stable matching. Contradiction.
+\end{proof}
+
+\section{Exercise 4 (10 pts)}
+
+Suppose the preference lists of one side, say the women, are private information of the agents. The main question in this exercise is: Can a woman $y$ end up better by lying about her preferences? Suppose $x \succ_y x'$, but both $x$ and $x'$ are low on $y$'s list. Now instead of the real list $\succ_y$, in the beginning $y$ reports a false list $\succ_y'$. Can she switch the order of $x$ and $x'$ such that running the DA algorithm with $\succ_y'$ assigns her to a better man $x''$ with $x'' \succ_y x$? Resolve this question in one of the following two ways:
+
+\begin{itemize}
+\item Give a proof that, for any set of preference lists, switching the order of a pair on the list cannot improve a woman's partner in the DA algorithm; or
+\item Give an example of a set of preference lists for which there is a switch that would improve the partner of a woman who switched preferences.
+\end{itemize}
+
+\bigskip \noindent \textbf{Answer:}
+
+$$A \succ_X B \succ_X C$$
+$$B \succ_Y A \succ_Y C$$ 
+$$A \succ_Z B \succ_Z C$$
+
+$$Y \succ_A X \succ_A Z$$
+$$X \succ_B Y \succ_B Z$$ 
+$$X \succ_C Y \succ_C Z$$
+
+If a woman lies about her preference, she can reject a man that she does not like much (which in turn won't propose again to her). This way, in the future rounds, she may be picked by a man that she likes more. For example:
+
+\bigskip
+\noindent X proposes to A. A accepts. \\
+\noindent Z proposes to A. A accepts and drops X (even though A prefers X). \\
+\noindent X proposes to B. B accepts. \\
+\noindent Y proposes to B. B rejects. (B prefers X) \\
+\noindent Y proposes to A. A accepts. (now A gets a better partner) \\
+\noindent ...
+
+\section{Exercise 5 (10 pts)}
+
+Consider a different way to construct a stable matching. Start with the empty matching $M = \emptyset$ and do the following: Pick an arbitrary blocking pair $(x, y)$ and resolve it by adding $(x, y)$ to $M$ and deleting any existing pairs $(x, \cdot)$ and $(\cdot, y)$ from $M$. Repeat until no blocking pair exists. Does this algorithm compute a stable matching? Resolve the question in one of the following two ways:
+
+\begin{enumerate}
+\item Give a proof that, for any set of preference lists and any sequence of blocking pair resolutions, the algorithm always terminates.
+\item Give an example of a set of preference lists and a sequence of blocking pair resolutions such that the algorithm does not terminate.
+\end{enumerate}
+
+
+\bigskip \noindent \textbf{Answer:}
+
+This algorithm is correct and terminates, because every time an arbitrary blocking pair is resolved, there is an order behind this selection. When $(x,y)$ is matched, both $x$ is matched to a strictly higher-ranked $y >_x y'$, for some $y'$, and $y$ is matched to a strictly higher-ranked $x >_y x'$, for some $x'$.
+Because for each vertex there is a finite number of higher-ranked vertices to be paired with, the algorithm will eventually terminate.
+
+\end{document}
