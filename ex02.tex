@@ -327,7 +327,7 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 	In this state, we proceed much as in the amortized data structure; \ie the fixed-size array $A$ stores $n$ items where $0 \le n < |A| =: w$.
 	Our interpretation requires\footnote{%
 		We systematically distinguish (mathematical) variables (\eg $A$, $n$) from the ``variables'' comprising our algorithm's state (\eg $\<buf>$, $\<cnt>$).
-		The assertion $\<var> \pointsto v$ connects the two, saying that the program variable $\<var>$ contains the value $v$.
+		The assertion $\<var> \pointsto v$ connects the two, saying that the location $\<var>$ points to the value $v$.
 	}
 	\begin{mathpar}
 		\<state>\pointsto \<Normal> \and
