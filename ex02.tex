@@ -333,7 +333,7 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 		\<state>\pointsto \<Normal> \and
 		\<buf> \pointsto A \and
 		\<cnt> \pointsto n \\\\
-		0 \le n < |A| \and
+		0 \le n \le |A| \and
 		\infer{i \in [0,n)}{\text{element $i$ at $A[i]$}}
 	\end{mathpar}
 	When inserting the $w+1$st item, we transition to $\<Double>(A,B,0,n)$ where $B$ is a fresh array allocated with $\<alloc>$ and $|B| = 2w$ and $n = w+1$.
