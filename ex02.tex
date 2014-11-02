@@ -1,11 +1,20 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
 \usepackage{times}
 \usepackage{amssymb}
-\usepackage{amsmath}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+\usepackage{mathpartir}
 \usepackage{amsthm}
 \usepackage{amsxtra}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
 \usepackage{color}
 \usepackage{listings}
 
@@ -50,9 +59,18 @@
   title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
 }
 
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
 
-\title{Exercise 02 - Algorithms and Data Structures}
-\author{Felipe Cerqueira (2547787) \quad David Swasey}
+\title{Exercise Sheet 1---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
 
 \begin{document}
 
@@ -62,7 +80,7 @@ Tutorial time: Monday 14:00
 
 \section{Exercise 1 (10 pts)}
 
-\noindent a) Prove the statement from the lecture: If for two functions $f, g: \mathbb{N} \rightarrow \mathbb{R}$, the value $L := \lim_{n \rightarrow \infty} \frac{f(n)}{g(n)} \in [0, \infty)$ exists, then
+\noindent a) Prove the statement from the lecture: If for two functions $f, g: \NN \to \RP$, the value $L := \lim_{n \to \infty} \frac{f(n)}{g(n)} \in [0, \infty)$ exists, then
 
 \begin{itemize}
 \item if $L = 0$, then $f(n) \in o(g(n))$.
@@ -72,10 +90,12 @@ Tutorial time: Monday 14:00
 
 \bigskip \noindent \textbf{Answer:}
 
-We can prove with using the formal definition of limit. The definitions we use for O-notation assume that $f$ and $g$ are positive functions.
+We use the definition of limit.
+The definitions for O-notation assume that $f$ and $g$ are positive functions.
+We modified the problem statement accordingly.
 
 \begin{itemize}
-\item 1) \textbf{If $L = 0$, then $f(n) \in o(g(n))$.}
+\item \textbf{If $L = 0$, then $f(n) \in o(g(n))$.}
 
 By definition of limit at infinity:
 
@@ -89,7 +109,7 @@ Thus, $f(n) = o(g(n))$.
 
 \bigskip
 
-\item 2) if $L \in (0, \infty)$, then $f(n) \in \Theta(g(n))$.
+\item \textbf{if $L \in (0, \infty)$, then $f(n) \in \Theta(g(n))$.}
 
 By definition of limit at infinity:
 
@@ -98,6 +118,8 @@ $$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0, \left | \frac{f(n)
 Thus:
 
 $$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0,  \left | \frac{f(n) - L \cdot g(n)}{g(n)} \right | < c$$
+
+\dave{I don't follow the reasoning.}
 
 This leads to two possible solutions. First:
 
@@ -112,8 +134,7 @@ $$f(n) \ge (L - c) \cdot g(n)$$
 
 Here $\exists c', 0 < c' < L, \exists n_0 \in \mathbb{N}, \forall n \ge n_0$, $f(n) \ge c' g(n)$. That is, $f(n) = \Omega(g(n))$.
 
-\bigskip
-\item 3) if $L = \infty$, then $f(n) \in \omega(g(n))$.
+\item \textbf{if $L = \infty$, then $f(n) \in \omega(g(n))$.}
 
 {\color{red} TODO!!!!!!!!!!!!!!!!!!!!!}
 
@@ -186,9 +207,9 @@ For the first case, note that $\lim_{n \rightarrow \infty}\frac{a^n}{b^n} = \lim
 
 For the other function:
 
-$$\lim_{n \rightarrow \infty}\frac{log_a n}{log_b n} = \lim_{n \rightarrow \infty}\frac{\log_b n}{\log_b a \cdot \log_b n} = \lim_{n \rightarrow \infty} \log_a b \in (0,\infty)$$
+$$\lim_{n \rightarrow \infty}\frac{\log_a n}{\log_b n} = \lim_{n \rightarrow \infty}\frac{\log_b n}{\log_b a \cdot \log_b n} = \lim_{n \rightarrow \infty} \log_a b \in (0,\infty)$$
 
-By the theorem from the lecture, $log_a n = \Theta(\log_b n)$.
+By the theorem from the lecture, $\log_a n = \Theta(\log_b n)$.
 
 \section{Exercise 2 (10 pts)}
 
@@ -205,6 +226,167 @@ By the theorem from the lecture, $log_a n = \Theta(\log_b n)$.
 
 \section{Exercise 5 (10 pts)}
 
-\bigskip \noindent \textbf{Answer:}
+\declareops{alloc,realloc,size,init,pushback[push\any{}back],popback[pop\any{}back],get,set,copy}%
+\declarevars{var,state,buf,cnt,from,to,cursor}%
+\newcommand*{\SET}{\leftarrow}%
+\declarestates{Normal,Halve,Double}%
+\newcommand*{\pointsto}{\hookrightarrow}%
+\newcommand{\stsfig}{%
+	\begin{figure}
+	\begin{center}
+	\begin{tikzpicture}[every node/.style=draw, node distance=3cm, thick]
+		\node (N) {$\<Normal>(A, n)$};
+		\node (H) [below left of=N] {$\<Halve>(A, B, c, n)$};
+		\node (D) [below right of=N] {$\<Double>(A, B, c, n)$};
+		\path[<->] (N) edge [bend left=45] (D);
+		\path[<->] (N) edge [bend right=45] (H);
+	\end{tikzpicture}
+	\end{center}
+	\caption{STS for algorithm 5(a).}
+	\label{fig:sts}
+	\end{figure}
+}%
+\newcommand{\codefig}{%
+	\begin{figure}\centering
+	\begin{minipage}{0.49\linewidth}
+	\begin{algorithmic}[1]
+		\Require $\<Halve>(A,B,c,n)$ and $n > 0$
+		\Ensure $\<Halve>(A,B,c+1,n-1)$ or $\<Normal>(B,n-1)$
+		\Procedure{pop\any{}back}{}
+			\State $\<cnt> \SET \<cnt>-1$\label{Hpop}
+			\State{$\<to>[\<cursor>] \SET \<from>[\<cursor>]$}
+			\If{$\<cursor>+1 < \<cnt>$}
+				\State{$\<cursor> \SET \<cursor>+1$}
+			\Else
+				\State $\<state> \SET \<Normal>$ \label{HtoN}
+				\State $\<buf> \SET \<to>$
+			\EndIf
+		\EndProcedure
+		\Statex
+		\Require $\<Halve>(A,B,c,n)$
+		\Ensure $\<Halve>(A,B,c,n+1)$ or $\<Normal>(A,n+1)$
+		\Procedure{push\any{}back}{$v$}
+			\State $\<cnt> \SET \<cnt>+1$
+			\State $\<from>[\<cnt>] \SET v$
+			\If{$\<cnt> = |\<to>|/2$}
+				\State $\<state> \SET \<Normal>$
+				\State $\<buf> \SET \<from>$
+			\EndIf
+		\EndProcedure
+	\end{algorithmic}
+	\end{minipage}
+	\caption{Pseudocode for the interesting operations in state $\protect\<Halve>(A,B,c,n)$.}
+	\label{fig:halveops}
+	\end{figure}
+}%
+The problem has two parts:
+\begin{itemize}
+	\item[a)] Design a data structure for unbounded arrays supporting worst-case rather than amortized $\<pushback>$, $\<popback>$, $\<get>$, and $\<set>$ operations.
+	
+	\item[b)] Design a data structure for fixed-size arrays supporting constant-time $\<init>$, $\<get>$, and $\<set>$ operations.
+	After $\<init>$, any item should have the value $\bot$.\footnote{%
+		A better abstraction has $\<init>$ take an initial value; \ie $\<init>(n,v)$ creates an array of size $n$ with initial value $v$.
+		This is better for \emph{clients} who no longer have to contend with $\bot$ unless they want to.
+		Moreover, it admits a simpler implementation.
+	}
+\end{itemize}
+
+\paragraph{Answer:}
+
+We assume the following constant-time operations for fixed-size arrays:
+\begin{itemize}
+	\item $\<alloc>(n)$ allocates and returns a new array of size $n$ containing ``junk''
+	\item $\<size>(A)$ returns the size of array $A$ (written $|A|$)
+	\item $\<get>(A,i)$ returns the $i$th element of array $A$ when $0 \le i < |A|$ (written $A[i]$)
+	\item $\<set>(A, i, v)$ sets the $i$th element of $A$ to $v$ when $0 \le i < |A|$ (written $A[i] \SET v$)
+\end{itemize}
+We can trivially implement the $\<size>$ operation atop more primitive arrays that lack it by storing, alongside a primitive array $\widehat A$, its size $n$.
+
+\begin{itemize}
+
+	\item[a)]
+	One can \emph{incrementalize} amortized data structures to obtain worst-case data structures~\cite{okasaki}.
+	That this is possible should come as no surprise:
+	To prove amortized time bounds, we \emph{logically} schedule the work of expensive operations amongst cheaper operations.
+	With additional bookkeeping, we may \emph{phsically} do so.
+	The amortized analysis shows not only that such scheduling is possible, but that the incremental work will be complete before their results are needed.
+	
+	In this case, the amortized algorithm stores $n$ items in a capacity $w \ge n$ fixed-sized array, doubling $w$ on $\<pushback>$ when $n=w$, and halving $w$ on $\<popback>$ when $n=w/4$.
+	The doubling and halving steps allocate a new array, copy the $n$ items to it, then switch to using it.
+	We seek to incrementalize these $\Theta(n)$ copy operations.
+	
+	\stsfig
+
+	One way to describe our data structure is via the state-transition system in \figref{fig:sts}.
+	An invariant \emph{interprets} each state by specifying what our data stucture must look like in that state.
+	Our operations may rely on the invariant when they start and must guarantee it when they terminate.
+
+	\begin{itemize}
+	
+	\item $\<Normal>(A, n)$:
+	In this state, we proceed much as in the amortized data structure; \ie the fixed-size array $A$ stores $n$ items where $0 \le n < |A| =: w$.
+	Our interpretation requires\footnote{%
+		We systematically distinguish (mathematical) variables (\eg $A$, $n$) from the ``variables'' comprising our algorithm's state (\eg $\<buf>$, $\<cnt>$).
+		The assertion $\<var> \pointsto v$ connects the two, saying that the program variable $\<var>$ contains the value $v$.
+	}
+	\begin{mathpar}
+		\<state>\pointsto \<Normal> \and
+		\<buf> \pointsto A \and
+		\<cnt> \pointsto n \\\\
+		0 \le n < |A| \and
+		\infer{i \in [0,n)}{\text{element $i$ at $A[i]$}}
+	\end{mathpar}
+	When inserting the $w+1$st item, we transition to $\<Double>(A,B,0,n)$ where $B$ is a fresh array allocated with $\<alloc>$ and $|B| = 2w$ and $n = w+1$.
+	When removing the $w/4$th item, we transition to $\<Halve>(A,B,0,n)$, where $|B| = w/2$ and $n = w/4 - 1$.
+	
+	We omit the code for this state.
+	
+	\item $\<Halve>(A, B, c, n)$:
+	In this state, we incrementally copy the relevant contents of the ``from-space'' $A$ to the ``to-space'' $B$, where the ``cursor'' $c$ says how many items we have copied and (as usual) $n$ says how many items we actually store for our client.
+	We interpret this state as follows.
+	\begin{mathpar}
+		\<state>\pointsto \<Halve> \and
+		\<from> \pointsto A \and
+		\<to> \pointsto B \and
+		\<cursor> \pointsto c \and
+		\<cnt> \pointsto n \\\\
+		0 \le c < n < |B|/2 \and
+		|B| = |A|/2 \and
+		\infer{i \in [0,c)}{\text{element $i$ at $A[i]$ and $B[i]$}} \and
+		\infer{i \in [c, n)}{\text{element $i$ at $A[i]$}}
+	\end{mathpar}
+	We give pseudocode for this state's $\<pushback>$ and $\<popback>$ operations in \figref{fig:halveops}.
+
+	The $\<popback>$ operation decrements $\<cnt>$ and performs a unit of copying work, incrementing $\<cursor>$ and transitioning to the normal state when we're done copying.
+	Note that we \emph{must} transition in line~\ref{HtoN}; otherwise, we would fail to satisfy our invariant.
+	
+	The $\<pushback>$ operation updates $\<from>$ and increments $\<cnt>$.
+	If the new value of $\<cnt>$ disagrees with our interpretation, then we \emph{abort} the on-going copy.
+	This sets us up for a later transition to $\<Double>$, in case our client continues to push values.
+
+	\item $\<Double>(A, B, c, n)$:
+	This state is analogous to $\<Halve>(A, B, c, n)$, but with interpretation:
+	\begin{mathpar}
+		\<state>\pointsto \<Double> \and
+		\<from> \pointsto A \and
+		\<to> \pointsto B \and
+		\<cursor> \pointsto c \and
+		\<cnt> \pointsto n \\\\
+		0 \le c < |A| \and
+		|A| < n < |B| = 2|A| \\\\
+		\infer{i \in [0,c)}{\text{element $i$ at $A[i]$ and $B[i]$}} \and
+		\infer{i \in [c, |A|)}{\text{element $i$ at $A[i]$}} \and
+		\infer{i \in [|A|,n)}{\text{element $i$ at $B[i]$}}
+	\end{mathpar}
+	We omit the corresponding code.
+	\end{itemize}
+	Our interpretation tells us, among other things, how to access the $i$th item in our data structure and thus how to properly implement the $\<get>$ and $\<set>$ operations for each state.
+	Concretely, all our operations begin with a case analysis on the current contents of $\<state>$, branching to state-specific code.
+
+	\codefig
+	
+	\item[b)]
+
+\end{itemize}
 
 \end{document}
