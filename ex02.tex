@@ -318,7 +318,20 @@ Therefore, the binomial property also holds when we include the extra term $X_{i
 
 \section{Exercise 3 (10 pts)}
 
+Consider the following two alternatives to the list data structures as discussed in the lecture:
+
+a) Every item has a pointer to its successor, but not its predecessor (singly-linked lists)
+
+b) The list is doubly connected, but does not start with a dummy item. Instead, the head
+pointer of the list points to the first element. Its predecessor and the successor of the last list element point to a special value \emph{NULL}.
+
+\bigskip Discuss the advantages and disadvantages of these implementations, both in terms of asymptotic complexity and practical considerations.
+
 \bigskip \noindent \textbf{Answer:}
+
+Implementation (a) has the advantage of using less memory for the representation (only half the number of pointers). However, it makes some operations on the list more complicated. Any move/delete operation on some element $e$ requires updating the ``next-pointer'' from the element $e_{prev}$ that precedes $e$. Therefore, these operations always need to be started from the head of the list, in order to identify this element $e_{prev}$.
+
+Regarding implementation (b), there are no major drawbacks, except that it makes the list less modular and more susceptible to low-level programming issues. For example, deleting every element would require setting the $head$ pointer to \emph{NULL}, which cannot be done if the list is passed by value to a function.
 
 \section{Exercise 4 (10 pts)}
 
