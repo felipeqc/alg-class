@@ -17,6 +17,7 @@
 	\reservestyle{\declarestates}{\text}
 \usepackage{color}
 \usepackage{listings}
+\usepackage{mathtools}
 
 \newtheorem{theorem}{Theorem}
 
@@ -232,7 +233,86 @@ By the theorem from the lecture, $\log_a n = \Theta(\log_b n)$.
 
 \section{Exercise 2 (10 pts)}
 
+\noindent a) Let $I$ and $J$ be two independent indicator variables with ${prob}(X = 1) = p$ and ${prob}(Y = 1) = q$, $p, q \in [0,1]$. Let $X = ( I + J) \mod 2$, that is, $X$ is one if and only if $I$ and $J$ are different. For which values of $p$ and $q$ are $I$ and $X$ independent? For which values are $I$, $J$, and $X$ independent?
+
 \bigskip \noindent \textbf{Answer:}
+
+Since $I$ and $J$ are independent, we can make a table with the events and probabilities.
+
+\begin{center}
+\begin{tabular}{ c | c | c | c }
+  I = i & J = j & X = x & ${prob}(I = i \wedge J = j \wedge X = x)$\\
+  \hline                       
+  0 & 0 & 0 & $(1-p)\cdot (1-q)$\\
+  0 & 1 & 1 & $(1-p)\cdot q$\\
+  1 & 0 & 1 & $p\cdot (1-q)$\\
+  1 & 1 & 0 & $p \cdot q$\\
+  \hline  
+\end{tabular}
+\end{center}
+
+
+To enforce independence of $I$ and $X$, we must guarantee that:
+
+$$ \forall i, x \in \{0,1\}, {prob}(I = i \wedge X = x) = {prob}(I = i) \cdot {prob}(X = 1) $$
+
+\begin{align*}
+{prob}(I = 0 \wedge X = 0) = {prob}(I = 0) \cdot {prob}(X = 0) \\
+{prob}(I = 0 \wedge X = 1) = {prob}(I = 0) \cdot {prob}(X = 1) \\
+{prob}(I = 1 \wedge X = 0) = {prob}(I = 1) \cdot {prob}(X = 0) \\
+{prob}(I = 1 \wedge X = 1) = {prob}(I = 1) \cdot {prob}(X = 1)
+\end{align*}
+
+Solving this set of equations, we obtain $p = 0$ and $q = 1/2$.
+
+\bigskip
+To enforce independence of $I$, $J$ and $X$, we must guarantee that:
+
+$$ \forall i, j, x \in \{0,1\}, {prob}(I = i \wedge J = j \wedge X = x) = {prob}(I = i) \cdot {prob}(J = j) \cdot {prob}(X = 1) $$
+
+However, this include the constraints for the impossible events:
+
+\begin{align*}
+0 = {prob}(I = 0 \wedge J = 0 \wedge X = 1) = {prob}(I = 0) \cdot {prob}(J = 0) \cdot {prob}(X = 1) \\
+0 = {prob}(I = 0 \wedge J = 1 \wedge X = 0) = {prob}(I = 0) \cdot {prob}(J = 1) \cdot {prob}(X = 0) \\
+0 = {prob}(I = 1 \wedge J = 0 \wedge X = 0) = {prob}(I = 1) \cdot {prob}(J = 0) \cdot {prob}(X = 0) \\
+0 = {prob}(I = 1 \wedge J = 1 \wedge X = 1) = {prob}(I = 1) \cdot {prob}(J = 1) \cdot {prob}(X = 1)
+\end{align*}
+
+Because we know that each of the three variables can assume all values in $\{0, 1\}$ (\ie, ${prob}(I = i), {prob}(J = j), {prob}(X = 1) > 0$), these equations cannot hold. Therefore, $I$, $J$, and $X$ cannot be made independent simultaneously.
+
+\bigskip \noindent b) Let $X_1, \ldots, X_n$ be independent indicator variables with ${prob}(X_i = 1) = p$ for all $i$. Show that $X = X_1 + \cdots + X_n$ is \emph{binomially distributed}, that is
+
+$${prob}(X = k) = {n \choose k} p^k (1-p)^{n-k}.$$
+
+\paragraph{Answer:}
+
+\begin{proof}
+By induction on the number of variables $n$. For a single variable $X_1$, we have:
+
+\begin{align*}
+{prob}(X = 0) = {prob}(X_1 = 0) = {1 \choose 0} p^0 (1-p)^{1} = (1 - p) \\
+{prob}(X = 1) = {prob}(X_1 = 1) = {1 \choose 1} p^1 (1-p)^{0} = p
+\end{align*}
+
+By IH, assume that for $i<n$ and $X = X_1 + \cdots + X_i$, the following holds:
+
+$${prob}(X = k) = {i \choose k} p^k (1-p)^{i-k}.$$
+
+Let's define a new variable $X' = X + X_{i+1}$ including one more term in the sum. Because $X_{i+1}$ can only assume two values:
+
+\begin{align*}
+{prob}(X' = k) & = {prob}(X = k-1 \wedge X_{i+1} = 1) + {prob}(X = k \wedge X_{i+1} = 0) && \text{[$X$ and $X_{i+1}$ are independent]}\\
+& = {prob}(X = k-1) \cdot {prob}(X_{i+1} = 1) + {prob}(X = k) \cdot {prob}(X_{i+1} = 0) && \text{[Initial assumption]} \\
+& = {prob}(X = k-1) \cdot p + {prob}(X = k) \cdot (1 - p) && \text{[By IH]}\\
+& = {i \choose k-1} p^{k-1} (1-p)^{i-k+1} \cdot p + {i \choose k} p^k (1-p)^{i-k} \cdot (1 - p)\\
+& = {i \choose k-1} p^{k} (1-p)^{i-k+1} + {i \choose k} p^k (1-p)^{i-k+1} \\
+\end{align*}
+
+{\color{red} ((Incomplete)).}
+
+\end{proof}
+
 
 \section{Exercise 3 (10 pts)}
 
