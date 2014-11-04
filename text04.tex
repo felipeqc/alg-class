@@ -1,0 +1,181 @@
+\newpage
+
+\section{Quicksort}
+
+\begin{algorithm}
+\begin{lstlisting}[mathescape]
+quicksort($a_0\ldots a_{n-1}$)
+
+    Choose pivot element $a_p$
+    L $\gets$ ()
+    H $\gets$ ()
+    for $i=0,\ldots,n-1$ do
+        if $a_i < a_p$ then $L \gets L . a_i$
+        if $a_i > a_p$ then $H \gets L . a_i$
+    end do
+    return quicksort(l) . $a_p$ . quicksort(H)
+\end{lstlisting}
+
+\end{algorithm}
+
+How to choose pivot?
+
+\begin{enumerate}
+\item Choose $p=0$?
+
+$\Theta(n^2)$ runtime if list is already sorted. However, average case complexity is $\Theta(n \log n)$. But why should the input be uniformly distributed?
+
+\item Choose $p \in \{0, \ldots, n-1\}$ uniformly at random (u.a.r.).
+
+\begin{mytheorem}
+The expected number of comparisons in quicksort is at most $2\cdot n \cdot \log n$ (for every input).
+\end{mytheorem}
+\begin{proof}
+Let $a_0',\ldots,a_{n-1}'$ be the sorted sequence. Each pair is compared at most once. Define indicator variables
+
+$X_{ij} = 1$ if $a_i'$ and $a_j'$ are compared.
+
+$X_i = \sum_{i < j} X_{ij}$ is the number of comparisons.
+
+We show that ${prob}(X_{ij} = 1) \le \frac{2}{j - i + 1}$. Consider $\{a_i', \ldots, a_j'\}$ and let $p$ be the first pivot chosen from $\{a_i', \ldots, a_j'\}$. We compare $a_i'$ and $a_j'$ iff $p \in \{a_i', a_j'\}$. The probability for that is 2 divided by the size of the list: $\frac{2}{j - i + 1}$.
+
+\begin{align*}
+E[X] = E[\sum X_{ij}] = \sum E[X_{ij}] \le \sum_{0 \le i < j \le n-1} \frac{2}{j - i + 1} \\
+= \sum_{i = 0}^{n-2} \sum_{j= i+1}^{n-1} \frac{2}{j -i + 1} = 2 \sum_{i = 0}^{n-2} \sum_{k=2}^{n-i} \frac{1}{k} \le 2 \sum_{i = 0}^{n-2} \sum_{k=2}^{n} \frac{1}{k} \\
+\le 2 n \cdot \ln n (\mbox{Because } \sum_{k=1}^n \frac{1}{k} \le \ln n + 1)
+\end{align*}
+
+\end{proof}
+
+\end{enumerate}
+
+\newpage
+
+\section{Hashing}
+
+\begin{itemize}
+\item We want to represent a \emph{set} $S = \{e_1,\ldots,e_n\}$.
+\item Each element $e$ has a key, ${key}(e) \in U$ (``universe'').
+\end{itemize}
+
+Assume that keys are pw distinct.
+
+\subsection{Dictionary problem}
+
+\begin{itemize}
+\item insert(e, S)
+\item remove(k, S) - remove element with key $k$ from $S$
+\item search(k, S) - return element with key $k$ in $S$ or $\bot$
+\end{itemize}
+
+If $|U|$ is small, just use an array of size $|U|$. But we can instead use an array of size $m$, with $m \equiv n$.
+
+\begin{mydefinition}
+A hash function $h$ is a map $h: U \rightarrow \{0, \ldots, m-1\}$. We write $h(e) = h(key(e))$.
+\end{mydefinition}
+
+We want to put element $e$ at position $h(e)$ in array. But there may be a collision (because the function is non-injective).
+
+\subsection{Chaining}
+
+We add a linked list per cell.
+
+\begin{itemize}
+\item insert(e, S): push\_back in list, $\theta(1)$.
+\item search(k, S): Scan through the appropriate list.
+\item remove(k, S): Similar to search + removal from list.
+\end{itemize}
+
+What is the length of the lists? $\Theta(n)$ in the worst case.
+
+\begin{mydefinition}
+A family $H$ of hash functions is called \emph{c-universal} for $c \ge 1$, if for all $x,y\in U, |\{h\in H: h(x) = h(y)\}| \le \frac{c}{m} |H|$. That is, when choosing $h$ uniformly at random from $H$, ${prob}(h(x)=h(y)) \le \frac{c}{m}$.
+\end{mydefinition}
+
+\begin{myexample}
+The family of all possible hash functions $U \rightarrow \{0, \ldots, m-1\}$ is 1-universal (but too large to be useful).
+\end{myexample}
+
+\noindent We assume that evaluating $h$ takes constant time.
+
+\begin{mytheorem}
+For hashing with chaining, using a c-universal family of hash functions, the expected cost of a search/remove operation is $O(1 + c \cdot \alpha)$, where
+$\alpha = \frac{n}{m}$, the \emph{load factor} of the hash table.
+\end{mytheorem}
+\begin{proof}
+Fix an element $\tilde{e}$ and $k = {key}(\tilde{e})$, and let $X$ be the length of the list at $h(k)$.
+
+For $e \in S$, we set $X_e = 1$ if $h(e) = h(\tilde{e})$, and $X_e = 0$ otherwise.
+
+$$E[X] = \sum_{e \in S} E[X_e] = \sum_{e \in S} {prob}(X_e=1) = \sum {prob}(h(e)=h(\tilde{e})) \le \sum_{e \in S} \frac{c}{m} = c \cdot \frac{n}{m} = c \alpha $$
+\end{proof}
+
+\subsection{Construction of a 1-universal family}
+
+Assume $w = \lfloor \log_2 m \rfloor$. For $U = \{0, \ldots, u-1\}$, write $x \in U$.
+
+\bigskip \noindent We split the string $x$ in w-bit strings $(X_1, X_2, X_3, \ldots, X_k)$.
+Choose $k$ random numbers $a = (a_1, \ldots, a_k) \in \{0, \ldots, m-1\}^k$.
+
+$$h_a(x) = \sum\limits_{i=1}^k a_i \cdot x_i (\mod m)$$
+
+\begin{mytheorem}
+$H = \{h_a | a \in \{0, \ldots, m-1\}^k\}$ is 1-universal if $m$ is a prime.
+\end{mytheorem}
+\begin{proof}
+Consider $x,y \in U$ with $x \neq y$. W.l.o.g., assume $x_1 \neq y_1$. Now, fix $a_2,\ldots, a_k$ arbitrarily. Then,
+
+\begin{align*}
+h(x) = h(y) &\iff \sum\limits_{i=1}^k a_i x_i \equiv \sum\limits_{i=1}^k a_i y_i \mod m \\
+& \iff a_1(x_1 - y_1) \equiv - \sum\limits_{i=2}^k a_i (x_i - y_i) \mod m \\
+& \iff a_1 \equiv (x_1 - y_1)^{-1} \cdot (- \sum \ldots) \mod m
+\end{align*}
+
+There are $m^{k-1}$ choices for $a_2, \ldots, a_k$. And only one choice for $a_1$.
+
+So, the number of functions that make $x$ and $y$ collide is $m^{k-1}$, and $|H| = m^k$, so ${prob}(h(x)=h(y)) = \frac{1}{m}$.
+\end{proof}
+
+\begin{mytheorem}
+The expected length of the longest list for a hash table of size $n = m$ is $O(\frac{\log n}{\log \log n})$.
+\end{mytheorem}
+\begin{proof}
+Set $M$ equal to the length of the longest list. For $k \in \{1, \ldots, n\}$.
+
+\begin{align*}
+E[M] &= \sum\limits_{i=1}^k i \cdot {prob}(M=i) + \sum\limits_{i=k+1}^n i \cdot {prob}(M=i) \\
+& \le k \sum\limits_{i=1}^k {prob}(M=i) + n \sum\limits_{i = k +1}^n {prob}(M=i) \\
+& \le k + n \cdot {prob}(M > k)
+\end{align*}
+
+Now, for $k = \frac{c \log n}{\log \log n}$ for some constant $c$, show that ${prob}(M > k) \le \frac{1}{n}$. Then, $E[M] \le \frac{c \log n}{\log \log n} + 1$.
+\end{proof}
+
+\begin{mylemma}
+${prob}(M> \frac{c \log n}{\log \log n}) \le \frac{1}{n}$ for some $c$.
+\end{mylemma}
+\begin{proof}
+Set $q_k^{(i)}$ = prob(list $i$ has length $\le$ k), $i \in \{0, \ldots, m-1\}$.
+This is equal to:
+
+\begin{align*}
+&= {n \choose k} \cdot \left(\frac{1}{n}\right)^k \\
+& = \frac{n!}{(n-k)!} \cdot \frac{1}{k!} \cdot \left(\frac{1}{n}\right)^k \\
+& \le n^k \cdot \left ( \frac{1}{n} \right ) ^ k \cdot \frac{1}{k!} \\
+&\le \frac{1}{\sqrt{2 \pi k} \cdot \left ( \frac{k}{e} \right )^k} \\
+&\le \left ( \frac{e}{k} \right )^k
+\end{align*}
+
+With $c$ large enough and $k = \frac{c \log n}{\log \log n}$, $q_k^{(i)} \le \left (\frac{e}{k}^k \right ) < 1/n^2$.
+
+\begin{align*}
+{prob}(M > k) & \le {prob} (M \ge k) = {prob} (Q^{(1)} \ge k \vee \cdots \vee Q^{(n)} \ge k) \\
+& \le \sum\limits_{i=1}^n {prob}(Q^{(i)}_k \ge l) \\
+& = \sum\limits_{i=1}^n q^{(i)}_k \\
+& \le n \cdot 1/n^2 = 1/n.
+\end{align*}
+
+
+\end{proof}
+
+

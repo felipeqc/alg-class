@@ -115,34 +115,53 @@ By definition of limit at infinity:
 
 $$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0, \left | \frac{f(n)}{g(n)} - L \right | < c$$
 
-Thus:
+This is equivalent to:
 
 $$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0,  \left | \frac{f(n) - L \cdot g(n)}{g(n)} \right | < c$$
 
-\dave{I don't follow the reasoning.}
+Solving the inequality with the absolute value produces two solutions. First:
 
-This leads to two possible solutions. First:
+$$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0,  f(n) \le (c + L) \cdot g(n)$$
 
-$$f(n) \le (c + L) \cdot g(n)$$
 
-Here, $\exists c' > 0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0$, $f(n) \le c' g(n)$.
+Therefore, $\exists c' = (c + L) > 0, \exists n_0 \in \mathbb{N}, \forall n \ge n_0$, $f(n) \le c' g(n)$.
 That is, $f(n) = O(g(n))$.
 
-\bigskip And as a second solution we have:
+\bigskip And as the second solution we have:
 
-$$f(n) \ge (L - c) \cdot g(n)$$
+$$\forall c > 0, \exists n_0 \in \mathbb{N}, \forall n > n_0,  f(n) \ge (L - c) \cdot g(n)$$
 
 Here $\exists c', 0 < c' < L, \exists n_0 \in \mathbb{N}, \forall n \ge n_0$, $f(n) \ge c' g(n)$. That is, $f(n) = \Omega(g(n))$.
 
 \item \textbf{if $L = \infty$, then $f(n) \in \omega(g(n))$.}
 
-{\color{red} TODO!!!!!!!!!!!!!!!!!!!!!}
+By the definition of infinite limits at infinity,
+
+$$\forall c > 0, \exists n_0>0, \forall n > n_0, \left | \frac{f(x)}{g(x)} \right | > c$$
+
+That is,
+
+$$\forall c > 0, \exists n_0>0, \forall n > n_0, f(x) > c \cdot g(x)$$
+
+This is exactly the definition of $f(n) = \omega(g(n))$.
+
 
 \end{itemize}
 
-\noindent b) Give an example of two (non-negative) functions $f,g$ with $f \in \Theta(g)$, but $\lim_{n \rightarrow \infty}\frac{f(n)}{g(n)}$ does not exist.
+\noindent b) Give an example of two (non-negative) functions $f,g$ with $f \in \Theta(g)$, but $\lim_{n \rightarrow \infty}\frac{f(n)}{g(n)}$ does not exist. 
 
-{\color{red} TODO!!!!!!!!!!!!!!!!!!!!!}
+\bigskip Consider $f(n) = sin(n) + 1$ and $g(n) = cos(n) + 1$, which are both non-negative. Because the image of both functions lies in $[0, 2]$, they differ at most by some constant, so it must be that $f(n) = \Theta(g(n))$.
+Now let's calculate the limit.
+
+$$\lim_{n \rightarrow \infty} \frac{\sin(n) + 1}{\cos(n) + 1} = 
+\lim_{n \rightarrow \infty} \frac{\sin(n)}{\cos(n) + 1} + \lim_{n \rightarrow \infty} \frac{1}{\cos(n) + 1}$$
+
+By L'Hospital Rule:
+
+ 
+$$= \lim_{n \rightarrow \infty} \left ( \frac{\cos(n)}{-\sin(n)} + \frac{1}{-\sin(n)} \right )= \lim_{n \rightarrow \infty} \left (- \cot (n) - \csc (n) \right )$$
+
+But since this function is periodic, the limit at infinity does not exist.
 
 \bigskip \noindent \textbf{Answer:}
 
