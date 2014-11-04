@@ -288,29 +288,31 @@ $${prob}(X = k) = {n \choose k} p^k (1-p)^{n-k}.$$
 \paragraph{Answer:}
 
 \begin{proof}
-By induction on the number of variables $n$. For a single variable $X_1$, we have:
+By induction on the number of variables $n$. Let $X^{(i)} = X_1 + \cdots + X_i$. For the base case with a single variable $X_1$, we have:
 
 \begin{align*}
-{prob}(X = 0) = {prob}(X_1 = 0) = {1 \choose 0} p^0 (1-p)^{1} = (1 - p) \\
-{prob}(X = 1) = {prob}(X_1 = 1) = {1 \choose 1} p^1 (1-p)^{0} = p
+{prob}(X^{(1)} = 0) = {prob}(X_1 = 0) = {1 \choose 0} p^0 (1-p)^{1} = (1 - p) \\
+{prob}(X^{(1)} = 1) = {prob}(X_1 = 1) = {1 \choose 1} p^1 (1-p)^{0} = p
 \end{align*}
 
-By IH, assume that for $i<n$ and $X = X_1 + \cdots + X_i$, the following holds:
+By IH, assume that for $i<n$ and $X^{(i)} = X_1 + \cdots + X_i$, the following holds:
 
-$${prob}(X = k) = {i \choose k} p^k (1-p)^{i-k}.$$
+$${prob}(X^{(i)} = k) = {i \choose k} p^k (1-p)^{i-k}.$$
 
-Let's define a new variable $X' = X + X_{i+1}$ including one more term in the sum. Because $X_{i+1}$ can only assume two values:
+Let's now consider the variable $X^{(i+1)} = X^{(i)} + X_{i+1}$, which includes one more term in the sum. Because $X_{i+1}$ can only assume two mutually-exclusive values (0 or 1):
 
 \begin{align*}
-{prob}(X' = k) & = {prob}(X = k-1 \wedge X_{i+1} = 1) + {prob}(X = k \wedge X_{i+1} = 0) && \text{[$X$ and $X_{i+1}$ are independent]}\\
-& = {prob}(X = k-1) \cdot {prob}(X_{i+1} = 1) + {prob}(X = k) \cdot {prob}(X_{i+1} = 0) && \text{[Initial assumption]} \\
-& = {prob}(X = k-1) \cdot p + {prob}(X = k) \cdot (1 - p) && \text{[By IH]}\\
+{prob}(X^{(i+1)} = k) & = {prob}(X^{(i)} = k-1 \wedge X_{i+1} = 1) + {prob}(X^{(i)} = k \wedge X_{i+1} = 0) && \text{[$X$ and $X_{i+1}$ are independent]}\\
+& = {prob}(X^{(i)} = k-1) \cdot {prob}(X_{i+1} = 1) + {prob}(X^{(i)} = k) \cdot {prob}(X_{i+1} = 0) && \text{[Initial assumption]} \\
+& = {prob}(X^{(i)} = k-1) \cdot p + {prob}(X^{(i)} = k) \cdot (1 - p) && \text{[By IH]}\\
 & = {i \choose k-1} p^{k-1} (1-p)^{i-k+1} \cdot p + {i \choose k} p^k (1-p)^{i-k} \cdot (1 - p)\\
 & = {i \choose k-1} p^{k} (1-p)^{i-k+1} + {i \choose k} p^k (1-p)^{i-k+1} \\
+& = \left [ {i \choose k-1} + {i \choose k} \right] p^{k} (1-p)^{i-k+1}
+&& \text{[By Pascal's rule]} \\
+& =  {{i+1} \choose k} p^{k} (1-p)^{i-k+1}
 \end{align*}
 
-{\color{red} ((Incomplete)).}
-
+Therefore, the binomial property also holds when we include the extra term $X_{i+1}$. This completes the induction proof.
 \end{proof}
 
 
