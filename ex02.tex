@@ -47,7 +47,7 @@
   keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   keywordstyle=\color{blue},       % keyword style
   language=Octave,                 % the language of the code
-  morekeywords={assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  morekeywords={then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
   numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
   numbersep=5pt,                   % how far the line-numbers are from the code
   rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
@@ -335,8 +335,43 @@ Regarding implementation (b), there are no major drawbacks, except that it makes
 
 \section{Exercise 4 (10 pts)}
 
+We represent an arbitrarily large number by an unbounded array where each entry is $0$ or $1$, called the \emph{binary bits}. The digits $\beta_0, \ldots, \beta_{n-1}$ in an array of size $n$ represent the number
+
+$$\sum\limits_{i=0}^{n-1} \beta_i 2^i.$$
+
+\noindent The number zero is represented by an array of size $1$ and $\beta_0 = 0$. We want to implement a binary counter, that is, we want to support increments (=increase the number by 1) efficiently.
+
+\noindent \textbf{a) Give pseudo-code for the increment operation. What is the worst-case running of a single increment?}
+
 \bigskip \noindent \textbf{Answer:}
 
+\begin{lstlisting}[mathescape]
+Increment(array, n) {
+    i $\gets$ 0
+    while $\beta_i \neq 1$ and $i < n$ do
+        $\beta_i \gets 0$
+        $i \gets i + 1$
+    end do
+    if $i < n$ then
+        $\beta_i \gets 1$
+    end if
+}
+\end{lstlisting}
+
+The algorithm may update every bit in the array. Since the representation of the entire number requires $\log_2 m$ bits, the complexity in the worst case is $\Theta(\log m)$.
+
+\bigskip \noindent \textbf{b) Show that starting from $0$, the cost of $m$ increments is $O(m)$.}
+
+
+
+\bigskip \noindent \textbf{Answer:}
+
+\bigskip \noindent \textbf{c) Assume that we also support decrements of the counter. Argue why a sequence if $M$ increments/decrements can take up to $\Omega(m \log m)$ operations.}
+
+\bigskip \noindent \textbf{Answer:}
+
+
+\bigskip
 
 \section{Exercise 5 (10 pts)}
 
