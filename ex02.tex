@@ -500,7 +500,25 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 	\codefig
 	
 	\item[b)]
+	\declareops{newkey,mac}%
+	Problem:
+	We take the view that $\<alloc>$ adversarily chooses the contents of the memory it returns to us.
+	Thus we cannot rely \emph{only} on relationships amongst values in the memory graph to decide if our client ``owns'' a particular array cell.
 
+	Solution:
+	We crypographically sign what we insert into the array:
+	\begin{itemize}
+	
+		\item $\<init>(n)$ creates two arrays $V$ and $M$ of size $n$ and calls $\<newkey>$ to create a fresh key $k$.
+		
+		\item $\<set>(i,v)$ sets $V[i] \SET v$ and $M[i] \SET \<mac>(k,v)$.
+		
+		\item $\<get>(i)$ returns $V[i]$ if $M[i] = \<mac>(k, V[i])$; else $\bot$.
+		
+	\end{itemize}
+	We use \emph{message authentication codes} and hidden state (a fresh key $k$ per array) to ensure that---up to standard computational assumptions for MACs---$\<set>$ returns the correct answer with overwhelming probability.
+	(Of course, we assume a fixed bound on key and value sizes so that we may regard $\<mac>$ as operating in unit time.)
+		
 \end{itemize}
 
 \end{document}
