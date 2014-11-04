@@ -459,7 +459,7 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 	With additional bookkeeping, we may \emph{phsically} do so, provided the bookkeeping code does not upset our complexity goals.
 	The amortized analysis shows not only that such scheduling is possible, but that the incremental work will be complete before their results are needed.
 	
-	In this case, the amortized algorithm stores $n$ items in a capacity $w \ge n$ fixed-sized array, doubling $w$ on $\<pushback>$ when $n=w$, and halving $w$ on $\<popback>$ when $n=w/4$.
+	In this case, the amortized algorithm stores $n$ items in a capacity $w \ge n$ fixed-sized array, doubling $w$ when pusing the $w+1$st item and halving $w$ when popping the $w/4$th item.
 	The doubling and halving steps allocate a new array, copy the $n$ items to it, then switch to using it.
 	We seek to incrementalize these $\Theta(n)$ copy operations.
 	
