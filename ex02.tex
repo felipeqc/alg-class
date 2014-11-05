@@ -420,54 +420,6 @@ The sequence we've described runs in $O(a) + \Theta(a \log a) = \Omega(a \log a)
 \newcommand*{\SET}{\leftarrow}%
 \declarestates{Normal,Halve,Double}%
 \newcommand*{\pointsto}{\hookrightarrow}%
-\newcommand{\stsfig}{%
-	\begin{figure}
-	\begin{center}
-	\begin{tikzpicture}[every node/.style=draw, node distance=3cm, thick]
-		\node (N) {$\<Normal>(A, n)$};
-		\node (H) [below left of=N] {$\<Halve>(A, B, c, n)$};
-		\node (D) [below right of=N] {$\<Double>(A, B, c, n)$};
-		\path[<->] (N) edge [bend left=45] (D);
-		\path[<->] (N) edge [bend right=45] (H);
-	\end{tikzpicture}
-	\end{center}
-	\caption{STS for algorithm 5(a).}
-	\label{fig:sts}
-	\end{figure}
-}%
-\newcommand{\codefig}{%
-	\begin{figure}\centering
-	\begin{minipage}{0.49\linewidth}
-	\begin{algorithmic}[1]
-		\Require $\<Halve>(A,B,c,n)$ and $n > 0$
-		\Ensure $\<Halve>(A,B,c+1,n-1)$ or $\<Normal>(B,n-1)$
-		\Procedure{pop\any{}back}{}
-			\State $\<cnt> \SET \<cnt>-1$\label{Hpop}
-			\State{$\<to>[\<cursor>] \SET \<from>[\<cursor>]$}
-			\If{$\<cursor>+1 < \<cnt>$}
-				\State{$\<cursor> \SET \<cursor>+1$}
-			\Else
-				\State $\<state> \SET \<Normal>$ \label{HtoN}
-				\State $\<buf> \SET \<to>$
-			\EndIf
-		\EndProcedure
-		\Statex
-		\Require $\<Halve>(A,B,c,n)$
-		\Ensure $\<Halve>(A,B,c,n+1)$ or $\<Normal>(A,n+1)$
-		\Procedure{push\any{}back}{$v$}
-			\State $\<cnt> \SET \<cnt>+1$
-			\State $\<from>[\<cnt>] \SET v$
-			\If{$\<cnt> = |\<to>|/2$}
-				\State $\<state> \SET \<Normal>$
-				\State $\<buf> \SET \<from>$
-			\EndIf
-		\EndProcedure
-	\end{algorithmic}
-	\end{minipage}
-	\caption{Pseudocode for the interesting operations in state $\protect\<Halve>(A,B,c,n)$.}
-	\label{fig:halveops}
-	\end{figure}
-}%
 The problem has two parts:
 \begin{itemize}
 	\item[a)] Design a data structure for unbounded arrays supporting worst-case rather than amortized $\<pushback>$, $\<popback>$, $\<get>$, and $\<set>$ operations.
@@ -494,18 +446,12 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 
 	\item[a)]
 	The idea is to spread out the copying steps required to double or halve the size of our buffer amongst subsequent operations.
-	
 	When doubling, we keep our original array $A$ and an array $B$ with $|B| = 2|A|$.
 	Each subsequent $\<pushback>$ does a unit of copying work.
 	We take care in $\<popback>$ to \emph{abort} the copy if we pop the $|A|+1$st item.
-	
-	Halving is similar
-	We keep our original array $A$ and an array $B$ with $|B| = |A|/2$.
-	$\<popback>$ does a unit of copying work, and $\<pushback>$ can abort.
-	
-	We keep our current state in $s$, which takes values in $\{\<N>, \<D>, \<H> \}$.
-	Counters  $\ell$ and $h$ track how much copying work we've done in states $D$ and $H$.
-
+	Halving is similar:
+	We keep our original array $A$ and an array $B$ with $|B| = |A|/2$, $\<popback>$ does a unit of copying work, and $\<pushback>$ can abort.
+	We keep our current state in $s$, which takes values in $\{\<N>, \<D>, \<H> \}$ and, when copying, a count $p$ of items remaining to copy.
 	We give the code in \figref{fig:code}.
 
 \begin{figure}
@@ -515,7 +461,7 @@ init(){
 	$s \gets \<N>$
 	$A \gets \<alloc>(1)$
 	$n \gets 0$
-	($B$, $\ell$, $h$ relevant when $s \not= \<N>$.)
+	($B$, $p$ relevant when $s \not= \<N>$.)
 }
 
 get($i \in [0, n)$){
@@ -540,12 +486,12 @@ push_back($v$){
 	if($s = \<N> \land n = |A|$){
 		$s \gets \<D>$
 		$B \gets \<alloc>(2|A|)$
-		$B[n] \gets v$; $\ell \gets 0$; $h \gets n$
+		$B[n] \gets v$; $p \gets n$
 	}
 	else if($s = \<N>$) $A[n] = v$
 	else if($s = \<D>$){
 		$B[n] \gets v$
-		$\<copy>()$
+		copy()
 	}
 	else{
 		$A[n] \gets B[n] \gets v$
@@ -563,20 +509,17 @@ pop_back(){
 	if($s = \<N> \land n = |A|/4$){
 		$s \gets \<H>$
 		$B \gets \<alloc>(|A|/2)$
-		$\ell \gets 0$; $h \gets n$
+		$p \gets n$
 	}
 	else if($s = \<H>$) $\<copy>()$
-	else{
-		if($n = |A|$)
-			$s \gets \<N>$
-	}
+	else if($n = |A|$) $s \gets \<N>$
 	$n \gets n-1$
 }
 
 copy(){
-	$B[\ell] = A[\ell]$
-	$\ell \gets \ell+1$
-	if($\ell = h$){
+	$p \gets p - 1$
+	$B[p] = A[p]$
+	if($p = 0$){
 		$s \gets \<N>$
 		$A \gets B$
 	}
@@ -587,87 +530,58 @@ copy(){
 \label{fig:code}
 \end{figure}
 
-	\paragraph{Old}
-	One can \emph{incrementalize} amortized data structures to obtain worst-case data structures~\cite{okasaki}.
-	That this is possible should come as no surprise:
-	To prove amortized time bounds, we \emph{logically} schedule the work of expensive operations amongst cheaper operations.
-	With additional bookkeeping, we may \emph{phsically} do so, provided the bookkeeping code does not upset our complexity goals.
-	The amortized analysis shows not only that such scheduling is possible, but that the incremental work will be complete before their results are needed.
-	
-	In this case, the amortized algorithm stores $n$ items in a capacity $w \ge n$ fixed-sized array, doubling $w$ when pusing the $w+1$st item and halving $w$ when popping the $w/4$th item.
-	The doubling and halving steps allocate a new array, copy the $n$ items to it, then switch to using it.
-	We seek to incrementalize these $\Theta(n)$ copy operations.
-	
-	\stsfig
+	\begin{figure}
+	\begin{center}
+	\begin{tikzpicture}[every node/.style=draw, node distance=2cm, thick]
+		\node (N) {$\<N>$};
+		\node (H) [below left of=N] {$\<H>$};
+		\node (D) [below right of=N] {$\<D>$};
+		\path[<->] (N) edge [bend left=45] (D);
+		\path[<->] (N) edge [bend right=45] (H);
+	\end{tikzpicture}
+	\end{center}
+	\caption{STS for algorithm 5(a).}
+	\label{fig:sts}
+	\end{figure}
 
-	One way to describe our data structure is via the state-transition system in \figref{fig:sts}.
-	An invariant \emph{interprets} each state by specifying what our data stucture must look like in that state.
-	Our operations may rely on the invariant when they start and must guarantee it when they terminate.
-
+	We specify our invariant with reference to the state-transition system in \figref{fig:sts}:
 	\begin{itemize}
 	
-	\item $\<Normal>(A, n)$:
-	In this state, we proceed much as in the amortized data structure; \ie the fixed-size array $A$ stores $n$ items where $0 \le n < |A| =: w$.
-	Our interpretation requires\footnote{%
-		We systematically distinguish (mathematical) variables (\eg $A$, $n$) from the ``variables'' comprising our algorithm's state (\eg $\<buf>$, $\<cnt>$).
-		The assertion $\<var> \pointsto v$ connects the two, saying that the location $\<var>$ points to the value $v$.
-	}
+	\item $s = \<N>$:
+	In this state, we proceed much as in the amortized data structure; \ie the fixed-size array $A$ stores $n$ items where
 	\begin{mathpar}
-		\<state>\pointsto \<Normal> \and
-		\<buf> \pointsto A \and
-		\<cnt> \pointsto n \\\\
-		0 \le n \le |A| \and
+		0 \le n < |A| \and
 		\infer{i \in [0,n)}{\text{element $i$ at $A[i]$}}
 	\end{mathpar}
-	When inserting the $w+1$st item, we transition to $\<Double>(A,B,0,n)$ where $B$ is a fresh array allocated with $\<alloc>$ and $|B| = 2w$ and $n = w+1$.
-	When removing the $w/4$th item, we transition to $\<Halve>(A,B,0,n)$, where $|B| = w/2$ and $n = w/4 - 1$.
+	Let $w := |A|$.
+	When inserting the $w+1$st item, we transition to state $\<D>$ ($\<pushback>$ lines 3--5).
+	When removing the $w/4$th item, we transition to $\<H>$ ($\<popback>$ lines 3--5).
 	
-	We omit the code for this state.
-	
-	\item $\<Halve>(A, B, c, n)$:
-	In this state, we incrementally copy the relevant contents of the ``from-space'' $A$ to the ``to-space'' $B$, where the ``cursor'' $c$ says how many items we have copied and (as usual) $n$ says how many items we actually store for our client.
-	We interpret this state as follows.
+	\item $s = \<H>$:
+	In this state, we incrementally copy the contents of the ``from-space'' $A$ to the ``to-space'' $B$, where $p$ says how many items remain to be copied and (as usual) $n$ says how many items we actually store for our client:
 	\begin{mathpar}
-		\<state>\pointsto \<Halve> \and
-		\<from> \pointsto A \and
-		\<to> \pointsto B \and
-		\<cursor> \pointsto c \and
-		\<cnt> \pointsto n \\\\
-		0 \le c < n < |B|/2 \and
+		0 < p \le n < |B|/2 \and
 		|B| = |A|/2 \and
-		\infer{i \in [0,c)}{\text{element $i$ at $A[i]$ and $B[i]$}} \and
-		\infer{i \in [c, n)}{\text{element $i$ at $A[i]$}}
+		\infer{i \in [0, n)}{\text{element $i$ at $A[i]$}} \and
+		\infer{i \in (p,n)}{\text{element $i$ at $B[i]$}} \and
 	\end{mathpar}
-	We give pseudocode for this state's $\<pushback>$ and $\<popback>$ operations in \figref{fig:halveops}.
+	Line~7 in $\<popback>$ is the incremental continuation of the halving operation that was started in state $\<N>$.
+	Note that $\<copy>$ transitions to state $\<N>$ when the copying job terminates.
+	Line~15 in $\<pushback>$ aborts the copy if our client pushed us out of state $\<H>$.
 
-	The $\<popback>$ operation decrements $\<cnt>$ and performs a unit of copying work, incrementing $\<cursor>$ and transitioning to the normal state when we're done copying.
-	Note that we \emph{must} transition in line~\ref{HtoN}; otherwise, we would fail to satisfy our invariant.
-	
-	The $\<pushback>$ operation updates $\<from>$ and increments $\<cnt>$.
-	If the new value of $\<cnt>$ disagrees with our interpretation, then we \emph{abort} the on-going copy.
-	This sets us up for a later transition to $\<Double>$, in case our client continues to push values.
-
-	\item $\<Double>(A, B, c, n)$:
-	This state is analogous to $\<Halve>(A, B, c, n)$, but with interpretation:
+	\item $s = \<D>$:
+	This state is analogous to $\<H>$:
 	\begin{mathpar}
-		\<state>\pointsto \<Double> \and
-		\<from> \pointsto A \and
-		\<to> \pointsto B \and
-		\<cursor> \pointsto c \and
-		\<cnt> \pointsto n \\\\
-		0 \le c < |A| \and
+		0 < p \le |A| \and
 		|A| < n < |B| = 2|A| \\\\
-		\infer{i \in [0,c)}{\text{element $i$ at $A[i]$ and $B[i]$}} \and
-		\infer{i \in [c, |A|)}{\text{element $i$ at $A[i]$}} \and
-		\infer{i \in [|A|,n)}{\text{element $i$ at $B[i]$}}
+		\infer{i \in [0, |A|)}{\text{element $i$ at $A[i]$}} \and
+		\infer{i \in (p,|A|)}{\text{element $i$ at $B[i]$}} \and
+		\infer{i \in [|A|,n)}{\text{element $i$ at $B[i]$}} \and
 	\end{mathpar}
-	We omit the corresponding code.
 	\end{itemize}
-	Our interpretation tells us, among other things, how to access the $i$th item in our data structure and thus how to properly implement the $\<get>$ and $\<set>$ operations for each state.
-	Concretely, all our operations begin with a case analysis on the current contents of $\<state>$, branching to state-specific code.
+	Our boundary conditions match those of the amortized algorithm and we take care to abort copies that are rendered moot.
+	This ensures that every doubling (halving) job terminates before the next must start.
 
-	\codefig
-	
 	\item[b)]
 	\declareops{newkey,mac}%
 	Problem:
