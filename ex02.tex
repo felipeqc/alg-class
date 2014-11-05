@@ -43,7 +43,7 @@
   deletekeywords={...},            % if you want to delete keywords from the given language
   escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
   extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-  frame=single,                    % adds a frame around the code
+ % frame=single,                    % adds a frame around the code
   keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   keywordstyle=\color{blue},       % keyword style
   language=Octave,                 % the language of the code
@@ -60,6 +60,7 @@
   title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
 }
 
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
 \newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
 \newcommand{\RR}{\mathbb{R}}
 \newcommand{\NN}{\mathbb{N}}
@@ -343,33 +344,66 @@ $$\sum\limits_{i=0}^{n-1} \beta_i 2^i.$$
 
 \noindent \textbf{a) Give pseudo-code for the increment operation. What is the worst-case running of a single increment?}
 
-\bigskip \noindent \textbf{Answer:}
-
-\begin{lstlisting}[mathescape]
-Increment(array, n) {
+\paragraph{Answer:}
+Ripple carry, where $\beta$ is an unbounded array of bits:
+\begin{lstlisting}[mathescape,xleftmargin=2cm]
+inc($\beta$){
+    n $\gets$ size($\beta$)
     i $\gets$ 0
-    while $\beta_i \neq 1$ and $i < n$ do
-        $\beta_i \gets 0$
+    while $i < n \land \beta[i] = 1$ do
+        $\beta[i] \gets 0$
         $i \gets i + 1$
     end do
-    if $i < n$ then
-        $\beta_i \gets 1$
+    if $i < n$
+    then $\beta[i] \gets 1$
+    else push_back($\beta$,1)
     end if
 }
 \end{lstlisting}
-
-The algorithm may update every bit in the array. Since the representation of the entire number requires $\log_2 m$ bits, the complexity in the worst case is $\Theta(\log m)$.
+Representing the natural number $m$ requires a bit array of size $\Theta(\log m)$.
+In the worst case, the loop guard never sees a zero bit, so increment runs in $\Theta(\log m)$ worst-case time.
 
 \bigskip \noindent \textbf{b) Show that starting from $0$, the cost of $m$ increments is $O(m)$.}
 
+\begin{proof}
+Attribution:
+Based on course notes prepared by Jeff Erickson.\footnote{%
+	The notes are at \url{http://web.engr.illinois.edu/~jeffe/teaching/algorithms/notes/15-amortize.pdf}.
+	We stumbled on these notes during a rapid study of the fancy, parallel adders that hardware folks use.
+	It hadn't crossed our minds to seriously consider ripple carry, or we might have attempted the amortized analysis without guidance.}
 
+Let $E$ be a sequence of $m$ calls to increment, starting from zero and let $N$ be the total number of bits flipped during $E$.
+The running time of $E$ is $\Theta(N)$.
+(To see why, observe that for a given call to increment, we flip some bits and do $\Theta(1)$ extra work.
+We flip one bit (from one to zero) on each iteration of the loop and one additional bit (from zero to one) after the loop.
+Each flip takes constant time.)
+It thus suffices to show that $N$ is $O(m)$.
 
-\bigskip \noindent \textbf{Answer:}
+For $i \in I := \{0, \dots, \floor{\log_2 m}\}$, let $N_i$ be the number of times that bit $i$ is flipped during $E$.
+We have $N = \sum_{i \in I} N_i$.
+Bit 0 is flipped on every call, bit 1 on every other call, bit 2 on every fourth call, \ldots, bit $i$ on every $2^i$th call.
+Thus
+\[
+	N = \sum_{i \in I} N_i = \sum_{i \in I} \floor{ \frac{m}{2^i} } \le m \sum_{i=0}^\infty \frac{1}{2^i} = 2m
+\]
+For the last step, observe that the sequence of partial sums $1$, $1\frac{1}{2}$, $1\frac{3}{4}$, $1\frac{7}{8}$, $\ldots$ has limit 2.
+\end{proof}
 
-\bigskip \noindent \textbf{c) Assume that we also support decrements of the counter. Argue why a sequence if $M$ increments/decrements can take up to $\Omega(m \log m)$ operations.}
+\bigskip \noindent \textbf{c) Assume that we also support decrements of the counter. Argue why a sequence if $m$ increments/decrements can take up to $\Omega(m \log m)$ operations.}
 
-\bigskip \noindent \textbf{Answer:}
-
+\paragraph{Answer:}
+Let $k \in \NN$ be given.
+We can create the string $\alpha$ of $k$ ones using $a := 2^k -1$ increments in $O(a)$ time.
+Incrementing $\alpha$ takes $\Theta(\log a)$ time and yields the string
+\[
+	\beta := 1 \overbrace{0 \cdots 0}^{k}
+\]
+comprising a one followed by $k$ zeros.
+Decrementing $\beta$ (evident code omitted) takes $\Theta(\log a)$ time and yields $\alpha$.
+Thus for any $r \in \NN$, a sequence of $2r$ calls, starting from $\alpha$ and switching between increment and decrement on each call, takes $\Theta(r \log a)$ time.
+In particular, this holds when $r = a$.
+Now recall exercise~(1c):
+The sequence we've described runs in $O(a) + \Theta(a \log a) = \Omega(a \log a)$ time.
 
 \bigskip
 
