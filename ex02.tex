@@ -82,7 +82,7 @@ Tutorial time: Monday 14:00
 
 \section{Exercise 1 (10 pts)}
 
-\noindent a) Prove the statement from the lecture: If for two functions $f, g: \NN \to \RP$, the value $L := \lim_{n \to \infty} \frac{f(n)}{g(n)} \in [0, \infty)$ exists, then
+\paragraph{a)} Prove the statement from the lecture: If for two functions $f, g: \NN \to \RP$, the value $L := \lim_{n \to \infty} \frac{f(n)}{g(n)} \in [0, \infty)$ exists, then
 
 \begin{itemize}
 \item if $L = 0$, then $f(n) \in o(g(n))$.
@@ -90,11 +90,11 @@ Tutorial time: Monday 14:00
 \item if $L = \infty$, then $f(n) \in \omega(g(n))$.
 \end{itemize}
 
-\bigskip \noindent \textbf{Answer:}
+\paragraph{Answer:}
 
 We use the definition of limit.
-The definitions for O-notation assume that $f$ and $g$ are positive functions.
-We modified the problem statement accordingly.
+(The definitions for O-notation assume that $f$ and $g$ are positive functions.
+We modified the problem statement accordingly.)
 
 \begin{itemize}
 \item \textbf{If $L = 0$, then $f(n) \in o(g(n))$.}
@@ -150,32 +150,31 @@ This is exactly the definition of $f(n) = \omega(g(n))$.
 
 \end{itemize}
 
-\noindent b) Give an example of two (non-negative) functions $f,g$ with $f \in \Theta(g)$, but $\lim_{n \rightarrow \infty}\frac{f(n)}{g(n)}$ does not exist. 
+\paragraph{b)} Give an example of two (non-negative) functions $f,g$ with $f \in \Theta(g)$, but $\lim_{n \rightarrow \infty}\frac{f(n)}{g(n)}$ does not exist. 
 
-\bigskip Consider $f(n) = sin(n) + 1$ and $g(n) = cos(n) + 1$, which are both non-negative. Because the image of both functions lies in $[0, 2]$, they differ at most by some constant, so it must be that $f(n) = \Theta(g(n))$.
+\paragraph{Answer:}
+
+Consider $f(n) = sin(n) + 1$ and $g(n) = cos(n) + 1$, which are both non-negative. Because the image of both functions lies in $[0, 2]$, they differ at most by some constant, so it must be that $f(n) = \Theta(g(n))$.
 Now let's calculate the limit.
 
 $$\lim_{n \rightarrow \infty} \frac{\sin(n) + 1}{\cos(n) + 1} = 
 \lim_{n \rightarrow \infty} \frac{\sin(n)}{\cos(n) + 1} + \lim_{n \rightarrow \infty} \frac{1}{\cos(n) + 1}$$
 
-By L'Hospital Rule:
+By L'Hospital's Rule:
 
  
 $$= \lim_{n \rightarrow \infty} \left ( \frac{\cos(n)}{-\sin(n)} + \frac{1}{-\sin(n)} \right )= \lim_{n \rightarrow \infty} \left (- \cot (n) - \csc (n) \right )$$
 
 But since this function is periodic, the limit at infinity does not exist.
 
-\bigskip \noindent \textbf{Answer:}
-
-\noindent c) Prove the following rules for O-notation:
+\paragraph{c)} Prove the following rules for O-notation:
+\paragraph{Answer:}
 \begin{itemize}
 \item \textbf{For any positive constant} $c$, $c \cdot f(n) = \Theta(f(n))$.
 
 Let $c$ be any positive constant. Note that $\forall n, c f(n) \le c f(n)$. Then $\exists c' = c > 0$ and $\exists n_0 = 0$, such that $\forall n \ge n_0$, $c\cdot f(n) \le c' \cdot f(n)$. So $c f(n) = O(f(n))$.
 
 Likewise, $\forall n, c f(n) \ge c f(n)$. Then $\exists c' = c > 0$ and $\exists n_0 = 0$, such that $\forall n \ge n_0$, $c\cdot f(n) \ge c' \cdot f(n)$. So $c f(n) = \Omega(f(n))$.
-
-
 
 \item $\mathbf{f(n) + g(n) = \Omega(f(n))}$.
 
@@ -218,11 +217,9 @@ Therefore, $\exists c'' = c \cdot c' > 0$ and $\exists n_0'' \in
 
 \end{itemize}
 
-\bigskip \noindent \textbf{Answer:}
+\paragraph{d)} Show that $a^n = o(b^n)$ and $\log_a n = \Theta (\log_b n)$ for any $1 < a < b$.
 
-\noindent d) Show that $a^n = o(b^n)$ and $\log_a n = \Theta (\log_b n)$ for any $1 < a < b$.
-
-\bigskip \noindent \textbf{Answer:}
+\paragraph{Answer:}
 
 For the first case, note that $\lim_{n \rightarrow \infty}\frac{a^n}{b^n} = \lim_{n \rightarrow \infty}\left (\frac{a}{b} \right )^n = 0$, since $a/b < 1$. Thus, by the theorem from the lecture, $a^n = o(b^n)$.
 
@@ -233,16 +230,17 @@ $$\lim_{n \rightarrow \infty}\frac{\log_a n}{\log_b n} = \lim_{n \rightarrow \in
 By the theorem from the lecture, $\log_a n = \Theta(\log_b n)$.
 
 \section{Exercise 2 (10 pts)}
+\newcommand{\prob}{\operatorname{prob}}%
 
-\noindent a) Let $I$ and $J$ be two independent indicator variables with ${prob}(X = 1) = p$ and ${prob}(Y = 1) = q$, $p, q \in [0,1]$. Let $X = ( I + J) \mod 2$, that is, $X$ is one if and only if $I$ and $J$ are different. For which values of $p$ and $q$ are $I$ and $X$ independent? For which values are $I$, $J$, and $X$ independent?
+\paragraph{a)} Let $I$ and $J$ be two independent indicator variables with $\prob(X = 1) = p$ and $\prob(Y = 1) = q$, $p, q \in [0,1]$. Let $X = ( I + J) \mod 2$, that is, $X$ is one if and only if $I$ and $J$ are different. For which values of $p$ and $q$ are $I$ and $X$ independent? For which values are $I$, $J$, and $X$ independent?
 
-\bigskip \noindent \textbf{Answer:}
+\paragraph{Answer:}
 
 Since $I$ and $J$ are independent, we can make a table with the events and probabilities.
 
 \begin{center}
 \begin{tabular}{ c | c | c | c }
-  I = i & J = j & X = x & ${prob}(I = i \wedge J = j \wedge X = x)$\\
+  I = i & J = j & X = x & $\prob(I = i \wedge J = j \wedge X = x)$\\
   \hline                       
   0 & 0 & 0 & $(1-p)\cdot (1-q)$\\
   0 & 1 & 1 & $(1-p)\cdot q$\\
@@ -252,16 +250,15 @@ Since $I$ and $J$ are independent, we can make a table with the events and proba
 \end{tabular}
 \end{center}
 
-
 To enforce independence of $I$ and $X$, we must guarantee that:
 
-$$ \forall i, x \in \{0,1\}, {prob}(I = i \wedge X = x) = {prob}(I = i) \cdot {prob}(X = 1) $$
-
+$$ \forall i, x \in \{0,1\}, \prob(I = i \wedge X = x) = \prob(I = i) \cdot \prob(X = 1) $$
+Expanding the quantifiers:
 \begin{align*}
-{prob}(I = 0 \wedge X = 0) = {prob}(I = 0) \cdot {prob}(X = 0) \\
-{prob}(I = 0 \wedge X = 1) = {prob}(I = 0) \cdot {prob}(X = 1) \\
-{prob}(I = 1 \wedge X = 0) = {prob}(I = 1) \cdot {prob}(X = 0) \\
-{prob}(I = 1 \wedge X = 1) = {prob}(I = 1) \cdot {prob}(X = 1)
+\prob(I = 0 \wedge X = 0) &= \prob(I = 0) \cdot \prob(X = 0) \land{} \\
+\prob(I = 0 \wedge X = 1) &= \prob(I = 0) \cdot \prob(X = 1) \land{} \\
+\prob(I = 1 \wedge X = 0) &= \prob(I = 1) \cdot \prob(X = 0) \land{} \\
+\prob(I = 1 \wedge X = 1) &= \prob(I = 1) \cdot \prob(X = 1)
 \end{align*}
 
 Solving this set of equations, we obtain $p = 0$ and $q = 1/2$.
@@ -269,22 +266,21 @@ Solving this set of equations, we obtain $p = 0$ and $q = 1/2$.
 \bigskip
 To enforce independence of $I$, $J$ and $X$, we must guarantee that:
 
-$$ \forall i, j, x \in \{0,1\}, {prob}(I = i \wedge J = j \wedge X = x) = {prob}(I = i) \cdot {prob}(J = j) \cdot {prob}(X = 1) $$
+$$ \forall i, j, x \in \{0,1\}, \prob(I = i \wedge J = j \wedge X = x) = \prob(I = i) \cdot \prob(J = j) \cdot \prob(X = 1) $$
 
 However, this include the constraints for the impossible events:
-
 \begin{align*}
-0 = {prob}(I = 0 \wedge J = 0 \wedge X = 1) = {prob}(I = 0) \cdot {prob}(J = 0) \cdot {prob}(X = 1) \\
-0 = {prob}(I = 0 \wedge J = 1 \wedge X = 0) = {prob}(I = 0) \cdot {prob}(J = 1) \cdot {prob}(X = 0) \\
-0 = {prob}(I = 1 \wedge J = 0 \wedge X = 0) = {prob}(I = 1) \cdot {prob}(J = 0) \cdot {prob}(X = 0) \\
-0 = {prob}(I = 1 \wedge J = 1 \wedge X = 1) = {prob}(I = 1) \cdot {prob}(J = 1) \cdot {prob}(X = 1)
+0 = \prob(I = 0 \wedge J = 0 \wedge X = 1) = \prob(I = 0) \cdot \prob(J = 0) \cdot \prob(X = 1) \\
+0 = \prob(I = 0 \wedge J = 1 \wedge X = 0) = \prob(I = 0) \cdot \prob(J = 1) \cdot \prob(X = 0) \\
+0 = \prob(I = 1 \wedge J = 0 \wedge X = 0) = \prob(I = 1) \cdot \prob(J = 0) \cdot \prob(X = 0) \\
+0 = \prob(I = 1 \wedge J = 1 \wedge X = 1) = \prob(I = 1) \cdot \prob(J = 1) \cdot \prob(X = 1)
 \end{align*}
 
-Because we know that each of the three variables can assume all values in $\{0, 1\}$ (\ie, ${prob}(I = i), {prob}(J = j), {prob}(X = 1) > 0$), these equations cannot hold. Therefore, $I$, $J$, and $X$ cannot be made independent simultaneously.
+Because we know that each of the three variables can assume all values in $\{0, 1\}$ (\ie, $\prob(I = i), \prob(J = j), \prob(X = 1) > 0$), these equations cannot hold. Therefore, $I$, $J$, and $X$ cannot be made independent simultaneously.
 
-\bigskip \noindent b) Let $X_1, \ldots, X_n$ be independent indicator variables with ${prob}(X_i = 1) = p$ for all $i$. Show that $X = X_1 + \cdots + X_n$ is \emph{binomially distributed}, that is
+\paragraph{b)} Let $X_1, \ldots, X_n$ be independent indicator variables with $\prob(X_i = 1) = p$ for all $i$. Show that $X = X_1 + \cdots + X_n$ is \emph{binomially distributed}, that is
 
-$${prob}(X = k) = {n \choose k} p^k (1-p)^{n-k}.$$
+$$\prob(X = k) = {n \choose k} p^k (1-p)^{n-k}.$$
 
 \paragraph{Answer:}
 
@@ -292,20 +288,20 @@ $${prob}(X = k) = {n \choose k} p^k (1-p)^{n-k}.$$
 By induction on the number of variables $n$. Let $X^{(i)} = X_1 + \cdots + X_i$. For the base case with a single variable $X_1$, we have:
 
 \begin{align*}
-{prob}(X^{(1)} = 0) = {prob}(X_1 = 0) = {1 \choose 0} p^0 (1-p)^{1} = (1 - p) \\
-{prob}(X^{(1)} = 1) = {prob}(X_1 = 1) = {1 \choose 1} p^1 (1-p)^{0} = p
+\prob(X^{(1)} = 0) = \prob(X_1 = 0) = (1 - p) = {1 \choose 0} p^0 (1-p)^{1} \\
+\prob(X^{(1)} = 1) = \prob(X_1 = 1) = p = {1 \choose 1} p^1 (1-p)^{0}
 \end{align*}
 
-By IH, assume that for $i<n$ and $X^{(i)} = X_1 + \cdots + X_i$, the following holds:
+For our IH, assume that for $i<n$ and $X^{(i)} = X_1 + \cdots + X_i$, the following holds:
 
-$${prob}(X^{(i)} = k) = {i \choose k} p^k (1-p)^{i-k}.$$
+$$\prob(X^{(i)} = k) = {i \choose k} p^k (1-p)^{i-k}.$$
 
 Let's now consider the variable $X^{(i+1)} = X^{(i)} + X_{i+1}$, which includes one more term in the sum. Because $X_{i+1}$ can only assume two mutually-exclusive values (0 or 1):
 
 \begin{align*}
-{prob}(X^{(i+1)} = k) & = {prob}(X^{(i)} = k-1 \wedge X_{i+1} = 1) + {prob}(X^{(i)} = k \wedge X_{i+1} = 0) && \text{[$X$ and $X_{i+1}$ are independent]}\\
-& = {prob}(X^{(i)} = k-1) \cdot {prob}(X_{i+1} = 1) + {prob}(X^{(i)} = k) \cdot {prob}(X_{i+1} = 0) && \text{[Initial assumption]} \\
-& = {prob}(X^{(i)} = k-1) \cdot p + {prob}(X^{(i)} = k) \cdot (1 - p) && \text{[By IH]}\\
+\prob(X^{(i+1)} = k) & = \prob(X^{(i)} = k-1 \wedge X_{i+1} = 1) + \prob(X^{(i)} = k \wedge X_{i+1} = 0) && \text{[$X$ and $X_{i+1}$ are independent]}\\
+& = \prob(X^{(i)} = k-1) \cdot \prob(X_{i+1} = 1) + \prob(X^{(i)} = k) \cdot \prob(X_{i+1} = 0) && \text{[Initial assumption]} \\
+& = \prob(X^{(i)} = k-1) \cdot p + \prob(X^{(i)} = k) \cdot (1 - p) && \text{[By IH]}\\
 & = {i \choose k-1} p^{k-1} (1-p)^{i-k+1} \cdot p + {i \choose k} p^k (1-p)^{i-k} \cdot (1 - p)\\
 & = {i \choose k-1} p^{k} (1-p)^{i-k+1} + {i \choose k} p^k (1-p)^{i-k+1} \\
 & = \left [ {i \choose k-1} + {i \choose k} \right] p^{k} (1-p)^{i-k+1}
@@ -328,9 +324,14 @@ pointer of the list points to the first element. Its predecessor and the success
 
 \bigskip Discuss the advantages and disadvantages of these implementations, both in terms of asymptotic complexity and practical considerations.
 
-\bigskip \noindent \textbf{Answer:}
+\paragraph{Answer:}
 
-Implementation (a) has the advantage of using less memory for the representation (only half the number of pointers). However, it makes some operations on the list more complicated. Any move/delete operation on some element $e$ requires updating the ``next-pointer'' from the element $e_{prev}$ that precedes $e$. Therefore, these operations always need to be started from the head of the list, in order to identify this element $e_{prev}$.
+Implementation (a) has the advantage of using less memory for the representation (only half the number of pointers).
+Also, the operations are less error-prone as there are fewer pointer manipulations.
+Operations at the head of the list continue to take constant time (\eg testing if the list is empty, consing on a new element, or removing the list head).
+However, it makes some operations on the list more time-consuming (\eg adding an element at the end of the list, or concatenating two lists).
+In general, any move/delete operation on some element $e$ requires updating the ``next-pointer'' from the element $e'$ that precedes $e$.
+Therefore, these operations always need to be started from some predecessor of $e$, in order to identify this element $e'$.
 
 Regarding implementation (b), there are no major drawbacks, except that it makes the list less modular and more susceptible to low-level programming issues. For example, deleting every element would require setting the $head$ pointer to \emph{NULL}, which cannot be done if the list is passed by value to a function.
 
@@ -389,7 +390,7 @@ Thus
 For the last step, observe that the sequence of partial sums $1$, $1\frac{1}{2}$, $1\frac{3}{4}$, $1\frac{7}{8}$, $\ldots$ has limit 2.
 \end{proof}
 
-\bigskip \noindent \textbf{c) Assume that we also support decrements of the counter. Argue why a sequence if $m$ increments/decrements can take up to $\Omega(m \log m)$ operations.}
+\bigskip \noindent \textbf{c) Assume that we also support decrements of the counter. Argue why a sequence of $m$ increments/decrements can take up to $\Omega(m \log m)$ operations.}
 
 \paragraph{Answer:}
 Let $k \in \NN$ be given.
