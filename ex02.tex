@@ -511,7 +511,7 @@ pop_back(){
 		$B \gets \<alloc>(|A|/2)$
 		$p \gets n$
 	}
-	else if($s = \<H>$) $\<copy>()$
+	else if($s = \<H>$) copy()
 	else if($n = |A|$) $s \gets \<N>$
 	$n \gets n-1$
 }
@@ -578,10 +578,13 @@ copy(){
 		\infer{i \in (p,|A|)}{\text{element $i$ at $B[i]$}} \and
 		\infer{i \in [|A|,n)}{\text{element $i$ at $B[i]$}} \and
 	\end{mathpar}
+	Line~10 in $\<pushback>$ continues and line~8 in $\<popback>$ aborts the copying job.
+	
 	\end{itemize}
 	Our boundary conditions match those of the amortized algorithm and we take care to abort copies that are rendered moot.
 	This ensures that every doubling (halving) job terminates before the next must start.
-
+	Obviously, every operation terminates in worst-case $\Theta(1)$ time.
+	
 	\item[b)]
 	\declareops{newkey,mac}%
 	Problem:
