@@ -35,7 +35,7 @@
 
 \lstset{ %
   backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  basicstyle=\small,        % the size of the fonts that are used for the code
   breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
   breaklines=true,                 % sets automatic line breaking
   captionpos=b,                    % sets the caption-position to bottom
@@ -45,6 +45,7 @@
   extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
  % frame=single,                    % adds a frame around the code
   keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
   keywordstyle=\color{blue},       % keyword style
   language=Octave,                 % the language of the code
   morekeywords={then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
@@ -57,7 +58,8 @@
   stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
   stringstyle=\color{mymauve},     % string literal style
   tabsize=2,                       % sets default tabsize to 2 spaces
-  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape
 }
 
 \newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
@@ -350,7 +352,7 @@ Peano's representation $n ::= \texttt{O} \mid \texttt{S}\;n$ supports worst-case
 
 \paragraph{Answer:}
 Ripple carry, where $\beta$ is an unbounded array of bits:
-\begin{lstlisting}[mathescape,xleftmargin=2cm]
+\begin{lstlisting}[xleftmargin=2cm]
 inc($\beta$){
     n $\gets$ size($\beta$)
     i $\gets$ 0
@@ -414,7 +416,7 @@ The sequence we've described runs in $O(a) + \Theta(a \log a) = \Omega(a \log a)
 \section{Exercise 5 (10 pts)}
 
 \declareops{alloc,realloc,size,init,pushback[push\any{}back],popback[pop\any{}back],get,set,copy}%
-\declarevars{var,state,buf,cnt,from,to,cursor}%
+\declarevars{var,state,buf,cnt,from,to,cursor,N,D,H}%
 \newcommand*{\SET}{\leftarrow}%
 \declarestates{Normal,Halve,Double}%
 \newcommand*{\pointsto}{\hookrightarrow}%
@@ -491,6 +493,101 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 \begin{itemize}
 
 	\item[a)]
+	The idea is to spread out the copying steps required to double or halve the size of our buffer amongst subsequent operations.
+	
+	When doubling, we keep our original array $A$ and an array $B$ with $|B| = 2|A|$.
+	Each subsequent $\<pushback>$ does a unit of copying work.
+	We take care in $\<popback>$ to \emph{abort} the copy if we pop the $|A|+1$st item.
+	
+	Halving is similar
+	We keep our original array $A$ and an array $B$ with $|B| = |A|/2$.
+	$\<popback>$ does a unit of copying work, and $\<pushback>$ can abort.
+	
+	We keep our current state in $s$, which takes values in $\{\<N>, \<D>, \<H> \}$.
+	Counters  $\ell$ and $h$ track how much copying work we've done in states $D$ and $H$.
+
+	We give the code in \figref{fig:code}.
+
+\begin{figure}
+\begin{minipage}{0.32\linewidth}
+\begin{lstlisting}
+init(){
+	$s \gets \<N>$
+	$A \gets \<alloc>(1)$
+	$n \gets 0$
+	($B$, $\ell$, $h$ relevant when $s \not= \<N>$.)
+}
+
+get($i \in [0, n)$){
+	if($i < |A|$) return $A[i]$
+	else return $B[\,i - |A|\,]$
+}
+
+set($i \in [0, n)$, v){
+	if($s = \<N>$) $A[i] \gets v$
+	else if($s = \<H>$) $A[i] \gets B[i] \gets v$
+	else{
+		$B[i] \gets v$
+		if($i < |A|$) $A[i] \gets v$
+	}
+}
+\end{lstlisting}
+\end{minipage}
+\vrule~~
+\begin{minipage}{0.32\linewidth}
+\begin{lstlisting}
+push_back($v$){
+	if($s = \<N> \land n = |A|$){
+		$s \gets \<D>$
+		$B \gets \<alloc>(2|A|)$
+		$B[n] \gets v$; $\ell \gets 0$; $h \gets n$
+	}
+	else if($s = \<N>$) $A[n] = v$
+	else if($s = \<D>$){
+		$B[n] \gets v$
+		$\<copy>()$
+	}
+	else{
+		$A[n] \gets B[n] \gets v$
+		if($n = |B|/2$)
+			$s \gets \<N>$
+	}
+	$n \gets n+1$
+}
+\end{lstlisting}
+\end{minipage}
+\vrule~~
+\begin{minipage}{0.32\linewidth}
+\begin{lstlisting}
+pop_back(){
+	if($s = \<N> \land n = |A|/4$){
+		$s \gets \<H>$
+		$B \gets \<alloc>(|A|/2)$
+		$\ell \gets 0$; $h \gets n$
+	}
+	else if($s = \<H>$) $\<copy>()$
+	else{
+		if($n = |A|$)
+			$s \gets \<N>$
+	}
+	$n \gets n-1$
+}
+
+copy(){
+	$B[\ell] = A[\ell]$
+	$\ell \gets \ell+1$
+	if($\ell = h$){
+		$s \gets \<N>$
+		$A \gets B$
+	}
+}
+\end{lstlisting}
+\end{minipage}
+\caption{Code for algorithm 5a.}
+\label{fig:code}
+\end{figure}
+
+	\paragraph{Old}
 	One can \emph{incrementalize} amortized data structures to obtain worst-case data structures~\cite{okasaki}.
 	That this is possible should come as no surprise:
 	To prove amortized time bounds, we \emph{logically} schedule the work of expensive operations amongst cheaper operations.
