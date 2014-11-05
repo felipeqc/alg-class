@@ -456,7 +456,7 @@ We can trivially implement the $\<size>$ operation atop more primitive arrays th
 
 \begin{figure}
 \begin{minipage}{0.32\linewidth}
-\begin{lstlisting}
+\begin{lstlisting}[deletekeywords={get,set}]
 init(){
 	$s \gets \<N>$
 	$A \gets \<alloc>(1)$
@@ -469,7 +469,7 @@ get($i \in [0, n)$){
 	else return $B[\,i - |A|\,]$
 }
 
-set($i \in [0, n)$, v){
+set($i \in [0, n)$, $v$){
 	if($s = \<N>$) $A[i] \gets v$
 	else if($s = \<H>$) $A[i] \gets B[i] \gets v$
 	else{
@@ -540,7 +540,7 @@ copy(){
 		\path[<->] (N) edge [bend right=45] (H);
 	\end{tikzpicture}
 	\end{center}
-	\caption{STS for algorithm 5(a).}
+	\caption{STS for algorithm 5a.}
 	\label{fig:sts}
 	\end{figure}
 
