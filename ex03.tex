@@ -130,8 +130,8 @@ ${prob}(X_i > k) \le 2^{-k}$. Thus:
 \paragraph{Answer:}
 
 \begin{align*}
-{prob}(X > 2 \log_2 n) & \le {prob}(\bigvee\limits_{i=1}^n X_i > \frac{2 \log_2 n}{n}) \\
-& = \sum\limits_{i=1}^n {prob}(X_i > \frac{2 \log_2 n}{n}) \\
+{prob}(X > 2 \log_2 n) & \le {prob}(\bigvee\limits_{i=1}^n X_i > 2 \log_2 n) \\
+& = \sum\limits_{i=1}^n {prob}(X_i > 2 \log_2 n) \\
 & \le n \cdot \frac{1}{n^2} \\
 & = \frac{1}{n}
 \end{align*}
@@ -169,5 +169,55 @@ E[X] & \le \int_1^n \! {prob}(X > t) \, \mathrm{d}t && \text{[Split into short a
 \noindent Consider the following problem: for some group of people, we know a list of their $n$ favorite songs, and we want to identify people with similar taste quickly. For each person, we create a Bloom filter, using the same table size $m$ and the same set of $k$ hash functions (from a 1-universal family). For any two people. determine the expected number of bits where the Bloom filters differ as a function of $n, m, k$, and $s$, the number of common songs in their lists. Explain how to estimate $s$ after measuring the numbers of differing bits of two people. What is the advantage of this approach in practice compared to direct comparison of the lists of songs?
 
 \paragraph{Answer:}
+
+\begin{itemize}
+\item $m$: number of bits in the vector
+\item $n$: total number of songs
+\item $k$: number of hash functions
+\item $s$: number of common songs
+\end{itemize}
+
+Let $B[p_i, r_j]$ denote the value of the bloom filter of person $i$ at a row $j$.
+Without loss of generality, assume that the first $s$ rows are the ones with common songs. For $j \in \{1, \ldots, s\}$:
+
+\begin{align*}
+{prob}(B[p_i, r_j] = 0) = 0 \\
+{prob}(B[p_i, r_j] = 1) = 1
+\end{align*}
+
+
+Now consider the remaining rows. The probability that a row is zero is that $(n-s)$ non-common songs have all the hash functions not pointing to that row. For $j \in \{s+1, \ldots, m\}$:
+
+\begin{align*}
+{prob}(B[p_i, r_j] = 0) = \left ( 1 - \frac{k}{m} \right )^{n-s}
+\end{align*}
+
+\begin{align*}
+{prob}(B[p_i, r_j] = 1) = 1 - \left ( 1 - \frac{k}{m} \right )^{n-s}
+\end{align*}
+
+Now let's create a variable $D_j$ that equals 1 iff row j differs, and 0 otherwise. For $j \in \{s+1, \ldots, m\}$:
+
+\begin{align*}
+{prob}(D_j = 1) \\
+= & {prob}(B[p_1, r_j] \neq B[p_2, r_j]) \\
+= & {prob}(B[p_1, r_j] = 0 \wedge B[p_2, r_j] = 1) + {prob}(B[p_1, r_j] = 1 \wedge B[p_2, r_j] = 0) && \text{[Independence of events]} \\
+= & {prob}(B[p_1, r_j] = 0) \cdot {prob}(B[p_2, r_j] = 1) + {prob}(B[p_1, r_j] = 1) \cdot {prob}(B[p_2, r_j] = 0) \\
+= & 2 \cdot \left ( \left ( 1 - \frac{k}{m} \right )^{n-s} \right ) \cdot \left (1 - \left ( 1 - \frac{k}{m} \right )^{n-s} \right ) \\
+= & 2 \cdot \left ( \left ( 1 - \frac{k}{m} \right )^{n-s}  - \left ( 1 - \frac{k}{m} \right )^{2n-2s} \right )
+\end{align*}
+
+Now, let's use a random variable $X$ to accumulate $\sum D_j$.
+
+\begin{align*}
+E[X] \\
+= & E[\sum_{j=1}^m D_j] && \text{[First $s$ rows do not differ]} \\
+= & \sum_{j=s+1}^m {prob}(D_j=1) \\
+= & 2\cdot (m-s) \cdot \left ( \left ( 1 - \frac{k}{m} \right )^{n-s}  - \left ( 1 - \frac{k}{m} \right )^{2n-2s} \right )
+\end{align*}
+
+
+For the second question, we can set $E[X]$ to the measured number of differing bits, and then solve the equation for $s$. The main advantage of this approach is that instead of checking whether each of the $n$ songs belongs to both sets, we can simply compare $O(m)$ bits and then solve the equation in $O(1)$.
+
 
 \end{document}
