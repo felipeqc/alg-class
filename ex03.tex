@@ -1,0 +1,173 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=\color{blue},       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape
+}
+
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+
+\title{Exercise Sheet 3---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+\section{Exercise 3 (10 pts)}
+
+\noindent Consider a hash table of size $m$ to store $n \le  \frac{m}{2}$ elements. We use open addressing and assume a uniform family of hash functions.
+
+\paragraph{a)} Show that for all $i = 1, \ldots, n$, the probability that the $i^{th}$ insertion requires strictly more than $k$ probes is at most $2^{-k}$.
+
+\paragraph{Answer:}
+
+By induction on the number of probes $k$. Consider the base case $k=0$.
+
+
+\begin{align*}
+\forall i \in \{1, \ldots, n\}, \\
+& {prob}(X_i > 0) \le 2^{-k} = 2^0 = 1.
+\end{align*}
+
+By IH, assume that $\forall i \in \{1, \ldots, n\}, {prob}(X_i > k) \le 2^{-k}$. We know that:
+
+\begin{align*}
+& {prob}(X_i > k+1) && \text{By mutual exclusion of events} \\
+& = {prob}(X_i > k) - {prob}(X_i = k+1) \\
+& \le {prob}(X_i > k) && \text{[By IH]} \\
+& \le 2^{-k}
+\end{align*}
+
+\paragraph{b)} Show that for $i = 1, \ldots, n$, the probability that the $i^{th}$ insertion requires more than $2 \log_2 n$ probes is at most $1/n^2$.
+
+\paragraph{Answer:}
+
+Assume $n$ is a power of $2$ (this makes no difference). We know that $\forall i \in \{1, \ldots, n\},$
+${prob}(X_i > k) \le 2^{-k}$. Thus:
+
+\begin{align*}
+{prob}(X_i > 2 \log_2 n) & \le 2^{-2\log_2 n} \\
+& \le \frac{1}{2^{2 \log_2 n}} \\
+& \le \frac{1}{n^2}
+\end{align*}
+
+
+\noindent Let $X_i$ be a random variable counting the number of probes required in the $i^{th}$ insertion. You have shown above that ${prob}(X_i > 2 \log_2 n) \le 1/n^2$. Let $X = \max_{1 \le i \le n} X_i$ be the maximum number of probes required by any of the $n$ insertions.
+
+
+\paragraph{c)} Show that $\{prob\}(X > 2 \log_2 n) \le 1/n$
+
+
+\paragraph{Answer:}
+
+\begin{align*}
+{prob}(X > 2 \log_2 n) & \le {prob}(\bigvee\limits_{i=1}^n X_i > \frac{2 \log_2 n}{n}) \\
+& = \sum\limits_{i=1}^n {prob}(X_i > \frac{2 \log_2 n}{n}) \\
+& \le n \cdot \frac{1}{n^2} \\
+& = \frac{1}{n}
+\end{align*}
+
+But I think we can obtain a tighter bound:
+
+\begin{align*}
+X & > 2 \log_2 n \\
+\iff \max\limits_{1 \le i \le n} X_i & > 2 \log_2 n \\
+\implies \sum\limits_{1 \le i \le n} X_i & > 2 \log_2 n \\
+\iff \forall X_i, X_i & > \frac{2 \log_2 n}{n}
+\end{align*}
+
+That is, the event $\{X > 2 \log_2 n\} \subseteq \bigvee\limits_{i=1}^n \{X_i > \frac{2 \log_2 n}{n}\}$, which leads to a smaller probability.
+
+\paragraph{d)} Conclude that the expected length of the longest probe sequence is $O(\log n)$.
+
+\paragraph{Answer:}
+
+\begin{align*}
+E[X] & \le \int_1^n \! {prob}(X > t) \, \mathrm{d}t && \text{[Split into short and long sums]} \\
+& = \int_1^{2 \log_2 n} \! {prob}(X > t) \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > t) \, \mathrm{d}t && \text{[Approximate short sum with probability = 1]} \\
+& \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > t) \, \mathrm{d}t && \text{[${prob}(X > t)$ decreases]} \\
+& \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > 2 \log_2 n) \, \mathrm{d}t && \text{[By result of question (c)]}\\
+& \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! \frac{1}{n} \, \mathrm{d}t \\
+& \le (2\log_2 n - 1) + \frac{1}{n} (n - 2\log_2 n) \\
+& \le 2\log_2 n - \frac{2\log_2 n}{n} \\
+& \le 2\log_2 n \\
+& = O(\log n)
+\end{align*}
+
+
+\section{Exercise 4 (10 pts)}
+
+\noindent Consider the following problem: for some group of people, we know a list of their $n$ favorite songs, and we want to identify people with similar taste quickly. For each person, we create a Bloom filter, using the same table size $m$ and the same set of $k$ hash functions (from a 1-universal family). For any two people. determine the expected number of bits where the Bloom filters differ as a function of $n, m, k$, and $s$, the number of common songs in their lists. Explain how to estimate $s$ after measuring the numbers of differing bits of two people. What is the advantage of this approach in practice compared to direct comparison of the lists of songs?
+
+\paragraph{Answer:}
+
+\end{document}
