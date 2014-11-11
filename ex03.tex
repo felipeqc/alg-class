@@ -95,23 +95,31 @@ For each strategy, find an input such that quicksort takes $\Omega(n^2)$ time on
 
 \paragraph{Answer:}%
 \newcommand*{\USED}[1]{{\color{blue}#1}}%
+\newcommand{\HOLE}{{\rule[-.2ex]{1ex}{.4pt}}}%
+\newcommand{\SWAP}{\leftrightarrow}%
 \newcommand*{\argmedian}{\operatorname{argmedian}}%
 \newcommand*{\set}[1]{\{#1\}}%
-Assume for clarity that the input list contains no duplicates.
-Quicksort achieves its worst-case running time of $\Theta(n^2) \subseteq \Omega(n^2)$ when one sublist on which it recurses \emph{always} has size $\Theta(1)$ while the other has size $\Theta(n)$.
-This forces quicksort to recurse $\Theta(n)$ times.
-As quicksort spends $\Theta(n)$ time at each level, in addition to recursing, the total running time is $\Theta(n^2)$.
-
-In the following, we ``animate'' quicksort on a permutation of $1, \dots, k$ for $k \in \NN$ large enough to make our point.
-We \USED{mark in blue} those elements in the list that are no longer ``in play''.
-In moving from one line of the animation to the other, we simply sort the $\Theta(1)$ sublist; that is, we immediatley take those items out of play.
+In the following, we describe how to obtain a counterexample, ``animate'' counterexample generation for a small size, and then ``animate'' quicksort on the resulting counterexample.
+In the animations, we \USED{mark in blue} elements that are no longer ``in play''.
+In quicksort animations, we simply sort any ``small'' subproblems that arise, so that, from one line to the next, we show only quicksort's ``big'' subproblems.
 \begin{itemize}
 
 	\item
 	(midpoint):
-	With this pivot selection strategy, we can ensure that the ``heavy'' sublist shrinks by one item on each recursive call:
+	\textbf{Construction:}
+	Create a sorted list of length $n$ and mark all positions $0,\ldots,n-1$ ``in play''.
+	While there are positions in play, swap the minimal element that's still in play into the middle position (wrt the number of positions in play) and mark the middle position no longer in play:
 	\[
-		\begin{array}{cl}
+		\begin{array}{cll}
+		\multicolumn{3}{c}{\text{\emph{constructing a counterexample}}} \\
+		\text{list} & \text{middle position} & \text{swap positions} \\
+		1, 2, 3, 4, 5	&\floor{5/2} = 2 & 2 \SWAP 0\\
+		3, 2, \USED{1}, 4, 5	&\floor{4/2} = 2 & 2 \SWAP 1 \\
+		3, 4, \USED{1, 2}, 5	&\floor{3/2} = 1 & 1 \SWAP 0 \\
+		4, \USED{3, 1, 2}, 5	&\floor{2/2} = 1 & 1 \SWAP 0 \\
+		\USED{4, 3, 1, 2}, 5	&\floor{1/2} = 0 & 0 \SWAP 0 \\
+		\USED{4, 3, 1, 2, 5} \\[\jot]
+		\multicolumn{3}{c}{\text{\emph{running quicksort}}} \\
 		\text{list} & \text{pivot position} \\
 		4, 3, 1, 2, 5	& \floor{5/2} = 2 \\
 		\USED{1}, 4, 3, 2, 5	&\floor{4/2} = 2 \\
@@ -121,21 +129,79 @@ In moving from one line of the animation to the other, we simply sort the $\Thet
 		\USED{1, 2, 3, 4, 5}
 		\end{array}
 	\]
-	
+	Note that
+	\begin{enumerate}
+	\item Our algorithm terminates, as the number of positions in play decreases on each iteration.
+	\item Since permutations are closed under swapping, it produces a permutation $\pi$ of the original sorted list.
+	\item As $\text{quicksort}(\pi)$ runs, it always pivots on the minimal element.
+	Thus its subproblems have size zero and $n-1$.
+	The running time
+	\begin{align*}
+		T(0) &= \Theta(1) \\
+		T(n) &= T(0) + n + T(n-1)
+	\end{align*}
+	is $\Theta(n^2$).
+
+	\end{enumerate}
+
 	\item
 	(median of three):
-	With this pivot selection strategy, we can ensure that ``heavy'' sublist shrinks by \emph{at most 2} items on each recursive call:
+	\textbf{Construction:}
+	We use the same idea, but rather than ``poison'' (\ie take out of play by swapping in a minimal element) just the middle position, we posion both the first and middle positions:
 	\[
-		\begin{array}{cl}
+		\begin{array}{cll}
+		\multicolumn{3}{c}{\text{\emph{constructing a counterexample}}} \\
+		\text{list} & \text{middle position} & \text{swap positions} \\
+		1, 2, 3, 4, 5, 6, 7, 8	&\floor{8/2} = 4 & 0 \SWAP 0, 4 \SWAP 1 \\
+		\USED{1}, 5, 3, 4, \USED{2}, 6, 7, 8 & \floor{6/2} = 3 & 0 \SWAP 1, 3 \SWAP 2 \\
+		\USED{1, 3}, 5, 6, \USED{2, 4}, 7, 8 & \floor{4/2} = 2 & 0 \SWAP 0, 2 \SWAP 1 \\
+		\USED{1, 3, 5}, 7, \USED{2, 4, 6}, 8 & \floor{2/2} = 1 & 0 \SWAP 0, 1 \SWAP 1 \\
+		\USED{1, 3, 5, 7, 2, 4, 6, 8} \\[\jot]
+		\multicolumn{3}{c}{\text{\emph{running quicksort}}} \\
 		\text{list} & \text{pivot position} \\
-		5, 3, 1, 2, 4	&\argmedian\set{ 0\mapsto 5, 4 \mapsto 4, \floor{5/2}=2\mapsto 1} = 4 \\
-		3, 1, 2, \USED{4, 5}	&\argmedian\set{0 \mapsto 3, 2 \mapsto 2, \floor{3/2}=1 \mapsto 1} = 1 \\
-		\USED{1}, 3, 2, \USED{4, 5} & \argmedian\set{0 \mapsto 3, 1 \mapsto 2, \floor{2/2}=1 \mapsto 2} = 1 \\
-		\USED{1, 2}, 3, \USED{4, 5} & \argmedian\set{0 \mapsto 3, 0 \mapsto 3, \floor{1/2}=0 \mapsto 3} = 0 \\
-		\USED{1, 2, 3, 4, 5}
+		1, 3, 5, 7, 2, 4, 6, 8	& 4 \\
+		\USED{1, 2}, 3, 5, 7, 4, 6, 8 & 3 \\
+		\USED{1, 2, 3, 4}, 5, 7, 6, 8 & 2 \\
+		\USED{1, 2, 3, 4, 5, 6}, 7, 8 & 0 \\
+		\USED{1, 2, 3, 4, 5, 6, 7}, 8 & 0 \\
+		\USED{1, 2, 3, 4, 5, 6, 7, 8}
 		\end{array}
 	\]
+	At each stage, quicksort's pivot selection strategy examines the two smallest elements left in the array.
+	Thus the subproblems created by quicksort have size one and $n - 2$.
+	The running time
+	\begin{align*}
+		T(0) = T(1) &= \Theta(1) \\
+		T(n) &= T(1) + n + T(n-2)
+	\end{align*}
+	is, again, $\Theta(n^2)$.
 
+	\item (bizarre):
+	\textbf{Construction:}
+	Create an array of length $n$ and mark positions $0, \ldots, n-1$ ``in play''.
+	While there are more than one positions in play,
+	(i)~let $k$ be the number of positions,
+	(ii)~drop $k$ into the in play position $p := k-1$,
+	(iii)~drop $k-1$ into the in play position $p' := k \mod k-1 = 1$, and
+	(iv)~mark positions $p$ and $p'$ out of play.
+	For the final, in play position (if any) drop in $1$:
+	\[
+		\begin{array}{cl}
+		\multicolumn{2}{c}{\text{\emph{constructing a counterexample}}} \\
+		\HOLE, \HOLE, \HOLE, \HOLE, \HOLE, \HOLE, \HOLE \\
+		\HOLE, \USED{6}, \HOLE, \HOLE, \HOLE, \HOLE, \USED{7} \\
+		\HOLE, \USED{6, 4}, \HOLE, \HOLE, \USED{5, 7} \\
+		\HOLE, \USED{6, 4, 2, 3, 5, 7} \\
+		\USED{1, 6, 4, 2, 3, 5, 7} \\[\jot]
+		\multicolumn{2}{c}{\text{\emph{running quicksort}}} \\
+		\text{list} & \text{pivot position} \\
+		1, 6, 4, 2, 3, 5, 7 & 1\\
+		1, 4, 2, 3, 5, \USED{6, 7} & 1\\
+		1, 2, 3, \USED{4, 5, 6, 7} & 1\\
+		1, \USED{2, 3, 4, 5, 6, 7} & 1\\
+		\end{array}
+	\]
+	As in the preceding case, the subproblems created by quicksort have size one and $n-2$, so the running time is $\Omega(n^2)$.
 \end{itemize}
 
 \subsection{Part b}
