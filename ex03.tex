@@ -82,6 +82,122 @@
 
 Tutorial time: Monday 14:00
 
+\section{Exercise 1 (10 pts)}
+
+\subsection{Part a}
+Consider the following pivot-selection strategies for the quicksort algorithm for a sequence $a_0, \ldots, a_{n-1}$ of $n$ distinct integers:
+\begin{itemize}
+	\item Pick $a_m$ with $m := \floor{n/2}$ as pivot.
+	\item Look at positions $a_0$, $a_{n-1}$, and $a_m$ (as above) and choose the median of the three values as pivot.
+	\item Pick $a_\ell$ with $\ell := a_{n-1} \mod n-1$ as pivot.
+\end{itemize}
+For each strategy, find an input such that quicksort takes $\Omega(n^2)$ time on that input.
+
+\paragraph{Answer:}%
+\newcommand*{\USED}[1]{{\color{blue}#1}}%
+\newcommand*{\argmedian}{\operatorname{argmedian}}%
+\newcommand*{\set}[1]{\{#1\}}%
+Assume for clarity that the input list contains no duplicates.
+Quicksort achieves its worst-case running time of $\Theta(n^2) \subseteq \Omega(n^2)$ when one sublist on which it recurses \emph{always} has size $\Theta(1)$ while the other has size $\Theta(n)$.
+This forces quicksort to recurse $\Theta(n)$ times.
+As quicksort spends $\Theta(n)$ time at each level, in addition to recursing, the total running time is $\Theta(n^2)$.
+
+In the following, we ``animate'' quicksort on a permutation of $1, \dots, k$ for $k \in \NN$ large enough to make our point.
+We \USED{mark in blue} those elements in the list that are no longer ``in play''.
+In moving from one line of the animation to the other, we simply sort the $\Theta(1)$ sublist; that is, we immediatley take those items out of play.
+\begin{itemize}
+
+	\item
+	(midpoint):
+	With this pivot selection strategy, we can ensure that the ``heavy'' sublist shrinks by one item on each recursive call:
+	\[
+		\begin{array}{cl}
+		\text{list} & \text{pivot position} \\
+		4, 3, 1, 2, 5	& \floor{5/2} = 2 \\
+		\USED{1}, 4, 3, 2, 5	&\floor{4/2} = 2 \\
+		\USED{1, 2}, 4, 3, 5	&\floor{3/2} = 1 \\
+		\USED{1, 2, 3}, 4, 5	&\floor{2/2} = 1 \\
+		\USED{1, 2, 3, 4}, 5	&\floor{1/2} = 0 \\
+		\USED{1, 2, 3, 4, 5}
+		\end{array}
+	\]
+	
+	\item
+	(median of three):
+	With this pivot selection strategy, we can ensure that ``heavy'' sublist shrinks by \emph{at most 2} items on each recursive call:
+	\[
+		\begin{array}{cl}
+		\text{list} & \text{pivot position} \\
+		5, 3, 1, 2, 4	&\argmedian\set{ 0\mapsto 5, 4 \mapsto 4, \floor{5/2}=2\mapsto 1} = 4 \\
+		3, 1, 2, \USED{4, 5}	&\argmedian\set{0 \mapsto 3, 2 \mapsto 2, \floor{3/2}=1 \mapsto 1} = 1 \\
+		\USED{1}, 3, 2, \USED{4, 5} & \argmedian\set{0 \mapsto 3, 1 \mapsto 2, \floor{2/2}=1 \mapsto 2} = 1 \\
+		\USED{1, 2}, 3, \USED{4, 5} & \argmedian\set{0 \mapsto 3, 0 \mapsto 3, \floor{1/2}=0 \mapsto 3} = 0 \\
+		\USED{1, 2, 3, 4, 5}
+		\end{array}
+	\]
+
+\end{itemize}
+
+\subsection{Part b}
+
+Assume for clarity that the input list contains no duplicates.
+Quicksort achieves its worst-case running time of $\Theta(n^2) \subseteq \Omega(n^2)$ when the pivot is \emph{always} (the position of) the minimum element in its input.
+One of the sublists on which quicksort recurses is empty, while the other is a list of length $n-1$.
+Thus there are $\Theta(n)$ levels of recursion---each taking $\Theta(n)$ time on its own---for a total of $\Theta(n^2)$.
+
+With this insight, our task is simple:
+Permute a sorted list for a given pivot selection strategy, $f$, so that $f$ always selects the minimum.
+\textbf{Algorithm to produce a worst-case input for a given pivot selection strategy:}
+Create a sorted list of length $n$ and mark all items ``in play''.
+While there are elements in play, swap the minimal element that's still in play into the pivot position, and mark the pivot as no longer in play.
+
+Our algorithm terminates, as the number of items in play decreases on each iteration.
+Since permutations are closed under swapping, it produces a permutation $\pi$ of the original sorted list.
+By construction, this permutation forces $\text{quicksort}_{f}(\pi)$ to run in $\Theta(n^2)$ time, \emph{provided $f$ is deterministic}.
+
+In the following, we ``animate'' our algorithm, draw a line, then (as a sanity check) animate quicksort.
+(This would be easier with chalk!)
+For both animations, we \USED{mark in blue} those elements in the list that are no longer ``in play''.
+In the quicksort animations, of course, we only show the work done by one of the recursive calls.
+For concreteness, we always start with the sorted list $1, 2, 3, 4, 5$.
+
+	\[
+		\begin{array}{cl}
+		\text{list} & \text{pivot position} \\
+		1, 2, 3, 4, 5	&\floor{5/2} = 2\\
+		3, 2, \USED{1}, 4, 5	&\floor{4/2} = 2 \\
+		3, 4, \USED{1, 2}, 5	&\floor{3/2} = 1 \\
+		4, \USED{3, 1, 2}, 5	&\floor{2/2} = 1 \\
+		\USED{4, 3, 1, 2}, 5	&\floor{1/2} = 0 \\
+		\USED{4, 3, 1, 2, 5}	\\\hline
+		4, 3, 1, 2, 5	& \floor{5/2} = 2 \\
+		\USED{1}, 4, 3, 2, 5	&\floor{4/2} = 2 \\
+		\USED{1, 2}, 4, 3, 5	&\floor{3/2} = 1 \\
+		\USED{1, 2, 3}, 4, 5	&\floor{2/2} = 1 \\
+		\USED{1, 2, 3, 4}, 5	&\floor{1/2} = 0 \\
+		\USED{1, 2, 3, 4, 5}
+		\end{array}
+	\]
+
+	\[
+		\begin{array}{cl}
+		\text{list} & \text{pivot position} \\
+		1, 2, 3, 4, 5	&\argmedian\set{ 0\mapsto 1, 4\mapsto 5, \floor{5/2}=2\mapsto 3} = 2 \\
+		3, 2, \USED{1}, 4, 5	&\argmedian\set{ 0\mapsto 3, 3\mapsto 5, \floor{4/2}=2\mapsto 4} = 2 \\
+		3, 4, \USED{1, 2}, 5	&\argmedian\set{ 0\mapsto 3, 2\mapsto 5, \floor{3/2}=1\mapsto 4} = 1 \\
+		4, \USED{3, 1, 2}, 5	&\argmedian\set{ 0\mapsto 4, 1\mapsto 5, \floor{2/2}=1\mapsto 5} = 1 \\
+		5, \USED{3, 1, 2, 4}	&\argmedian\set{ 0\mapsto 5, 0\mapsto 5, \floor{1/2}=5\mapsto 5} = 0 \\
+		\USED{5, 3, 1, 2, 4} \\\hline
+		5, 3, 1, 2, 4	&\argmedian\set{ 0\mapsto 5, 4 \mapsto 4, \floor{5/2}=2\mapsto 1} = 4 \\
+		3, 1, 2, \USED{4, 5}	&\argmedian\set{0 \mapsto 3, 2 \mapsto 2, \floor{3/2}=1 \mapsto 1} = 1 \\
+		\USED{1}, 3, 2, \USED{4, 5} & \argmedian\set{0 \mapsto 3, 1 \mapsto 2, \floor{2/2}=1 \mapsto 2} = 1 \\
+		\USED{1, 2}, 3, \USED{4, 5} & \argmedian\set{0 \mapsto 3, 0 \mapsto 3, \floor{1/2}=0 \mapsto 3} = 0 \\
+		\USED{1, 2, 3, 4, 5}
+		\end{array}
+	\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% no conflicts, git! %%%%%
+
 \section{Exercise 3 (10 pts)}
 
 \noindent Consider a hash table of size $m$ to store $n \le  \frac{m}{2}$ elements. We use open addressing and assume a uniform family of hash functions.
