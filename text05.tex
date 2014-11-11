@@ -1,0 +1,172 @@
+\newpage 
+\section{Open Addressing}
+
+In open addressing, we store one element on each position, without chaining. It works exactly as normal hashing, except the way that collisions are handled.
+
+When there is a collision, we insert the element in the next position. Clearly, we can only store $n \le m$ elements.
+
+\paragraph{Probing:} If slot is occupied, search for a free slot.
+
+\bigskip \noindent Insert: Cost proportional to the number of probes.
+
+\bigskip \noindent Search: Follow the probe sequence until either (a) $\bot$ is found, or (b) element $e$ with key $k$ is found.
+
+\bigskip \noindent Delete: tricky.
+
+%\begin{lstlisting}[mathescape]
+%Search(k, S):
+%    $i \gets k$
+%    while $i
+%\end{lstlisting}
+
+\bigskip \noindent Generally, define an (extended) hash function $h: U \times \{0, \ldots, m-1\} \rightarrow \{0, \ldots, m-1\}$ such that for any $x \in U, (h(x, 0), \ldots, h(x,m-1))$ is a permutation of $\{0, \ldots, m-1\}$.
+
+Common choices:
+
+\begin{itemize}
+\item \textbf{Linear Probing:} $h(x, i) = (h'(x) + i) \mod m$, where $h'$ is an ordinary hash function
+\item \textbf{Quadratic Probing:} $h(x, i) = (h'(x) + c_1 i + c_2 i^2) \mod m$, with $c_1, c_2$, constants
+\item \textbf{Double Hashing:} $h(x, i) = (h_1(x) + i h_2(x)) \mod m$, with $h_1, h_2$ ordinary hash functions
+\end{itemize}
+
+\begin{mydefinition}
+A family of extended hash functions is called \emph{uniform}, if for $h \in H$ taken uniformly at random, for any $x \in U$ and any permutation $\pi$ of $\{0, \ldots, m-1\}$,
+
+$${prob}((h(x,0), \ldots, h(x, m-1)) = \pi) = \frac{1}{m!}$$
+\end{mydefinition}
+
+Recall: $\alpha = \frac{n}{m}$ is the load factor, $\alpha \le 1$.
+
+\begin{mytheorem}
+With a uniform family the expected number of probes in a search/insert is at most $\frac{1}{1-\alpha}$.
+\end{mytheorem}
+\begin{proof}
+Let $q_i$ denote the probability that we need more than $i$ probes.
+
+$$q_i \le \frac{n}{m} \times \frac{n-1}{m-1} \times \cdots \times \frac{n-i+1}{m-i+1} \le \left (\frac{n}{m} \right )^i$$
+
+Let $P$ be the number of probes needed.
+
+\begin{align*}
+E[P] & = \sum\limits_{i=1}^n i {prob}(P=i) \le \sum\limits_{i=1}^\infty i \cdot \left ({prob}(P>i-1) - {prob}(P > i) \right) \\
+& = (q_0 - q_1) + 2 \cdot (q_1 - q_2) + 3 \cdot (q_2 - q_3) = \ldots \\
+& = \sum\limits_{i=0}^\infty q_i \le  \sum\limits_{i=0}^\infty \alpha^i = \frac{1}{1-\alpha}
+\end{align*}
+\end{proof}
+
+How to ensure that $\alpha \le \frac{1}{2}$: When $n > \frac{m}{2}$,
+\begin{enumerate}
+\item Create hash table of twice the size and choose hash function $h$.
+\item Iterate through elements and insert into new hash table using $h$.
+\item Cost: $O(n)$, but amortized by previous insertions (bank account method).
+\end{enumerate}
+
+\section{Bloom Filter}
+
+We have a bit-vector of size $m$. We choose $k$ independent hash functions $h_1, \ldots, h_k$ from a 1-universal family.
+
+\bigskip \noindent insert(e, B): Set $B[h_i(e)] \gets 1$ for all $i = 1, \ldots, k$.
+
+\bigskip \noindent search(e, B): Check if all $B[h_i(e)] = 1$.
+
+\bigskip \noindent delete(e, B): tricky.
+
+\bigskip \noindent If $search(e, B)$ returns \emph{false}, then $e$ is definitely not in the set. Else, $e$ may be in the set or not.
+
+
+\subsection{Pros and Cons}
+
+\begin{itemize}
+\item (+) worst-case constant time for search/insert
+\item (+) very space efficient structure
+\item (-) false positives
+\item (-) no deletions
+\item (-) perhaps no resizing
+\item (-) cannot retrieve and element when searching for a key
+\end{itemize}
+
+\subsection{Probability of False Positives}
+
+Consider $n$ = \# elements in $b$, i.e., $i \in \{0, \ldots, m-1\}$.
+
+\bigskip \noindent ${prob}(B[i] = 0) = (1 - 1/m)^kn \approx e^{-\frac{kn}{m}}$
+
+\bigskip \noindent $\left [ (1 - 1/x)^y = ((1 = \frac{1}{-x})^{-x})^{-\frac{y}{x}} \right ]$
+
+\bigskip \noindent Let $x \notin B$.
+
+\begin{align*}
+{prob}(\text{x is false positive}) & = {prob}(B[h_1(x)] = 1 \wedge \cdots \wedge B[h_n(x)]=1) \\
+& \approx \prod\limits_{i=1}^k {prob}(B[h_i(x)]=1) \\
+& \approx (1 - e^{-\frac{kn}{m}})^k \\
+& = p(k, n, m)
+\end{align*}
+
+Equality does not hold because events are not independent. This can be ``repaired'' using concentration of measure / Chenoff bounds.
+
+Note that $p$ is minimized for $k = \ln 2 \cdot \frac{m}{n}$, with min value $(\frac{1}{2})^k \approx 0.6185^\frac{m}{n}$. To ensure a false positive rate of $1\%$, choose $c$ such that $m = c \cdot n$ and $(0.6185)^c < 0.01$, that is, $c \approx 9.6$.
+
+\section{Cuckoo Hashing (simplified variant) [2001]}
+
+\paragraph{Goal:} Dictionary with \emph{worst-case} constant search.
+
+\paragraph{Idea:} Use two arrays, each of size $m \ge 2n$.
+
+\begin{itemize}
+\item We have arrays $T_0$ and $T_1$.
+\item Every cell stores one element (no chaining).
+\item Search(k, S): Check if $T_0[h_0(k)]$ has key $k$ or $T_1[h_1(k)]$ has key $k$.
+\item Remove(k, S): Similar.
+\item insert(k, S)?
+\end{itemize}
+
+Assume that we want to insert element $e_1$ in $T_0$. If cell is not occupied, than it is simple. But if cell is occupied, $e_1$ replaces $e_2$. And we move $e_2$ to $T_1$. And so on...
+
+\newpage
+\begin{lstlisting}[mathescape]
+${insert(e, S)}$
+    ${insert}'(e, S, 0, 0)$
+    
+${insert}'(e, S, t, c)$
+    if (c gets too large [$c \ge 2n$]) then
+        stop and rehash
+
+    e' $\gets$ T_t[h_t(e)]
+    T_t[h_t(e)] \gets e
+    if $e' \neq \bot$ then ${insert}'(e', S, 1-t, c+1)$
+\end{lstlisting}
+
+\subsection{Analysis of Insert}
+
+Assume a randomly chosen hash function from the family of all hash functions.
+
+\begin{mydefinition}[Un-nested Sequence]
+Sequence of elements which are ``pushed out'', starting with the element to be inserted.
+\end{mydefinition}
+
+An U.S. can have repetitions. There are three types of such sequences:
+\begin{enumerate}
+\item $e_1, e_2, \ldots, e_k$ with no repetition: \textbf{finite}
+\item $e_1, \ldots, e_{i-i}, e_i, \ldots, e_{j-i}, e_j, \ldots, e_{j+i-1}, e_{j+i}, \ldots, e_k$, where $(e_i = e_j), (e_{i-1} = e_{j+1}), \ldots, (e_1 = e_{j+i-1})$: \textbf{finite}, with two exploratory fases.
+\item $e_1, \ldots, e_{i}, \ldots, e_j, \ldots, e_{j+i-1}, \ldots$: \textbf{infinite/cyclic}
+\end{enumerate}
+
+\begin{mylemma}
+The expected length of a finite sequence is $\Theta(1)$.
+\end{mylemma}
+\begin{proof}[Proof-sketch]
+Let $k$ = \# sequence. There is an exploratory phase with length $\ge \frac{k}{3}$. The probability of an exploratory sequence of ength $k$ drops exponentially with $k$. Therefore, this leads to a geometric series: $\Theta(1)$. 
+\end{proof}
+
+\begin{mylemma}
+An infinite sequence appears with probability $O(\frac{1}{n^2})$.
+\end{mylemma}
+\begin{proof}[Proof-sketch]
+Look at the shortest possible infinite sequence. The three elements map to the same two cells. If the sequence is longer instead, then the exploratory phases happen with lower probability.
+\end{proof}
+
+
+
+
+
+
