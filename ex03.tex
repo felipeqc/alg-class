@@ -145,7 +145,7 @@ X & > 2 \log_2 n \\
 \iff \forall X_i, X_i & > \frac{2 \log_2 n}{n}
 \end{align*}
 
-That is, the event $\{X > 2 \log_2 n\} \subseteq \bigvee\limits_{i=1}^n \{X_i > \frac{2 \log_2 n}{n}\}$, which leads to a smaller probability.
+That is, the event $\{X > 2 \log_2 n\} \subseteq \bigvee\limits_{i=1}^n \{X_i > \frac{2 \log_2 n}{n}\}$, which leads to a tighter bound on the probability.
 
 \paragraph{d)} Conclude that the expected length of the longest probe sequence is $O(\log n)$.
 
@@ -154,7 +154,7 @@ That is, the event $\{X > 2 \log_2 n\} \subseteq \bigvee\limits_{i=1}^n \{X_i > 
 \begin{align*}
 E[X] & \le \int_1^n \! {prob}(X > t) \, \mathrm{d}t && \text{[Split into short and long sums]} \\
 & = \int_1^{2 \log_2 n} \! {prob}(X > t) \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > t) \, \mathrm{d}t && \text{[Approximate short sum with probability = 1]} \\
-& \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > t) \, \mathrm{d}t && \text{[${prob}(X > t)$ decreases]} \\
+& \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > t) \, \mathrm{d}t && \text{[Approximate long sum, since ${prob}(X > t)$ decreases]} \\
 & \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! {prob}(X > 2 \log_2 n) \, \mathrm{d}t && \text{[By result of question (c)]}\\
 & \le \int_1^{2 \log_2 n} \! \, \mathrm{d}t + \int_{2 \log_2 n}^n \! \frac{1}{n} \, \mathrm{d}t \\
 & \le (2\log_2 n - 1) + \frac{1}{n} (n - 2\log_2 n) \\
