@@ -94,6 +94,9 @@ Consider the following pivot-selection strategies for the quicksort algorithm fo
 For each strategy, find an input such that quicksort takes $\Omega(n^2)$ time on that input.
 
 \paragraph{Answer:}%
+\dave{%
+	If time permits, make the first two read like the third and simplify accordingly.
+}
 \newcommand*{\USED}[1]{{\color{blue}#1}}%
 \newcommand{\HOLE}{{\rule[-.2ex]{1ex}{.4pt}}}%
 \newcommand{\SWAP}{\leftrightarrow}%
@@ -211,6 +214,8 @@ Which elements are inspected may depend on the value of previously inspected ele
 
 \paragraph{Answer:}
 \begin{proof}[Proof sketch]
+\dave{This needs work.
+	I will return to it after taking a look at problem 2.}
 If we can arrange for quicksort to create subproblems of size $c$ and size $n-c$, then it runs in time $\Theta(n^2)$.
 Since the selection strategy, $f$, is deterministic, we \emph{can} do so.
 An \emph{efficient} or \emph{insightful} algorithm to construct a counterexample of size $n$ depends on $f$.
