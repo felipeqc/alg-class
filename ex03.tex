@@ -97,9 +97,7 @@ Consider the following pivot-selection strategies for the quicksort algorithm fo
 For each strategy, find an input such that quicksort takes $\Omega(n^2)$ time on that input.
 
 \paragraph{Answer:}%
-\dave{%
-	If time permits, make the first two read like the third and simplify accordingly.
-}
+%\dave{If time permits, make the first two read like the third and simplify accordingly.}
 \newcommand*{\USED}[1]{{\color{blue}#1}}%
 \newcommand{\HOLE}{{\rule[-.2ex]{1ex}{.4pt}}}%
 \newcommand{\SWAP}{\leftrightarrow}%
@@ -217,12 +215,11 @@ Which elements are inspected may depend on the value of previously inspected ele
 
 \paragraph{Answer:}
 \begin{proof}[Proof sketch]
-\dave{This needs work.
-	I will return to it after taking a look at problem 2.}
+%\dave{This needs work.}
 If we can arrange for quicksort to create subproblems of size $c$ and size $n-c$, then it runs in time $\Theta(n^2)$.
 Since the selection strategy, $f$, is deterministic, we \emph{can} do so.
-An \emph{efficient} or \emph{insightful} algorithm to construct a counterexample of size $n$ depends on $f$.
-An \emph{ineffcient} algorithm is straightforward:
+%An \emph{efficient} or \emph{insightful} algorithm to construct a counterexample of size $n$ depends on $f$.
+A straightforward (if inefficient) algorithm:
 Consider all $n!$ permutations, $\pi$, of $1, \ldots, n$.
 Count the number of comparisons $C$ in $\text{quicksort}_f(\pi)$.
 Return the $\tilde \pi$ that maximizes $C$.
@@ -268,7 +265,7 @@ Show that this family is $(\ceil{p/m}/(p/m))^2$-universal, and therefore, in par
 
 When $a=0$, the probability of a collision is 1, so we consider only the case when $a \not= 0$.
 
-\begin{proof}
+\begin{proof}[Broken proof]
 	\newcommand{\hh}{h_{(a,b)}}%
 	Let $x, y \in U$ and assume $x \not= y$.
 	We have to show
@@ -291,10 +288,9 @@ When $a=0$, the probability of a collision is 1, so we consider only the case wh
 	Observe there are $p-1$ possible choices for $a$ and $\floor{p/m}$ possible values for $\ell$ (and thus the RHS).
 	So
 	\begin{align*}
-		\prob(\hh(x) = \hh(y)) &= \frac{\floor{p/m}}{p-1}
+		\prob(\hh(x) = \hh(y)) &= \frac{\floor{p/m}}{p-1} \overset{\text{\color{red}?}}{\le} \frac{\ceil{p/m}^2}{p^2/m}
 	\end{align*}
-	\dave{I don't see how to bridge the gap to~\eqref{eq:goal}.
-		Also, I haven't proved the lemma necessary to step from modulus $m$ to modulus $p$.}
+	\dave{I don't see how to bridge the gap~(?) between our probability and~\eqref{eq:goal}.}
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% no conflicts, git! %%%%%
