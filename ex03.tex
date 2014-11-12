@@ -62,10 +62,13 @@
   mathescape
 }
 
+\DeclareMathOperator{\prob}{prob}
 \newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
 \newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
 \newcommand{\RR}{\mathbb{R}}
 \newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
 \newcommand{\RP}{\RR_{\ge 0}}
 \newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
 \newcommand{\ie}{\emph{i.e.,} }
@@ -246,6 +249,53 @@ In either case, we have $\Omega(n \log n)$.
 
 The reasoning when $f$ inspects $n$ elements (\ie $f \in \Omega(n)$) is analogous.
 
+\section{Exercise 2 (10 pts)}
+\newcommand{\HH}{H^{*}}%
+
+Assume that $U = \set{0, \ldots, p-1}$ for some prime $p$ and $m \le p$.
+For $a, b \in U$, let
+\[
+	h_{(a,b)}(x) = ((ax+b) \bmod p) \bmod m.
+\]
+For example, if $p=97$ and $m=8$, we have $h_{(23,73)}(2) = ((23\cdot 2+73) \bmod 97) \bmod 8 = 22 \bmod 8 = 6$.
+Let
+\[
+	\HH = \set{\,h_{(a,b)} \mid a,b \in U\,}.
+\]
+Show that this family is $(\ceil{p/m}/(p/m))^2$-universal, and therefore, in particular, $2$-universal.
+
+\paragraph{Answer:}
+
+When $a=0$, the probability of a collision is 1, so we consider only the case when $a \not= 0$.
+
+\begin{proof}
+	\newcommand{\hh}{h_{(a,b)}}%
+	Let $x, y \in U$ and assume $x \not= y$.
+	We have to show
+	\begin{align*}
+		|\set{\,h \in \HH \mid h(x) = h(y)\,}| &\le \left(\frac{\ceil{p/m}}{p/m}\right)^2 \frac{|\HH|}{m} = \frac{\ceil{p/m}^2}{p^2/m^2} \frac{p(p-1)}{m} \\
+			&\le \frac{\ceil{p/m}^2}{p^2/m^2} \frac{p^2}{m} = \frac{\ceil{p/m}^2}{m}
+	\end{align*}
+	Alternatively, we can show that, for $\hh\in\HH$ chosen UAR,
+	\begin{equation}\label{eq:goal}
+		\prob(\hh(x) = \hh(y))\le \frac{\ceil{p/m}^2}{p^2/m^2}\frac{1}{m} = \frac{\ceil{p/m}^2}{p^2/m}
+	\end{equation}
+%	Recall the definition of the modulus operator: $\alpha \bmod \beta := \alpha - \beta\floor{\alpha/\beta}$.
+	We have
+	\begin{align*}
+		\hh(x) = \hh(y) &\iff \mathrlap{(ax+b) \bmod p \equiv (ay+b) \bmod p \pmod m} \\
+			&\iff ax+b \equiv ay+b+\ell m \pmod p	&\text{for some $\ell \in \set{0, \ldots, \floor{p/m}-1}$} \\
+			&\iff a \equiv \ell m(x-y)^{-1} \pmod p
+	\end{align*}
+	In solving for $a$, we used ($p$ prime so that) $\ZZ_p$ a field and $x - y \not= 0$.
+	Observe there are $p-1$ possible choices for $a$ and $\floor{p/m}$ possible values for $\ell$ (and thus the RHS).
+	So
+	\begin{align*}
+		\prob(\hh(x) = \hh(y)) &= \frac{\floor{p/m}}{p-1}
+	\end{align*}
+	\dave{I don't see how to bridge the gap to~\eqref{eq:goal}.
+		Also, I haven't proved the lemma necessary to step from modulus $m$ to modulus $p$.}
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% no conflicts, git! %%%%%
 
