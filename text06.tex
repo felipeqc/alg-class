@@ -1,0 +1,252 @@
+— Search trees
+
+• Offer a more elegant writeup for these (2,4)-trees.
+
+Terms:
+	root, parent, internal vs leaf node, sibling node, node depth,
+	ancestors/descendants,
+
+ρ(v) := # children of v
+height of tree is max depth of a leaf.
+
+Elements have keys from a /totally ordered/ set U (eg U=ℤ).
+Want to represent a sequence $S$ of /sorted/ elements taht supports
+• insert(e,S)
+• remove(k,S)
+• search(k,S) returns min_{e∈S}{ e : key(e) ≥ k } or max_{e∈S} {e : key(e) ≤ k}
+
+Ex: S={1,2,15,18}
+	search(3,S) returns 2 or 15
+	search(5,S) returns 5
+	search(30,S) returns 18
+
+Slightly more powerful than dictionaries.
+
+Def: A tree $T$ is a (2,4)-tree if
+	(i) Each leaf has the same depth (``perfectly balanced'')
+	(ii) Each internal node has 2, 3, or 4 children
+
+Note: In such a tree, every leaf has the same depth.
+
+Example:
+	5 → 2
+	5 → "7|8|9"=:big
+	2 → 1; 2 → 3
+	big → 7; big → 8; big → 9; big → 10
+With sibling links at the leaves (sorted linked list):
+	1 ↔ 3 ↔ 7 ↔ 8 ↔ 9 ↔ 10
+
+Assume Each /leaf/ stores one element.
+Assume leaves are connected by a linked list. (So each leaf has next/prev sibling pointers.)
+
+Assume internal node v stores p(v) = d stores d pointers to its children.
+Moreover, it stores (d-1) keys, s₁, …, s_{d-1} called /splitters/, such that
+	any key $k$ stored in the $i$th subtree of $v$ satisfies
+	s_{i-1} < k ≤ s_{i}.
+Convention: $s₀ = -∞$ and $s_d = +∞$.
+
+search(k,T)
+	v ← root(T)
+	while v is not a leaf
+		find j s.t. s_{j-1} <k ≤ s_j
+		with s₁, …, s,_{ρ(v)-1} the splitters of v
+		v ← jth child of v
+	end while
+	return v
+
+eg, search(6,example tree) returns the leaf with key 7
+and search(4,example tree) returns the leaf with key 3.
+
+cost of search: O(depth of returned leaf) = O(height of tree)
+
+What's the height of a (2,4)-tree?
+
+Lemma:
+	A (2,4)-tree with $n$ leaves and height $h$ satisfies
+	\[
+		2^h ≤ n≤ 4^h
+	\]
+	or, equivalently,
+	\[
+		\frac{1}{2} \lg n \le h \le \lgn
+	\]
+\begin{proof}
+	By picture:
+	Count the number of nodes on each level.
+	Nodes of depth 0: Just the root: ≤ 1.
+	Nodes of depth 1: ≤ 4¹
+	Nodes of depth 2: ≤ 4²
+	⋯
+	Nodes of depth h: ≤ 4^h
+	Thus we have at most $4^h$ leaves, but the number of leaves is $n$.
+	
+	For the other direction,
+	depth 0:	≥ 1
+	depth i:	≥ 2^i
+	Number of leaves $n ≥ 2^h$.
+\end{proof}
+
+More interesting: Insert and remove.
+We must maintain the invariant.
+
+For a node n containing element e, put key(n) := key(e).
+
+New example:
+	r := "2 7 9" → 1; r → "4 5 6"; r → 8; r → 10
+	1 → 1,2
+	"456" → 4,5,6,7
+	8 → 8,9
+	10 → 10,11
+
+When we insert 3, we want to create a new leaf.
+We can use search(3) to find the right position in the tree for the new leaf.
+In this case, search(3) returns the leaf 4.
+We create a node 3.
+Replace parent of 3 by
+	x' := "34", x'' := "567".
+	
+insert(e,T)
+	follow path from root to leaf v as in search(key(e),T)
+	create a new node w for e
+	put w as left- or right-sibling of v, depending on key(v) and key(w).
+	Let x be the parent of v.
+	In previous step, x got a new child.
+	Add a splitter for $x$ at appropriate position.
+		If the resulting node after insertion has at most 4 children (ρ(x)≤4), we're done; else:
+		We must repair.
+		Split the children into 2 and 3.
+		We replace $x$ by two siblings $x'$, $x''$.
+		$x'$ gets first two children.
+		$x''$ gets last three children.
+		Now we must assign splitters to $x'$ and $x''$.
+		Make $s₁$ the splitter of $x'$.
+		Make $s₃$, $s₄$ the splitters of $x''$.
+		Idea: We use $s₂$ as the splitter in repairing the parent of $y$, which just got one new child.
+		Let $y$ be the parent of $x$.
+		Add $s₂$ as additional splitter in $y$.
+		Recurse with $x := y$ and $s₂$.
+
+There's a special case: We're at the root.
+Splitting the root is strictly simpler than splitting subtrees, it involves creating a fresh root.
+
+Cost of a single repair: O(1).
+Cost of initial search: O(h).
+Number of repairs: O(h).
+Cost of insert: O(h) = O(log b).
+
+remove: homework.
+
+NB This generalizes to so-called ($A$, $B$)-trees, where every node but the root has at least $A$ and at most $B$ children.
+The height of the tree is logarithmic in $B$, so we generally use much larger constants than 2 and 4.
+
+— Splay trees
+
+A splay tree is a binary tree (\ie $ρ(v) ≤ 2$).
+We store one element per \emph{node}; \ie internal nodes also contain elements.
+Invariant: At any node $v$, the keys in the left subtree $< \key(v) <$ keys in right subtree.
+
+We do not require that the tree is balanced.
+
+Example:
+	6 → 3, 8
+	3 → 1,4
+
+Example:
+	5 → 4 → 3 → 2 → 1
+
+splay(k, T): Reorganizes $T$ so that the root of $T$ is one of
+\begin{mathpar}
+	min_{e∈S} {e : \key(e) ≥ k}
+	max_{e∈S} {e : \key(e) ≤ k}.
+\end{mathpar}
+In particular, if $k$ occurs in $T$, then splay makes the node for $k$ the root of $T$.
+
+type 'a tree ::= E | T of 'a tree * 'a * 'a tree
+
+Assume we have splay.
+We can define
+	• search(k,T): splay(k,T) and return the root.
+	• insert(e,T):
+		Create a new node w for e.
+		splay(key(e), T) and examine the root.
+		Case root = E: return T(E, e, E)
+		Case root = T(a, e', b):
+			if key(v) ≤ key(w)
+				Construct the tree T(T(a, e', E), e, b)
+			else if key(v) > key(w)
+				Construct the tree T(a, e, T(E, e', b))
+	• remove(k, T):
+		Let t := splay(k, T)
+		Case root = E: E
+		Case root = T(a, e', b):
+			Let a' := splay(+∞, a)	; k will also do
+			Idea: make b the right subtree of a'.
+			case a' of
+			| E => b
+			| T(a', e'', b) => T(a', e'', b)
+
+find(k, T): Binary tree search.
+	x ←root
+	if key(x) = k, return x.
+	if key(x) < k then
+		if x has no right child, return x
+		else find(k, right child x)
+	else
+		if x has no left child, return x
+		else find(k, left child x)
+
+patch(x):
+	as long as $x$ is not the root, perform one of the following rotations.
+	
+	(i) zig: If y, the parent of x, is the root
+		rewrite
+			T(T(A, x, B), y, C) → T(A, x, T(B,y,C))
+		Or the symmetric case.
+		observe we preserved the invariant
+		
+	(ii) zig-zig: If x is the left child of y, and y is the left child of z,
+	(right/right) analogous
+		rewrite
+			T(T(T(A, x, B), y, C), z, D) →  T(A, x, T(B, y, T(C, z, D)))
+	
+	(iii) zig-zag: If path from z to x is "left-right" or "right-left", then rewrite
+			T(T(A, y, T(B, x, C)), z, D) → T(T(A, y, B), x, T(C, z, D))
+
+In every case, the tree satisifies the tree invariant.
+
+spay(k,T):
+	let c = find(k,T)
+	patch every node on the path to the root.
+
+Example:
+		T(T(T(T(T(T(E, 1, E), 2, E), 3, E), 4, E) 5, E), 6, E)
+Here are the patches that happen on splaying 1:
+	zig-zig:
+		T(T(T(T(T(E, 1, T(E, 2, T(E, 3, E))), 4, E) 5, E), 6, E)
+We end up with
+	1 → 6 right
+	6 → 4 left
+	4 → 2, 5
+	2 → 3 right
+
+Notation: For node $x$, let $S(x)$ be the subtree rooted at $x$.
+Let $|T|$ be the number of nodes in $T$.
+Define $μ(S) := \floor{\log |S|}$ and $μ(x) := μ(S(x))$.
+
+We can interpret $μ(x)$ as the weight of $x$.
+Heavier nodes are more likely to participate in rotations.
+
+In the analysis, we will put a bank account on each /node/ rather than use a single account.
+
+The proof will maintain the following /credit invariant/:
+	Each node $x$ has a bank account with at least $μ(x)$ tokens.
+
+Lemma:
+	Let $x$ be the node that becomes root after a splay operation on tree $T$.
+	Then, we need to spend at most
+	\[
+		3 (μ(T) - μ(x) + 1)
+	\]
+	tokens to pay for all rebalancing operations and for maintaining the credit invariant.
+
+Note that $μ(x) ≥ 0$, so the bound is $≤ 3 \log n + 1$.

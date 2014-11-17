@@ -1,0 +1,132 @@
+\newpage \section{Fibonacci Heaps}
+
+\paragraph{Representation:}
+
+\begin{itemize}
+\item Forest of (arbitrary) heap-ordered trees
+\item Min-pointer to smallest element ($\implies {min}(Q) = O(1)$)
+\item Roots are connected by a linked list, called the \emph{root list}
+\end{itemize}
+
+\paragraph{Every node contains:}
+
+\begin{itemize}
+\item One element
+\item Its rank (= \# children)
+\item Pointers to parent, left and right sibling, and to one child
+\item A flag (marked or not) used in ${decrease\_key}$.
+\end{itemize}
+
+\paragraph{Operations:}
+
+\begin{itemize}
+\item ${insert}(e,Q)$: Add new tree with one node $e$ to root list and update the ${min}$ pointer $\implies O(1)$.
+\item ${union}(Q_1, Q_2):$ Splice the root lists and update the ${min}$ pointer $\implies O(1)$.
+\item ${remove}(h, Q):$ ${decrease\_key}(h, -\infty, Q)$, then, ${delete\_min}(Q)$. 
+\end{itemize}
+
+\begin{lstlisting}[mathescape]
+${delete\_min(Q)}$
+    Delete min-node and add all its children to the root list
+    Create and unbounded array $A$ storing handles to roots
+    Traverse the root list. Let $v$ be a root and $r$ its rank:
+        while($A[r] \neq \bot$):
+            Let $w = A[v]$, so ${rank}(v)=r={rank}(w)$.
+            Combine $v$ and $w$ into a new tree by making either $v$ a child
+            of $w$ or vice versa.
+            $A[v] \gets \bot$
+            $r \gets r + 1$
+        $A[v] \gets V$
+    Traverse $A$ once more and find ${min-node}$ to update the pointer
+            
+\end{lstlisting}
+
+${Decrease\_key}$ can be defined as follows:
+
+\begin{lstlisting}[mathescape]
+${decrease\_key(h, k, Q)}$
+    Cut subtree at $h$ and make it a new root
+    Update its key and update the ${min\_pointer}$. $\implies O(1)?$
+\end{lstlisting}
+
+However, this allows too ``wild'' shapes for the trees.
+
+
+
+\begin{lstlisting}[mathescape]
+Repair (Cascading Cuts):
+    When node $v$ is cut, let $w$ be its parent.
+    while($w$ is marked):
+        Unmark and cut $w$
+        $w \gets$ (old) parent of $w$
+\end{lstlisting}
+
+\subsection{Amortized Analysis}
+
+\paragraph{Credit Invariant:} Each root holds one token and each marked node holds two tokens.
+
+Let $R$ be the maximal rank of a node in the Fibonacci Heap.
+
+\begin{mylemma}
+${decrease\_key}$ needs to pay $O(1)$ credits to perform all its operations and maintain the credit invariant.
+\end{mylemma}
+\begin{proof}
+The methods marks (at most) one element and we can spend the two tokens for this marking. The first cut costs $O(1)$. Any further cut turns a marked node into a root, so one token becomes free and we spend it to pay for the cut.
+\end{proof}
+
+\begin{mylemma}
+${delete\_min}$ needs to pay $O(R)$ credits to pay for all its operations and to maintain the credit invariant.
+\end{mylemma}
+\begin{proof}
+We need to pay $O(R)$ credits to make the children of min-node roots and give them one token each. The array $A$ has size $O(R)$, and ${delete\_min}$ can pay for initialization.
+
+The running time of the loop is $O(R + \# {combines})$. Each combine turns some root into a non-root, so we can use its token to pay or the combine. Finding the min-pointer costs at most $O(R)$ additional operations.
+\end{proof}
+
+It remains to show that $R = O(\log n)$.
+
+\paragraph{Fibonacci Numbers:}
+\begin{itemize}
+\item $F_0 = 0, F_1 = 1, \forall i \ge 2, FI = F_{i-1} + F_{i - 1}$
+\item 0,1, 1,2,3,5,8,13,21, \ldots
+\end{itemize}
+
+\begin{mylemma}
+$F_{i + 2} \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^i \ge 1.618^i$ (homework).
+\end{mylemma}
+
+\begin{mylemma}
+Let $v$ be a node of rank $i$. Then, the subtree rooted at $v$ has at least $F_{i+2}$ nodes. In particular, if the FH has $n$ nodes, each rank is bounded by $1.4404 \log n$.
+\end{mylemma}
+\begin{proof}
+Let $v$ be a node of rank $i$. Let $w_1, \ldots, w_i$ be its children, sorted in order when they became children of $v$. For $w_j, 1 \le j \le i$, $w_j$ became child of $v$ through a combine in ${delete\_min}$. So, the rank of $w_j$ at that time was at least $j - 1$, because $w_1, \ldots, w_{j-1}$ were children of $v$ and combine only merges roots of same rank. Because $w_j$ has lost at most one child since then, ${rank}(w_j) \ge j-2$.
+
+Let $S_i$ be the minimum number of nodes in a subtree with a root of rank $i$. We have $S_0 = 1, S_i \ge 2$ and $\forall i \ge 2, S_i \ge 2 + S_0 + S_1 + \ldots + S_{i-2}$.
+
+We have that $S_i \ge F_{i+2}$ (homework).
+
+For the second claim, for any ode of tank $i$, we have $F_{n+2} \le n \iff 1.618^n \le n \iff i \le 1.4404 \log n$.
+\end{proof}
+
+\section{Union-find}
+
+We want to represent a collection of \emph{disjoint} sets $S_1, \ldots, S_k$. Each set $S_i$ has a representative $r_i \in S_i$. Our data structure suports:
+
+\begin{itemize}
+\item ${make\_set}(x):$ Create a new set $\{x\}$
+\item ${union}(x, y):$ Combine $S_i$ and $S_j$, where $x \in S_i$ and $y \in S_j$, into a new set $S_i \cup S_j$ and pick some element of the union as representative.
+\item ${find}(x):$ return the representative of the set containing $x$
+\end{itemize}
+ 
+\paragraph{Application:} Find the connected components of a graph $\implies$ minimum spanning tree.
+
+\paragraph{Representation: }
+\begin{itemize}
+\item Forest of (arbitrary) trees, one per set
+\item One element per node. Root contains the representative.
+\item Only pointer to the parent. Root points to itself.
+\end{itemize}
+
+Naive implementation of ${make\_set}$, ${union}$, ${find}$ is clear. Efficiency? Bad, because trees can degenerate.
+
+\paragraph{Optimization 1: } ``Union by ranks''. Merge the less deep tree into the deeper tree.
