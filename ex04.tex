@@ -277,10 +277,21 @@ This leaves us with $\mu'(x) - \mu(x) - 1$ credits left to pay for the constant 
 
 \section{Exercise 4 (10 pts)}
 
+A major advantage of binary heaps is that they can be represented by an array, Assume the heap with $n$ elements is stored in an unbounded array $A$. Rephrase ${insert}$, ${remove}$, and ${build}$ for this array representation.
+
 \paragraph{Answer:}
 
 \section{Exercise 5 (10 pts)}
 
+\paragraph{a) } Argue that the implementation of ${sift\_down}$ as given in the lecture requires $2 \log n$ comparison of keys in the worst case.
+
+\paragraph{Answer:} First, note that there is one comparison to compute smallest child and one in the ${if}$ statement.
+ 
+The worst-case happens if we compute ${sift\_down}({root})$ and the comparison ${key}(v) < {key}(w)$ is always false (else case). Then, we require 2 comparisons for every node in some path from the root to a leaf, that is, twice the height of the tree:  $2 \log n$.
+
+\paragraph{b) } Give an alternative implementation that requires only $\log n + O(\log \log n)$ comparisons.
+
 \paragraph{Answer:}
+
 
 \end{document}

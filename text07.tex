@@ -114,8 +114,7 @@ ${insert}(e, Q)$:
     sift_up(v)
     
 ${sift\_up}(v)$:
-    if $v$ is root, return
-    $w \gets {parent}(v)$
+    $w \gets {parent}(v)$
     if ${key}(v) > {key}(w)$, return
     else
         swap elements of $v$ and $w$
