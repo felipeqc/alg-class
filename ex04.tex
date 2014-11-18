@@ -246,8 +246,10 @@ All flavors of HFS, for example, store metadata in B-trees.
 \section{Exercise 3(10 pts)}
 
 Change the splay by replacing the zig-zig rotation according to the following picture:
-
-$x$ is left child of $y$, which is left child of $z$. Apply ${rotate}(x), {rotate}(x)$.
+\[
+	\tikz{\Tree [.$z$ [.$y$ [.$x$ $A$ $B$ ] $C$ ] $D$ ]} \Rightarrow \tikz{\Tree [.$x$ $A$ [.$z$ [.$y$ $B$ $C$ ] $D$ ] ]}
+\]
+%$x$ is left child of $y$, which is left child of $z$. Apply ${rotate}(x), {rotate}(x)$.
 
 
 \noindent Explain why the proof that a splay operation has logarithmic amortized complexity does not carry over to this case.
