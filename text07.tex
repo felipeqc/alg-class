@@ -114,7 +114,8 @@ ${insert}(e, Q)$:
     sift_up(v)
     
 ${sift\_up}(v)$:
-    $w \gets {parent}(v)$
+    if $v$ is root, return
+    $w \gets {parent}(v)$
     if ${key}(v) > {key}(w)$, return
     else
         swap elements of $v$ and $w$
@@ -162,7 +163,5 @@ ${heapify}(v)$:
 & = \underbrace{\sum_{j \ge 1} \frac{1}{2^j}}_{=1} \left ( 1 + \frac{1}{2} + \frac{1}{4} + \ldots \right ) \\
 & \le 2
 \end{align*}
-
-
 
 

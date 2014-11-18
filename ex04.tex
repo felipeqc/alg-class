@@ -41,7 +41,7 @@
   breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
   breaklines=true,                 % sets automatic line breaking
   captionpos=b,                    % sets the caption-position to bottom
-  commentstyle=\color{mygreen},    % comment style
+  commentstyle=\color{red},    % comment style
   deletekeywords={...},            % if you want to delete keywords from the given language
   escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
   extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
@@ -280,6 +280,51 @@ This leaves us with $\mu'(x) - \mu(x) - 1$ credits left to pay for the constant 
 A major advantage of binary heaps is that they can be represented by an array, Assume the heap with $n$ elements is stored in an unbounded array $A$. Rephrase ${insert}$, ${remove}$, and ${build}$ for this array representation.
 
 \paragraph{Answer:}
+
+As long as we have an implementation of an unbounded array, we can simply implement the binary heap on top of this abstraction. Note that an array always provides random access to elements and push/pop\_back() in constant time (amortized in this case). So let's assume that these operations already take charge of the reallocation.
+
+\begin{lstlisting}[mathescape]
+${insert}(Q, e)$:
+    $Q.{push\_back}(e)$
+    ${sift\_up}$($Q, Q.{size}()-1$) % Sift up inserted element
+    
+${sift\_up}(Q, v)$:
+    if $v == 0$: $\text{\quad}$ % v is root
+        return
+    $w \gets v/2$ $\text{\quad}$ % w = parent of v
+    if $(Q[v] > Q[w])$:
+        return
+    else:
+        ${swap}(Q[v], Q[w]$)
+        ${sift\_up}(Q, w)$
+
+${delete\_min}(Q)$:
+    ${swap}(Q[0], Q[Q.size()-1]$) $\text{\quad}$ % swap root and last
+    $Q.{pop\_back}()$ $\text{\quad}$ % delete last
+    ${sift\_down}(Q, 0)$
+
+${sift\_down}(Q, v)$:
+    if $v >= Q.size()/2$: % v is child
+        return
+    % w is smallest child of v
+    if $Q[2*v] < Q[2*v + 1]$:
+        $w \gets 2*v$
+    else:
+        $w \gets 2*v + 1$
+        
+    if $Q[v] < Q[w]$:
+        return
+    else:
+        ${swap}(Q[v], Q[w])$
+        ${sift\_down}(Q, w)$
+
+${heapify}(Q, v)$:
+    if $2*v < Q.size()$:
+        ${heapify}(Q, 2*v)$
+    if $2*v + 1 < Q.size()$:
+        ${heapify}(Q, 2*v + 1)$
+    ${sift\_down}(Q, v)$
+\end{lstlisting}
 
 \section{Exercise 5 (10 pts)}
 
