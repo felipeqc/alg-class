@@ -6,6 +6,7 @@
 	\mathtoolsset{centercolon}
 \usepackage{tikz}
 	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
 \usepackage{mathpartir}
 \usepackage{amsthm}
 \usepackage{amsxtra}
@@ -18,6 +19,7 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage{mathtools}
+\usepackage{enumerate}
 
 \newtheorem{theorem}{Theorem}
 
@@ -63,6 +65,7 @@
 }
 
 \DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\key}{key}
 \newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
 \newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
 \newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
@@ -76,7 +79,7 @@
 \usepackage{hyperref}
 \newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
 
-\title{Exercise Sheet 4---Algorithms and Data Structures}
+\title{Exercise Sheet 3---Algorithms and Data Structures}
 \author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
 
 \begin{document}
@@ -91,7 +94,154 @@ Tutorial time: Monday 14:00
 
 \section{Exercise 2 (10 pts)}
 
+One of the most famous balanced search trees is the \emph{red-black tree}.
+This is a binary search tree where each edge is either colored black or red.
+The \emph{black depth} of a node $v$ is the number of black edges on the path from the root to $v$.
+The following invariants have to hold:
+\begin{enumerate}[a)]
+\item All leaves have the same black depth.
+\item Edges incident to leaves are black.
+\item No path from the root to a leaf contains two consecutive red edges.
+\end{enumerate}
+
+Explain how a $(2,4)$-tree can be transformed into a red-black tree and vice versa.
+Assuming that elements are stored in the leaves of the red-black tree, give a procedure for inserting a new element in logarithmic time which corresonds to the insertion in $(2,4)$-trees.
+
 \paragraph{Answer:}
+
+First, some intuition:
+Why do the red-black~(RB) invariants help?
+The following lemma says that RB trees are balanced ``up to a factor of two''.
+
+\begin{mylemma}
+	For any node $v$ in an RB tree,
+	\[
+		S(v) \le 2L(v)
+	\]
+	where $L(v)$ (resp.\ $S(v)$) is the number of edges in a longest (resp.\ shortest) path from $v$ to a leaf.
+\end{mylemma}
+
+\begin{proof}
+	Define $L'$ and $S'$ analogous to $L$ and $S$, but counting black edges only.
+	By~(a), $L'(v) = S'(v)$.
+	By~(c), $L'(v) \le 2L(v)$ (since the worst we can do is alternate red, black edges).
+	By minimality, $S(v) \le S'(v)$.
+	Thus $S(v) \le S'(v) = L'(v) \le 2L(v)$.
+\end{proof}
+
+Having demonstrated we understand your invariants, we feel free to change them!
+We prefer to color nodes rather than edges:
+A RB tree is a binary search tree where each node stores, in addition to its ordinary payload, a color (red or black).
+These data satisfy three invariants:
+\begin{enumerate}[A)]
+\item Every path from the root to an empty node contains the same number of black nodes.
+\item Empty nodes (\ie pointers to $\bot$) are black.
+\item No red node has a red child.
+\end{enumerate}
+The two representations are isomorphic:
+We can regard the color bit stored in a node as the color for the link to the node from its parent (or from the outside world, in the case of the root node).
+We make this change because coloring nodes is more familiar to us.
+It might help if one wants to implement RB trees.
+(Pointers aren't always colorful, but nodes can always carry color bits.)
+
+\begin{figure}
+\[
+	\begin{array}{c@{\qquad}c@{\qquad}c}
+		\tikz{\Tree [.$s$ $c_1$ $c_2$ ]} & \tikz{\Tree [.{$s_1, s_2$} $c_1$ $c_2$ $c_3$ ]} & \tikz{\Tree[.{$s_1, s_2, s_3$} $c_1$ $c_2$ $c_3$ $c_4$ ]} \\[2\jot]
+		\Downarrow & \Downarrow & \Downarrow \\[2\jot]
+		\tikz{\Tree [.$s$ $c_1$ $c_2$ ]} & \tikz{\Tree [.$s_1$ $c_1$ [.\node[red]{$s_2$}; $c_2$ $c_3$ ] ]} & \tikz{\Tree [.$s_2$ [.$s_1$ $c_1$ $c_2$ ] [.$s_3$ $c_3$ $c_4$ ] ]}
+	\end{array}
+\]
+\caption{%
+	Turning $(2,4)$-trees into red-black trees.
+	We color red nodes red.
+}
+\label{fig:torb}
+\end{figure}
+
+\paragraph{Turning a $(2,4)$-tree into a RB tree:}
+We give the basic idea in \figref{fig:torb}.
+In each case, the root is colored black and the black depth of the children $c_i$ is identical.
+Thus the obvious recursive algorithm produces a RB tree.
+
+\begin{figure}
+\[
+	\begin{array}{ccccc}
+		&& \tikz{\Tree [.$a$ [.\node[red]{$b$}; $A$ $B$ ] [.\node[red]{$c$}; $C$ $D$ ] ]} \\
+		&& \Downarrow \\
+		\tikz{\Tree [.$a$ [.\node[red]{$b$}; $A$ $B$ ] [.$c$ $C$ $D$ ] ]} & \Rightarrow & \tikz{\Tree [.\node{$b, a, c$}; $A$ $B$ $C$ $D$ ]} & \Leftarrow & \tikz{\Tree [.$a$ [.$b$ $A$ $B$ ] [.\node[red]{$c$}; $C$ $D$ ] ]}
+	\end{array}
+\]
+\caption{%
+	Turning red-black trees into $(2,4)$ trees.
+	We color red nodes red.
+	We omit the case of a black node with black children (see the text).
+}
+\label{fig:to24}
+\end{figure}
+
+\paragraph{Turning a RB tree into a $(2,4)$-tree:}
+Assume the root is black.
+(If it's not, then color it black.
+This does not violate the RB invariants.)
+By~(C), we need not consider the case of red nodes with red children.
+We show how to treat black nodes with red children in \figref{fig:to24}.
+To deal with black nodes with black children, we turn the root into a single-splitter node, then recurse on the subtrees.
+In each case, all subtrees have the same depth.
+Thus the obvious recursive algorithm produces a $(2,4)$-tree.
+
+\paragraph{RB tree insertion:}
+The textbook algorithm for insertion into RB trees is structured just like insertion into (2,4)-trees:
+Search for the spot to insert, drop in the new node, then patch the path back to the root, making local changes on the way up in order to re-establish the invariant.
+In detail:
+\begin{enumerate}
+\item Create a new node, $v$, colored \emph{red}, to contain the element $e$ to be inserted.
+
+\item Use binary search to find the the leaf node, $p$, that should be $v$'s parent.
+
+\item If $\key(v) < \key(p)$, then $p.L \gets v$; otherwise $p.R \gets v$.
+
+\item patch($v$).
+(Discussed next.)
+
+\end{enumerate}
+By coloring the new node red, we preserved invariant~(A).
+We changed one of $p$'s children from black to red ($\bot$ is black), so we have to worry about invariant~(C).
+
+\begin{figure}
+\[
+	\begin{array}{ccccc}
+		&& \tikz{\Tree [.$z$ [.\node[red]{$x$}; $A$ [.\node[red]{$y$}; $B$ $C$ ] ] $D$ ]} \\[2\jot]
+		&& \Downarrow \\
+		\tikz{\Tree [.$z$ [.\node[red]{$y$}; [.\node[red]{$x$}; $A$ $B$ ] $C$ ] $D$ ]} & \Rightarrow & \tikz{\Tree [.\node[red]{$y$}; [.$x$ $A$ $B$ ] [.$z$ $C$ $D$ ] ]} & \Leftarrow & \tikz{\Tree [.$x$ $A$ [.\node[red]{$y$}; $B$ [.\node[red]{$z$}; $C$ $D$ ] ] ]} \\[2\jot]
+		&& \Uparrow \\[2\jot]
+		&& \tikz{\Tree [.$x$ $A$ [.\node[red]{$z$}; [.\node[red]{$y$}; $B$ $C$ ] $D$ ] ]}
+	\end{array}
+\]
+\caption{%
+	Moving a red-red violation toward the root (part of RB tree insertion).
+	Here, $x$, $y$, and $z$ represent nodes that are examined by patch;
+	$A$, $B$, $C$, and $D$ represent arbitrary subtrees (pointers pushed around by patch);
+	and we color red nodes red.
+	(Attribution: Adapted from Figure~3.5 in Chris Okasaki's {\it Purely functional data structures,} Cambridge University Press, 1998.)
+}
+\label{fig:rbpatch}
+\end{figure}
+
+In patch($v$), we permit at most one red-red violation at a time, and we push it toward the root.
+Once we reach the root, we color the root black, avoiding any red-red violations while preserving invariant~(A).
+In detail, patch($v$) works by following parent pointers, pattern-matching against the four red-red cases in~\figref{fig:rbpatch}, and rewriting acording to the figure.
+(Optimization:
+If, on the way up to the root, patch sees no red-red case, then it can stop.
+Further optimizations are possible by considering eight rather than four cases.)
+
+\paragraph{Practical advice:}
+If you need persistent finite sets or maps, then RB trees are great.
+If you don't care about persistence, then use splay trees (if you can tolerate amortized complexity) or hash tables (if you can tolerate writing hash functions rather than comparison functions).
+They're faster.
+Avoid $(2,4)$-trees; the constants are ridiculous.
+Their only benefit, in the second author's opinon, is that they generalize to B-trees, where they really shine as an on-disk data structure.
+All flavors of HFS, for example, store metadata in B-trees.
 
 \section{Exercise 3(10 pts)}
 
