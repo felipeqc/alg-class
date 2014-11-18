@@ -338,5 +338,29 @@ The worst-case happens if we compute ${sift\_down}({root})$ and the comparison $
 
 \paragraph{Answer:}
 
+Hint found in: \emph{Algorithms and Data Structures: The Basic Toolbox By Kurt Mehlhorn, Peter Sanders.}
+
+In sift-down, instead of swapping the element $v$ with a child step-by-step until it falls into the desired position, we can do something different. We first find the path downwards that contains the smallest nodes and then do a binary search up to find the right position for $v$.
+
+\begin{lstlisting}[mathescape]
+
+${sift\_down}(v)$:
+    $cur \gets v$
+    while (true):
+        if $cur$ is leaf, break
+        $child \gets$ smallest child of $cur$
+        if ${key}(cur) < {key}(child)$:
+            break
+        else:
+            cur = child
+    % We end with a path Q[0], ..., Q[cur/2^(half of height of cur)], ..., Q[cur/2], Q[cur].
+    % We do binary search on this path to find the node to swap with the root
+    k = binary_search(0, height of cur)
+    $swap(v, cur / 2^{(cur-k)})$ % Something like that
+    
+    
+\end{lstlisting}
+
+
 
 \end{document}
