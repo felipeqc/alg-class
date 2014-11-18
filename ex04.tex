@@ -306,8 +306,8 @@ ${delete\_min}(Q)$:
 ${sift\_down}(Q, v)$:
     if $v >= Q.size()/2$: % v is child
         return
-    % w is smallest child of v
-    if $Q[2*v] < Q[2*v + 1]$:
+
+    if $2*v+1 >= Q.{size}()$ or $Q[2*v] < Q[2*v + 1]$: % w is smallest child of v
         $w \gets 2*v$
     else:
         $w \gets 2*v + 1$
