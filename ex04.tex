@@ -410,10 +410,10 @@ ${sift\_down}(v)$:
             break
         else:
             cur = child
-    % We end with a path Q[0], ..., Q[cur/2^(half of height of cur)], ..., Q[cur/2], Q[cur].
-    % We do binary search on this path to find the node to swap with the root
-    k = binary_search(0, height of cur)
-    $swap(v, cur / 2^{(cur-k)})$ % Something like that
+    % Consider the sequence of ancestor nodes Q[0], ..., Q[cur/2^(half of height of cur)], ..., Q[cur/2], Q[cur].
+    % We do binary search on the height of this sequence to find the node to swap with v
 \end{lstlisting}
+
+This does not eliminate the $\log n$ time to find the path, but doing the binary search to find the right node to swap requires $O(\log (\text{height of path})) = O(\log \log n)$. The resulting complexity is $\log n + O(\log\log n)$.
 
 \end{document}
