@@ -301,16 +301,7 @@ In patch($v$), we permit at most one red-red violation at a time, and we push it
 Once we reach the root, we color the root black, avoiding any red-red violations while preserving invariant~(A).
 In detail, patch($v$) works by following parent pointers, pattern-matching against the four red-red cases in~\figref{fig:rbpatch}, and rewriting acording to the figure.
 (Optimization:
-If, on the way up to the root, patch sees no red-red case, then it can stop.
-Further optimizations are possible by considering eight rather than four cases.)
-
-\paragraph{Practical advice:}
-If you need persistent finite sets or maps, then RB trees are great.
-If you don't care about persistence, then use splay trees (if you can tolerate amortized complexity) or hash tables (if you can tolerate writing hash functions rather than comparison functions).
-They're faster.
-Avoid $(2,4)$-trees; the constants are ridiculous.
-Their only benefit, in the second author's opinon, is that they generalize to B-trees, where they really shine as an on-disk data structure.
-All flavors of HFS, for example, store metadata in B-trees.
+If, on the way up to the root, patch sees no red-red case, then it can stop.)
 
 \section{Exercise 3(10 pts)}
 
