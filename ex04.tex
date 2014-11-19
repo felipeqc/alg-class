@@ -41,7 +41,7 @@
   breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
   breaklines=true,                 % sets automatic line breaking
   captionpos=b,                    % sets the caption-position to bottom
-  commentstyle=\color{mygreen},    % comment style
+  commentstyle=\color{red},    % comment style
   deletekeywords={...},            % if you want to delete keywords from the given language
   escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
   extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
@@ -346,10 +346,90 @@ This leaves us with $\mu'(x) - \mu(x) - 1$ credits left to pay for the constant 
 
 \section{Exercise 4 (10 pts)}
 
+A major advantage of binary heaps is that they can be represented by an array, Assume the heap with $n$ elements is stored in an unbounded array $A$. Rephrase ${insert}$, ${remove}$, and ${build}$ for this array representation.
+
 \paragraph{Answer:}
+
+As long as we have an implementation of an unbounded array, we can simply implement the binary heap on top of this abstraction. Note that an array always provides random access to elements and push/pop\_back() in constant time (amortized in this case). So let's assume that these operations already take charge of the reallocation.
+
+\begin{lstlisting}[mathescape]
+${insert}(Q, e)$:
+    $Q.{push\_back}(e)$
+    ${sift\_up}$($Q, Q.{size}()-1$) % Sift up inserted element
+    
+${sift\_up}(Q, v)$:
+    if $v == 0$: $\text{\quad}$ % v is root
+        return
+    $w \gets v/2$ $\text{\quad}$ % w = parent of v
+    if $(Q[v] > Q[w])$:
+        return
+    else:
+        ${swap}(Q[v], Q[w]$)
+        ${sift\_up}(Q, w)$
+
+${delete\_min}(Q)$:
+    ${swap}(Q[0], Q[Q.size()-1]$) $\text{\quad}$ % swap root and last
+    $Q.{pop\_back}()$ $\text{\quad}$ % delete last
+    ${sift\_down}(Q, 0)$
+
+${sift\_down}(Q, v)$:
+    if $v >= Q.size()/2$: % v is child
+        return
+
+    if $2*v+1 >= Q.{size}()$ or $Q[2*v] < Q[2*v + 1]$: % w is smallest child of v
+        $w \gets 2*v$
+    else:
+        $w \gets 2*v + 1$
+        
+    if $Q[v] < Q[w]$:
+        return
+    else:
+        ${swap}(Q[v], Q[w])$
+        ${sift\_down}(Q, w)$
+
+${heapify}(Q, v)$:
+    if $2*v < Q.size()$:
+        ${heapify}(Q, 2*v)$
+    if $2*v + 1 < Q.size()$:
+        ${heapify}(Q, 2*v + 1)$
+    ${sift\_down}(Q, v)$
+\end{lstlisting}
 
 \section{Exercise 5 (10 pts)}
 
+\paragraph{a) } Argue that the implementation of ${sift\_down}$ as given in the lecture requires $2 \log n$ comparison of keys in the worst case.
+
+\paragraph{Answer:} First, note that there is one comparison to compute smallest child and one in the ${if}$ statement.
+ 
+The worst-case happens if we compute ${sift\_down}({root})$ and the comparison ${key}(v) < {key}(w)$ is always false (else case). Then, we require 2 comparisons for every node in some path from the root to a leaf, that is, twice the height of the tree:  $2 \log n$.
+
+\paragraph{b) } Give an alternative implementation that requires only $\log n + O(\log \log n)$ comparisons.
+
 \paragraph{Answer:}
+
+Hint found in: \emph{Algorithms and Data Structures: The Basic Toolbox By Kurt Mehlhorn, Peter Sanders.}
+
+In sift-down, instead of swapping the element $v$ with a child step-by-step until it falls into the desired position, we can do something different. We first find the path downwards that contains the smallest nodes and then do a binary search up to find the right position for $v$.
+
+\begin{lstlisting}[mathescape]
+
+${sift\_down}(v)$:
+    $cur \gets v$
+    while (true):
+        if $cur$ is leaf, break
+        $child \gets$ smallest child of $cur$
+        if ${key}(cur) < {key}(child)$:
+            break
+        else:
+            cur = child
+    % We end with a path Q[0], ..., Q[cur/2^(half of height of cur)], ..., Q[cur/2], Q[cur].
+    % We do binary search on this path to find the node to swap with the root
+    k = binary_search(0, height of cur)
+    $swap(v, cur / 2^{(cur-k)})$ % Something like that
+    
+    
+\end{lstlisting}
+
+
 
 \end{document}
