@@ -90,7 +90,76 @@ Tutorial time: Monday 14:00
 
 \section{Exercise 1 (10 pts)}
 
+Describe a removal procedure for $(2,4)$-trees that takes $O(\log n)$ time.
+Use the following two operations:
+\emph{balancing} removes a child $v$ of a node $w$ and makes $v$ a child of a sibling of $w$ instead.
+\emph{Fusing} merges two siblings into a single node, whose children are the union of the children of the merged nodes.
+
 \paragraph{Answer:}
+
+\begin{figure}
+\[
+	\tikz{\Tree [.$\alpha\hat s\beta$ [.$s$ $c$ ] [.{$s'_1, s'_2$} $c'_1$ $c'_2$ $c'_3$ ] ]} \Rightarrow \tikz{\Tree [.{$\alpha s'_1\beta$} [.$\hat s$ $c$ $c'_1$ ] [.$s'_2$ $c'_2$ $c'_3$ ] ]}
+\]
+\caption{%
+	Balancing a node from the right.
+	The ``imbalanced'' node has one splitter $s$ (discarded) and one child $c$, a parent with relevant splitter $\hat s$,  and a right-sibling with more than two children.
+	We omit the analogous case of a sibling with three splitters and four children.
+}
+\label{fig:balanceright}
+\end{figure}
+
+\begin{figure}
+\begin{align*}
+	\tikz{\Tree [.$\hat{s}$ [.$s$ $c$ ] [.$s'$ $c'_1$ $c'_2$ ] ]} &\Rightarrow \tikz{\Tree [.{$\hat{s}, s'$} $c$ $c'_1$ $c'_2$ ]} \\
+	\tikz{\Tree [.$\alpha\hat s\beta$ $\cdots$ [.$s$ $c$ ] [.$s'$ $c'_1$ $c'_2$ ] $\cdots$ ]} &\Rightarrow \tikz{\Tree [.$\alpha\beta$ $\cdots$ [.{$\hat s, s'$} $c$ $c'_1$ $c'_2$ ] $\cdots$ ]}
+\end{align*}
+\caption{%
+	Fusing a node with its right sibling.
+	The ``imbalanced'' node has one splitter $s$ (discarded) and one child $c$, a parent with relevant splitter $\hat s$, and a right-sibling with two children.
+	The first rule applies when the parent has exactly one splitter.
+	The second rule applies when $\alpha\beta$ is a non-empty list of splitters (sorry about the ellipses; our intent should be clear).
+	The parent loses a child, and must be patched!
+}
+\label{fig:fuseright}
+\end{figure}
+
+Attribution:
+After being inspired, then rushing headling down the wrong track, we consulted Wikipedia for the high-level idea.
+
+If the tree is empty, then we're done.
+Use the search procedure to find the node $v$ nearest to the key, $k$, we want to delete.
+If $\key(v) \not= k$, then we're done.
+If $v$ has no parent, then simply drop $v$ on the floor (the tree is now empty); otherise, let $w$ be $v$'s parent.
+Remove $v$ from $w$'s child array, and drop the corresponding splitter.
+Having removed a child, we have to deal with the possibility that $w$ contains only one child.
+This is the job of patch($w$), which operates as follows.
+\begin{enumerate}
+\item If $\rho(w) \ge 2$, then stop.
+\item If $w$ is the root, then simply discard its splitter and make its (sole) child the root.
+
+(Aside:
+Otherwise, $w$ has a child $c$ and splitter $s$.
+As will become clear, $s$ goes away and we don't care if $s > c$ or $s < c$.)
+
+\item Try to balance~(q.v.) from the right; if that succeeds, we're done.
+\item Try to balance from the left; if that succeeds, we're done.
+\item Try to fuse~(q.v.) on the right; if that succeeds, then patch $w$'s parent and we are done.
+\item Fuse on the left, then patch $w$'s parent.
+\end{enumerate}
+Balancing from the right fails if a node has no right sibling or if its right sibling has only two children; otherwise, it steals a child and splitter from the sibling according to \figref{fig:balanceright}, and succeeds.
+Balancing on the left is analogous.
+
+Fusing on the right works under the assumption that $w$'s right sibling has only two children (else, balancing on the right would have succeeded).
+The idea, illustrated in \figref{fig:fuseright}, is simple:
+Merge the ``depleted'' node with its sibling.
+
+The final step, fusing on the left then patching $w$'s parent, must succeed since $w$ is not the root, it has no right sibling (else balancing or fusing right would have succeeded), and its left sibling has only two children (else balancing left would have succeeded).
+
+\paragraph{Time bounds:}
+Searching for $v$ takes $\Theta(\log n)$ time.
+All of the fusing and balancing attempts for a particular node take constant time, and we make at most one one such attempt for each node on the path to the root.
+Thus patch and delete each take $\Theta(\log n)$ time.
 
 \section{Exercise 2 (10 pts)}
 
