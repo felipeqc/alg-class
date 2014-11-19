@@ -375,12 +375,10 @@ ${delete\_min}(Q)$:
 ${sift\_down}(Q, v)$:
     if $v >= Q.size()/2$: % v is child
         return
-
     if $2*v+1 >= Q.{size}()$ or $Q[2*v] < Q[2*v + 1]$: % w is smallest child of v
         $w \gets 2*v$
     else:
         $w \gets 2*v + 1$
-        
     if $Q[v] < Q[w]$:
         return
     else:
@@ -412,7 +410,6 @@ Hint found in: \emph{Algorithms and Data Structures: The Basic Toolbox By Kurt M
 In sift-down, instead of swapping the element $v$ with a child step-by-step until it falls into the desired position, we can do something different. We first find the path downwards that contains the smallest nodes and then do a binary search up to find the right position for $v$.
 
 \begin{lstlisting}[mathescape]
-
 ${sift\_down}(v)$:
     $cur \gets v$
     while (true):
@@ -426,10 +423,6 @@ ${sift\_down}(v)$:
     % We do binary search on this path to find the node to swap with the root
     k = binary_search(0, height of cur)
     $swap(v, cur / 2^{(cur-k)})$ % Something like that
-    
-    
 \end{lstlisting}
-
-
 
 \end{document}
