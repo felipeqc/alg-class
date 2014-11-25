@@ -145,6 +145,29 @@ S_{k+1} & \ge 2 + S_0 + S_1 + \ldots + S_{k-1} && \text{[By IH]}\\
 & = F_{k+3}
 \end{align*}
 
+\section{Exercise 3 (10 pts)}
+
+Professor Pinocchio claims that the height of a Fibonacci heap with $n$ nodes is $O(\log n)$. Show that the professor is mistaken by giving, for any integer $n$, a sequence of addressable priority queue operations that creates a Fibonacci heap of just one tree that is a linear chain of $n$ nodes.
+
+\paragraph{Answer:}
+
+\section{Exercise 4 (10 pts)}
+
+Show that with union by weights, but without path compression, a sequence of $n$ $make\_set$ and $m$ $union$ and $find$ operations takes $O(m \log n)$ time in the worst case. (Hint: prove the lemma from the lecture that the height of any tree is logarithmic in $n$).
+
+\paragraph{Answer:}
+
+Consider a sequence $\sigma$ of $m$ union/find operations on $n$ elements. For each operation $t$, let $T_t(u)$ denote the subtree rooted at $u$ after $t$ operations \emph{without} path compression. We define ${rank}(u) = 2 + h(T_m(u))$, where $h$ is the height.
+
+In the class we proved that for every node $u$, $|T_t(u)| \ge 2^{h(T_t(u))}$, where $|T|$ denotes the number of nodes in $T$. By taking the logarithmic on both sides:
+
+$$\log_2 (2^{h(T_t(u))}) \le \log_2 |T_t(u)|$$
+
+Thus:
+
+$$h(T_t(u)) \le \log_2 |T_t(u)| \le \log_2 n = O(\log n)$$
+
+
 \section{Exercise 5 (10 pts)}
 
 The \emph{off-line minimum problem} asks us to maintain a set $T$ of elements from the domain $\{1, \ldots, n\}$ under the operations $insert$ and $extract\_min$, which returns and deletes the minimum element from the set. We are given a sequence $S$ of $n$ $insert$ and $m$ $extract\_min$ calls, where each key is inserted exactly once. We wish to fill an array $extracted[1,\ldots, m]$ of size $m$, where $extract[i]$ yields the value of the $i$-th call of $extract\_min$ call. The problem is ``off-line'', that is, we can process the entire sequence $S$ before determining any extracted key.
