@@ -1,0 +1,148 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage{enumerate}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{red},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=\color{blue},       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape
+}
+
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+
+\title{Exercise Sheet 3---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+\section{Exercise 1 (10 pts)}
+
+The $i$-th Fibonacci number $F_i$ is defined by the recursion $F_0 = 0$, $F_1 = 1$, $F_i = F_{i-2} + F_{i-1}$.
+
+\paragraph{a)} Show by induction that $F_{k+2} \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^k$ for all $k \ge 0$.
+
+\paragraph{Answer:}
+
+By strong induction on $k$. For $k=0$, $F_{2} = F_0 + F_1 = 0 + 1 = 1$. Thus, $F_2 \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^0 = 1$.
+
+By IH, assume that for every $i \le k$, $F_{i+2} \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^i$ holds. We need to prove it also holds for $k+1$.
+
+Consider $F_{k+3} = F_{k+1} + F_{k+2}$. By IH, it follows that:
+
+\begin{align*}
+F_{(k+2) + 1} & = F_{k+1} + F_{k+2} && \text{[Substitution for $i=k-1$ and $i=k$]} \\
+& \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} + \left ( \frac{1 + \sqrt{5}}{2} \right )^{k} \\
+& = \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} + \left ( \frac{1 + \sqrt{5}}{2} \right ) \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left (1 + \frac{1 + \sqrt{5}}{2} \right ) \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left ( \frac{3 + \sqrt{5}}{2} \right ) \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left ( \frac{1 + \sqrt{5}}{2} \right )^{2} \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left ( \frac{1 + \sqrt{5}}{2} \right )^{k+1}
+\end{align*}
+
+
+\paragraph{b)} Show that for all $k$:
+
+$$F_{k+2} = 1 + \sum\limits_{i=0}^k F_i$$
+
+\paragraph{Answer:}
+
+For $k = 0$, $F_2 = 1 + \sum\limits_{i=0}^0 F_i = 1 + F_0 = 1$.
+
+By IH, assume that for some $k \ge 0$, $F_{k+2} = 1 + \sum\limits_{i=0}^k F_i$. Let's prove this property holds for $k+1$.
+
+\begin{align*}
+1 + \sum\limits_{i=0}^{k+1} F_i & =  1 + \sum\limits_{i=0}^{k} F_i + F_{k+1} && \text{[By IH]} \\
+& = F_{k+2} + F_{k+1} && \text{[Definition of Fibonacci sequence]} \\
+& = F_{k+3}
+\end{align*}
+
+\paragraph{c)} Argue that for a sequence satisfying $S_0 = 1, S_1 \ge 2, S_k \ge 2 + S_0 + S_1 + \ldots + S_{k-2}$, it holds that $S_k \ge F_{k+2}$ for all $k \ge 0$.
+
+\paragraph{Answer:}
+
+By strong induction on $k$. For $k=0$, $S_0 = 1 \ge F_{2}$. For $k=1$, $S_1 \ge 2 \ge F_3$.
+
+By IH, assume that for every $i \le k$, $S_i \ge F_{i+2}$. We must prove that this holds for $k+1$. By definition of $S$:
+
+\begin{align*}
+S_{k+1} & \ge 2 + S_0 + S_1 + \ldots + S_{k-1} && \text{[By IH]}\\
+& \ge 2 + F_2 + F_3 + \ldots + F_{k+1} && \text{[$F_0 + F_1 = 1$]} \\
+& \ge 1 + F_0 + F_1 + F_2 + F_3 + \ldots + F_{k+1} \\
+& = 1 + \sum\limits_{i=0}^{k+1} F_i && \text{[By result from (b)]} \\
+& = F_{k+3}
+\end{align*}
+
+\end{document}
