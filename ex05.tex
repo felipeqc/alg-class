@@ -151,6 +151,45 @@ Professor Pinocchio claims that the height of a Fibonacci heap with $n$ nodes is
 
 \paragraph{Answer:}
 
+We can insert and extract a small dummy element (say, 0) to force roots to be combined. And then we use decrease-key/deletion to introduce some unbalance.
+
+\begin{enumerate}
+\item Insert 3, insert 4
+
+\[
+	\Tree [. \node{3};] \quad \Tree [. \node{4};]
+\]
+
+\item Insert 0, Extract-min 0
+
+\[
+	\Tree [.$3$ $4$ ]
+\]
+
+\item Insert 1, insert 2
+
+\[
+	\Tree [.$3$ $4$ ] \quad \Tree [. \node{1};] \quad \Tree [. \node{2};]
+\]
+
+\item Insert 0, Extract-min 0
+
+\[
+	\Tree [.$3$ $4$ ] \quad \Tree [.$1$ $2$ ]
+\]
+
+\newpage This is further combined:
+
+\[
+	\tikz{\Tree [.$1$ [.$3$ [.$4$ ] ] $2$ ]} \]
+
+\item Delete 2
+
+\[
+	\tikz{\Tree [.$1$ [.$3$ [.$4$ ] ] ]} \]
+
+\end{enumerate}
+
 \section{Exercise 4 (10 pts)}
 
 Show that with union by weights, but without path compression, a sequence of $n$ $make\_set$ and $m$ $union$ and $find$ operations takes $O(m \log n)$ time in the worst case. (Hint: prove the lemma from the lecture that the height of any tree is logarithmic in $n$).
