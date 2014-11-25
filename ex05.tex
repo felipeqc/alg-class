@@ -145,4 +145,48 @@ S_{k+1} & \ge 2 + S_0 + S_1 + \ldots + S_{k-1} && \text{[By IH]}\\
 & = F_{k+3}
 \end{align*}
 
+\section{Exercise 5 (10 pts)}
+
+The \emph{off-line minimum problem} asks us to maintain a set $T$ of elements from the domain $\{1, \ldots, n\}$ under the operations $insert$ and $extract\_min$, which returns and deletes the minimum element from the set. We are given a sequence $S$ of $n$ $insert$ and $m$ $extract\_min$ calls, where each key is inserted exactly once. We wish to fill an array $extracted[1,\ldots, m]$ of size $m$, where $extract[i]$ yields the value of the $i$-th call of $extract\_min$ call. The problem is ``off-line'', that is, we can process the entire sequence $S$ before determining any extracted key.
+
+\paragraph{a)} An example sequence is given below. Here, an $insert$ is given a number and an $extract\_min$ is represented by the letter $E$:
+
+$$4,8,E,3,E,9,2,6,E,E,E,1,7,E,5$$
+
+What would be the correct $extract$ array to be returned?
+
+\paragraph{Answer:} The array $[4, 3, 2, 6, 8, 1]$.
+
+\paragraph{b)} Argue that the array returned by this method is correct.
+
+\paragraph{Answer:} The method searches for the call where each element $i$ was inserted, and because this is done in increasing order, we guarantee that $i$ is the minimum element of the following ($j$-th) $extract\_min$ call. Since we know the result of this $j$-th call, it can be eliminated from the list, and the other inserted elements are left for being extracted by the remaining calls.
+
+\paragraph{c)} Describe how to use a union-find data structure to implement the above algorithm efficiently and analyze the worst-case running time of your implementation. 
+
+\paragraph{Answer:} First, we need to add an initialization phase where we read the array and extract the sets using $make\_set$ and $union$. We also maintain a doubly-linked of representative elements of each \textbf{non-empty} set $K_i$ ($i \le m)$: $<K_1 \rightarrow \cdots \rightarrow K_6  \rightarrow K_7>$, so that we can iterate over the sets more easily. Then we just update the algorithm:
+
+\begin{itemize}
+\item 3) Determine $j$ with $i \in K_j$:
+
+This can be replaced by $j = find(i)$ to return the set where $i$ belongs to.
+
+\item 4) if $j \neq m+1$:
+
+This would check if the return value of the find(i) is valid (different from some dummy element).
+
+\item 6 and 7) Set $K_l \gets K_\ell \cup K_j$ and remove the set $K_j$:
+
+This can be replaced by locating $j$ in the linked-list (via some backward pointer to the handle, that we can store initially).
+
+$<\cdots \rightarrow \underbrace{e(K_j)}_\text{here} \rightarrow e(K_\ell) \rightarrow \cdots>$.
+
+Then, we do union of $K_j$ with the next set in the list and then delete $K_j$.
+
+\end{itemize}
+
+\paragraph{Complexity: } We need to add the initialization phase that reads the array and uses union/find/make-set operations ($O(m)$ amortized).
+Then, inside the main loop ($1 \ldots n$), all the operations are pointer manipulation or union/find operations ($O(n)$ amortized).
+
+The complexity of the algorithm is $O(m+n)$ amortized. 
+
 \end{document}
