@@ -61,10 +61,12 @@
   stringstyle=\color{mymauve},     % string literal style
   tabsize=2,                       % sets default tabsize to 2 spaces
   title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
-  mathescape
+  mathescape,
 }
 
 \DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
 \DeclareMathOperator{\key}{key}
 \newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
 \newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
@@ -191,12 +193,21 @@ This definition is obviously equivalent to the original.
 	
 	\item Merging two binomial trees of rank $k$ (\ie making one a child of the other) produces a binomial tree of rank $k+1$, by the definition of binomial trees.
 	
+	In (too much) detail, let $T_1 = (r, \{ c_0, \ldots, c_{k-1} \})$ and $T_2$ be binomial trees of rank $k$, where each $c_i$ is a binomial tree of rank $i$.
+	Set
+	\begin{align*}
+		C &:= \{ c_0, \ldots, c_{k-1}, T_2 \} \\
+		T &:= (r, C)
+	\end{align*}
+	Observe that $C$ comprises $k+1$ trees and for $i \in \{0, \ldots, k\}$, $C$ contains a single binomial tree of rank $i$.
+	Thus $T$ is a binomial tree of rank $k+1$.
+
 	\item A binomial tree $T$ of rank $n$ has $2^n$ nodes.
 	
 	\begin{proof}
-		Straightforward structural induction on $T$, using the definition of binomial trees.
+		By straightforward structural induction on $T$, using the definition of binomial trees.
 		
-		In more detail, let a binomial tree $T$ of rank $n$ be given.
+		In (too much) detail, let a binomial tree $T$ of rank $n$ be given.
 		Then $T$ comprises a root node, $r$, and $n$ children, $c_0, \ldots, c_{n-1}$, where each $c_i$ is a binomial tree of rank $i$.
 		Thus (writing $|t|$ for the number of nodes in tree $t$)
 		\begin{align*}
@@ -206,7 +217,150 @@ This definition is obviously equivalent to the original.
 		\end{align*}
 	\end{proof}
 	
+%	\item
+%	For binomial heaps, insert$(e, Q)$, union$(Q_1, Q_2)$, min$(Q)$, and delete\any{}min$(h, k, Q)$ are implemented as for Fibonacci heaps.
+%	The analysis still holds:
+%	Delete\any{}min takes amortized logarithmic time, the rest take (worst-case) constant time.
+%	
+%	\item
+%	The question has two parts.
+%	First, implementing decrease\any{}key$(h, k, Q)$ with worst-case $O(\log n)$ time.
+%	This immediately yields an implementation of remove (the same as for Fibonacci heaps) that operates in worst-case $O(\log n)$ plus \emph{amortized} $O(1)$ time.
+%	
+%	Second, eliminate the amortized complexity for remove.
+	
 \end{enumerate}
+For parts~(d) and~(e), we decided to deviate slightly from the exercise sheet in order to present a lovely algorithm.
+Attribution:
+The key insight---the forthcoming binary invariant---comes from Chris Okasaki's book, \emph{Purely functional data structures.}
+
+\paragraph{The min operation:}
+For clarity, we do not bother maintaining a pointer to a minimal element, or supporting the min operation.
+This can be added, when desired, in $O(1)$ space and (worst case) $O(1)$ time by a trivial wrapper (around \emph{any} implementation of heaps).
+
+\paragraph{Representation:}
+A binomial heap comprises an unbounded array, $A$, of (possibly $\bot$) pointers to binomial trees.
+
+\paragraph{Representation invariant:}
+For each $0 \le i < |A|$, if $A[i] \not= \bot$, then it points to a binomial, heap-ordered tree $t$ of rank $i$.
+
+\paragraph{Binary invariant:}
+A binomial heap storing $n$ elements has $A[i] \not= \bot$ iff bit $i$ is non-zero in the binary representation of $n$.
+
+By part~(c), this invariant is ``exactly right''.
+If bit $i$ is non-zero in the binary representation of $n$, then the tree $A[i]$ (of rank $i$) contains $2^i$ of the $n$ nodes.
+This is lovely!
+It tells us how to write insert and union:
+Use merge to add ``bits'' and implement binary increment and addition using ripple-carry.
+
+\begin{figure}
+\begin{minipage}{0.49\textwidth}
+\begin{lstlisting}[xleftmargin=5mm,keywordstyle=,numbers=none]
+insert($e$, $A$):	% Increment a binary number
+	construct a zero rank binomial tree, $t$, for $e$
+	$i \gets 0$
+	while $i < |A| \land A[i] \not= \bot$ do
+		$t \gets$ merge$(A[i], t)$	% rank $i$ to rank $i+1$
+		$A[i] \gets \bot$
+	done
+	if $i < |A|$ then $A[i] \gets t$ else push_back$(A[i], t)$
+
+union($A$, $A'$):	% Add two binary numbers
+	WLOG assume $|A| > |A'|$
+	$c \gets \bot$
+	for $i \gets 0$ to $|A'| -1$ do
+		$(A[i], c) \gets$ addbit$(A[i], A'[i], c)$
+		if $c = \bot$ then return
+	done
+	for $i \gets |A'|$ to $|A| -1$ do
+		$(A[i], c) \gets$ addbit$(A[i], \bot, c)$
+		if $c = \bot$ then return
+	done
+	push_back$(A, c)$
+\end{lstlisting}
+\end{minipage}
+~~\vrule~~
+\begin{minipage}{0.49\textwidth}
+\begin{lstlisting}[xleftmargin=5mm,keywordstyle=,numbers=none]
+delete_min($A$):
+	If every $A[i]$ is $\bot$, return
+	Find $j$, an index of a minimal root in $A$
+	Construct $A'$ from the children of $A[j]$
+	$A[j] \gets \bot$
+	union($A$, $A'$)
+
+decrease_key($h$, $k$, $A$):
+	Let $v$ be the node referenced by $h$
+	$\key(v) \gets k$
+	while $p(v) \not= \bot \land \key(v) < \key(p(v))$ do
+		$w \gets p(p(v))$
+		swap($v$, $p(v)$)
+		$v \gets w$
+	done
+
+remove($h$, $A$):
+	decrease_key$(h, -\infty, A)$
+	delete_min($A$)
+\end{lstlisting}
+\end{minipage}
+\caption{%
+	Binomial heap operations.
+	See the text for delete\protect\any{}min and see \figref{fig:binheapbit} for bit-level operations.
+}
+\label{fig:binheap}
+\end{figure}
+
+\begin{figure}
+\begin{lstlisting}[xleftmargin=1cm,keywordstyle=,numbers=none]
+addbit($t$, $t'$, $c$)
+	if all of $t$, $t'$, and $c'$ are $\bot$, return $(\bot, \bot)$
+	if one of $t$, $t'$, and $c$ is not $\bot$
+		WLOG assume $t$ not $\bot$ and return $(t, \bot)$
+	if two of $t$, $t'$, and $c$ are not $\bot$
+		WLOG assume $t$, $t'$ are not $\bot$
+		$c \gets$ merge$(t, t')$; return $(\bot, c)$
+	otherwise
+		$c \gets$ merge$(t', c)$; return $(t, c)$
+\end{lstlisting}
+\caption{%
+	Adding three ``bits''.
+	We assume there exists an $i$ such that each of $t$, $t'$, and $c$ are rank $i$ binomial trees or $\bot$.
+	We return a pair $(t'', c')$, where $t''$ is rank $i$ or $\bot$ and $c'$ is rank $i+1$ or $\bot$.
+}
+\label{fig:binheapbit}
+\end{figure}
+
+\paragraph{Implementation:}
+We give the code in Figures~\ref{fig:binheap} and~\ref{fig:binheapbit}.
+Observe that the merge operation on binomial heaps can be implemented in constant time.
+Thus:
+\begin{itemize}
+
+\item
+Insertion is identical in structure to binary increment (analyzed in an earlier exercise sheet) and takes worst-case $O(\log n)$ time.
+Moreover, a sequence of insert operations (intermingled with queries, but not with union) takes amoritzed $O(1)$ time.
+
+\item
+Union takes worst-case $O(\log n)$ time, where $n$ is the size of the larger of the two heaps.
+(The auxiliary function addbit takes constant time.)
+
+\item
+Delete\any{}min takes $O(\log n)$ time because it operates in three $O(\log n)$ stages.
+First, it takes $O(|A|) = O(\log n)$ time to find the target, $j$.
+Since tree $A[j]$ has $j = O(\log n)$ children, constructing $A'$ takes $O(\log n)$ time.
+Since $A$ has size $O(n)$ and $A'$ has size $O(\log n)$, the union takes $O(\log n)$ time.
+
+\item
+Decrease\any{}key takes $O(\log n)$ time.
+The algorithm is simple:
+Adjust the target node's key, then bubble it up toward the root of its binomial tree (as needed) to preserve the heap order invariant.
+This algorithm runs in time $O(\text{height of target tree})$ and an easy induction shows that a binomial tree with $k$ elements has height $O(\log k)$.
+The worst case puts all $n$ elements in the target tree, for $O(\log n)$ time.
+
+\item
+Clearly, remove is $O(\log n)$.
+
+\end{itemize}
 
 \section{Exercise 3 (10 pts)}
 
