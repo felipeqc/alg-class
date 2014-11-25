@@ -19,7 +19,7 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage{mathtools}
-\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
 
 \newtheorem{theorem}{Theorem}
 
@@ -79,7 +79,7 @@
 \usepackage{hyperref}
 \newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
 
-\title{Exercise Sheet 3---Algorithms and Data Structures}
+\title{Exercise Sheet 4---Algorithms and Data Structures}
 \author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
 
 \begin{document}
@@ -144,6 +144,69 @@ S_{k+1} & \ge 2 + S_0 + S_1 + \ldots + S_{k-1} && \text{[By IH]}\\
 & = 1 + \sum\limits_{i=0}^{k+1} F_i && \text{[By result from (b)]} \\
 & = F_{k+3}
 \end{align*}
+
+\section{Exercise 2 (10+5 pts)}
+
+A tree is a \emph{binomial tree of rank 0} if it only consists of a single node.
+For $i>0$, a tree is a \emph{binomial tree of rank $i$} if its root has $i$ children, and the subtrees rooted at the children are binomial trees of ranks $0, \ldots, i-1$.
+
+\begin{enumerate}[a)]
+\item Draw binomial trees of rank $0, \ldots, 5$.
+\item What happens if we merge two binomial trees $A$ and $B$ of the same rank; that is, making the root of $B$ an additional child of the root of $A$?
+\item Show that a binomial tree of rank $i$ has exactly $2^i$ nodes.\footnote{%
+	The exercise sheet said ``$2^i$ children'', which is incorrect.
+}
+\end{enumerate}
+
+A \emph{binomial heap} is a forest of binomial trees, with the same representation as a Fibonacci heap (pointer to the minimal element, linked list of root elements, etc.).
+Binomial heaps are a simplified version of Fibonacci heaps with slightly worse performance guarantees:
+\begin{enumerate}[a), resume]
+\item Show that the operations insert, union, and min can be realized in constant time, and delete\any{}min in amortized logarithmic time.
+\item Give algorithms for decrease\any{}key and remove that run in $O(\log n)$ worst-case time.
+(Hint: There is a straightforward solution that does not require a subtree cut---if you want a challenge, give a solution through subtree cuts that still runs in $O(\log n)$.)
+\end{enumerate}
+
+\paragraph{Answer:}
+We restate the definition of binomial trees, avoiding a pointless case distinction.
+\begin{quote}
+Let $n\in\NN$ be given.
+A \emph{binomial tree of rank $n$} comprises a root node, $r$, and $n$ children, $c_0, \ldots, c_{n-1}$, where each $c_i$ is a binomial tree of rank $i$.
+\end{quote}
+This definition is obviously equivalent to the original.
+
+\begin{enumerate}[a)]
+
+	\item See \figref{fig:bintrees}.
+
+	\begin{figure}\centering
+	zero:~\Tree [.$\bullet$ ] \quad
+	one:~\Tree [.$\bullet$ $\bullet$ ] \quad
+	two:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ]
+	three:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ]
+	four:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ] ] \\
+	five:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ] ] ]
+	\caption{Binomial trees of ranks $0, \ldots, 5$.}
+	\label{fig:bintrees}
+	\end{figure}
+	
+	\item Merging two binomial trees of rank $k$ (\ie making one a child of the other) produces a binomial tree of rank $k+1$, by the definition of binomial trees.
+	
+	\item A binomial tree $T$ of rank $n$ has $2^n$ nodes.
+	
+	\begin{proof}
+		Straightforward structural induction on $T$, using the definition of binomial trees.
+		
+		In more detail, let a binomial tree $T$ of rank $n$ be given.
+		Then $T$ comprises a root node, $r$, and $n$ children, $c_0, \ldots, c_{n-1}$, where each $c_i$ is a binomial tree of rank $i$.
+		Thus (writing $|t|$ for the number of nodes in tree $t$)
+		\begin{align*}
+			|T| &= \overbrace{1}^{\text{root}} + \sum_{i=0}^{n-1} |c_i| \\
+				&= 1 + \sum_{i=0}^{n-1} 2^i &\text{by the IH applied to the $c_i$} \\
+				&= 1 + (2^n - 1) = 2^n \qedhere
+		\end{align*}
+	\end{proof}
+	
+\end{enumerate}
 
 \section{Exercise 3 (10 pts)}
 
