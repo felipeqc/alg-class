@@ -110,7 +110,7 @@ For the second claim, for any ode of tank $i$, we have $F_{n+2} \le n \iff 1.618
 
 \section{Union-find}
 
-We want to represent a collection of \emph{disjoint} sets $S_1, \ldots, S_k$. Each set $S_i$ has a representative $r_i \in S_i$. Our data structure suports:
+We want to represent a collection of \emph{disjoint} sets $S_1, \ldots, S_k$. Each set $S_i$ has a representative $r_i \in S_i$. Our data structure supports:
 
 \begin{itemize}
 \item ${make\_set}(x):$ Create a new set $\{x\}$
@@ -129,4 +129,148 @@ We want to represent a collection of \emph{disjoint} sets $S_1, \ldots, S_k$. Ea
 
 Naive implementation of ${make\_set}$, ${union}$, ${find}$ is clear. Efficiency? Bad, because trees can degenerate.
 
-\paragraph{Optimization 1: } ``Union by ranks''. Merge the less deep tree into the deeper tree.
+\paragraph{Optimization 1 (Union by weight): }
+\begin{itemize}
+\item For each root, maintain the number of nodes in its subtree (weight = 1 after ${make\_set}$, sum up the weights in ${union}$ operation).
+\item When ${union}$ merges two trees with roots $x$, $y$, if $w(x) \le w(y)$, make $x$ a child of $y$, else make $y$ a child of $x$.
+\end{itemize}
+
+\paragraph{Optimization 2 (Path compression): } 
+\begin{itemize}
+\item In ${find}$, make all nodes in the search path children of the root.
+\end{itemize}
+
+\begin{mydefinition}[Ackermann Function]
+For a function $f$ and $i \ge 0$, let $f^{(0)}(x) = x$ and $f^{(i+1)}(x) = f(f^{(i)}(x))$. Now, for $k\ge 0$ and $x \ge 2$,
+
+\begin{align*}
+A_0(x) = x+1 \\
+A_{k+1}(x) = A_k^{(x)}(x)
+\end{align*}
+
+\end{mydefinition}
+
+It follows that:
+
+\begin{align*}
+A_1(x) = 2x \\
+A_2(x) = x \cdot 2^x \ge 2^x \\
+A_3(x) = \underbrace{2^{2^2}}_{x} = 2 \uparrow x \\
+A_3(x) = 2 \uparrow (2 \uparrow ( \ldots ) ) = 2 \uparrow \uparrow x
+\end{align*}
+
+Concretely, $A_0(2) = 3$, $A_1(2) = 4$, $A_2(2) = 8$, $A_3(2) = A_2(8) = 8 \cdot 2^8 = 2048$, $A_4(2) = A_3(A_3(2)) = A_3(2048) = \underbrace{2^{\cdots^2}}_2048$.
+
+Define the inverse Ackermann function as:
+
+\begin{align*}
+\alpha(n) = \min \{ k \ge 0; A_k(2) \ge n \} \\
+\alpha(n) \le 4, \forall n\le 2 \uparrow 2048
+\end{align*}
+
+\begin{mytheorem}
+Using optimizations I and II, a sequence of $n$ make\_set and $m$ union-find operations takes $O((n+m)\alpha(n))$ time.
+\end{mytheorem}
+
+Consider a sequence $\sigma$ of $m$ union/find operations on $n$ elements. For $0 \le t \le m$, let $T_t(u)$ denote the subtree rooted at $u$ after $t$ operations \emph{without} path compression. Define:
+
+\begin{align*}
+{rank}(u) = 2 + h(T_m(u)) && \text{($h$ is the height)}
+\end{align*}
+
+If $u$ is a descendant of $v$ at some time $t$, then ${rank}(u) < {rank}(v)$.
+
+\begin{mylemma}
+For every node $u$, $|T_t(u)| \ge 2^{h(T_t(u))}$, where $|T|$ denotes the number of nodes in $T$.
+\end{mylemma}
+\begin{proof}
+Induction on $t$. when $t=0$, for all $u$, $|T_t(u)| = 1 = 2^0 = 2^{h(T_t(u))}$.
+
+If proposition is true for time $t$ and $h(T_{t+1}(u)) = h(T_t(u))$, then $|T_{t+1}(u)| \ge |T_t(u)| \underbrace{\ge}_\text{I.H.} 2^{h(T_t(u))} = 2^{h(T_{t+1}(u))}$.
+
+\bigskip If $h(T_{t+1}(u)) > h(T_t(u))$, the $(t+1)-th$ operation is a union that makes another root $v$ a child of $u$. 
+
+Because of union by weights,  $|T_t(v)| \le |T_t(u)|$ and also $h(T_t(v)) = h(T_{t+1}(v)) = h(T_{t+1}(u))-1$.
+
+So, $|T_{t+1}(u)| = |T_t(u)| + |T_t(v)| \ge 2 |T_t(v)| \ge 2 \cdot 2^{h(T_t(v))} = 2^{h(T_{t+1}(u))}$ 
+\end{proof}
+
+\begin{mycorollary}
+For all $u$, ${rank}(u) \le \lfloor \log n \rfloor + 2$. (HOMEWORK)
+\end{mycorollary}
+
+\begin{mylemma}
+$\sum\limits_{u} {rank}(u) \le 8n$
+\end{mylemma}
+\begin{proof}
+Let $c+r$ be the number of nodes of rank $r$. Any pair of such nodes has disjoint subtrees at time $m$. Since each subtree has at least $2^{t-2}$ nodes, $c_r \le \frac{n}{2^{r-2}}$.
+
+(fix equation)
+$$\sum\limits_{u} {rank}(u) \le \sum\limits_{i=0}^\infty i \cdot \underbrace{|\{u | {rank}(u) = i\}|}_{c_i} \le \sum i \cdot \frac{n}{2^{i-2}} \le 4n \sum \frac{i}{2^i} \le 8n$$
+
+\end{proof}
+
+Now, consider the same sequence $\sigma$ \emph{with path compression}. Define
+
+\begin{align*}
+\delta(u) = \min \{k : {rank}({par}(u)) \ge A_k({rank}(u)) \} && \text{[par is the parent]}
+\end{align*}
+
+Note that $\delta(u)$ depends on time $t$ (because parent changes due to path compression). $\delta(u)$ cannot decrease over time.
+
+\begin{mylemma}
+For $n \ge 5$, $\delta(u) < \alpha(n)$
+\end{mylemma}
+\begin{proof}
+For $n \ge 5$:
+
+\begin{align*}
+n &> \lfloor \log n \rfloor + 2 \\
+& \ge {rank}({par}(u)) \\
+& \ge A_{\delta(u)}({rank}(u)) \\
+& \ge A_{\delta(u)}(2)
+\end{align*}
+
+But $A_{\alpha(n)} (2) \ge n > A_{\delta(u)}(2)$, so $\alpha(n) > \delta(u)$.
+\end{proof}
+
+We give each node $u$, $\alpha(n) \cdot {rank}(u)$ tokens initially. This makes $\sum_u \alpha(n) \cdot {rank}(u) \le 8 \cdot \alpha(n) \cdot n = O(n \cdot \alpha(n))$.
+
+For a node $x$ on the search path of a find,
+\begin{enumerate}
+\item if $x$ has an ancestor $y$ with $\delta(x) = \delta(y)$, we spend one token of $x$ to pay for traversing $x$ and its path compression.
+\item if $x$ has no such ancestor, the find method pays for that node.
+\end{enumerate}
+
+Since $\delta$ takes only values in $\{0, \ldots, \alpha(n) - 1\}$, case (2) only happens $\alpha(n)$ times per find.
+
+We need to show that case (1) happens only $\alpha(n) \cdot {rank}(x)$ many times per node $x$.
+
+\begin{mylemma}
+For a fixed $k$, assume that case (1) has happened $i$ times for a node $x$ with $k = \delta(x)$, and let $w = {par}(x)$. Then, ${rank}(w) > A_k^{(i)}(rank(x))$.
+\end{mylemma}
+\begin{proof}
+Induction on $i$, the number of times we charge. For $i= 0$, $A_k^{(0)} = {rank}(x) < {rank}(w)$.
+Assume ${rank}(w) \ge A_k^{(i)}({rank}(x))$ and $x$ is charged again. Then, $x$ gets a new parent $z$ by path compression. Also, $\delta(x) = k = \delta(y)$ for some ancestor $y$ of $x$, with $y$ descendant of $z$.
+
+\begin{align*}
+{rank}(z) &\ge {rank}({par}(y)) \\
+& \ge A_k({rank}(y)) && \text{(because $\delta(y) = k$)} \\
+& \ge A_k({rank}(w)) \\
+& > A_k(A_k^{(i)}({rank}(x))) && \text{(by I.H.)} \\
+& = A_k^{(i+1)}({rank}(x))
+\end{align*}
+\end{proof}
+
+So, after case (1) happened ${rank}(x)$ times for a fixed $k = \delta(x)$.
+
+Then, ${rank}({par}(x)) > A_k^{({rank}(x))}({rank}(x)) = A_{k+1}({rank}(x))$. Therefore,
+$\delta(x) \ge k+1$ at this point. That means, $x$ is charged only ${rank}(x)$ times for each $k\in \{0, \ldots, \alpha(n) - 1\}$, thus $\alpha(n)\cdot {rank}(x)$ charges in total.
+
+\bigskip At the end we have the following amortized complexity:
+
+$$O(\underbrace{n \cdot \alpha(n)}_\text{amortized cost of $n$ makesets} + \underbrace{m \cdot \alpha(n)}_\text{amortized cost of $m$ union/find}) = O((n+m) \cdot \alpha(n))$$
+
+
+
+
