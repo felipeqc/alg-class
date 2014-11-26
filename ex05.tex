@@ -1,0 +1,472 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage[shortlabels]{enumitem}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{red},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=\color{blue},       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape,
+}
+
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+
+\title{Exercise Sheet 4---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+\section{Exercise 1 (10 pts)}
+
+The $i$-th Fibonacci number $F_i$ is defined by the recursion $F_0 = 0$, $F_1 = 1$, $F_i = F_{i-2} + F_{i-1}$.
+
+\paragraph{a)} Show by induction that $F_{k+2} \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^k$ for all $k \ge 0$.
+
+\paragraph{Answer:}
+
+By strong induction on $k$. For $k=0$, $F_{2} = F_0 + F_1 = 0 + 1 = 1$. Thus, $F_2 \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^0 = 1$.
+
+By IH, assume that for every $i \le k$, $F_{i+2} \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^i$ holds. We need to prove it also holds for $k+1$.
+
+Consider $F_{k+3} = F_{k+1} + F_{k+2}$. By IH, it follows that:
+
+\begin{align*}
+F_{(k+2) + 1} & = F_{k+1} + F_{k+2} && \text{[Substitution for $i=k-1$ and $i=k$]} \\
+& \ge \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} + \left ( \frac{1 + \sqrt{5}}{2} \right )^{k} \\
+& = \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} + \left ( \frac{1 + \sqrt{5}}{2} \right ) \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left (1 + \frac{1 + \sqrt{5}}{2} \right ) \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left ( \frac{3 + \sqrt{5}}{2} \right ) \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left ( \frac{1 + \sqrt{5}}{2} \right )^{2} \cdot \left ( \frac{1 + \sqrt{5}}{2} \right )^{k-1} \\
+& = \left ( \frac{1 + \sqrt{5}}{2} \right )^{k+1}
+\end{align*}
+
+
+\paragraph{b)} Show that for all $k$:
+
+$$F_{k+2} = 1 + \sum\limits_{i=0}^k F_i$$
+
+\paragraph{Answer:}
+
+For $k = 0$, $F_2 = 1 + \sum\limits_{i=0}^0 F_i = 1 + F_0 = 1$.
+
+By IH, assume that for some $k \ge 0$, $F_{k+2} = 1 + \sum\limits_{i=0}^k F_i$. Let's prove this property holds for $k+1$.
+
+\begin{align*}
+1 + \sum\limits_{i=0}^{k+1} F_i & =  1 + \sum\limits_{i=0}^{k} F_i + F_{k+1} && \text{[By IH]} \\
+& = F_{k+2} + F_{k+1} && \text{[Definition of Fibonacci sequence]} \\
+& = F_{k+3}
+\end{align*}
+
+\paragraph{c)} Argue that for a sequence satisfying $S_0 = 1, S_1 \ge 2, S_k \ge 2 + S_0 + S_1 + \ldots + S_{k-2}$, it holds that $S_k \ge F_{k+2}$ for all $k \ge 0$.
+
+\paragraph{Answer:}
+
+By strong induction on $k$. For $k=0$, $S_0 = 1 \ge F_{2}$. For $k=1$, $S_1 \ge 2 \ge F_3$.
+
+By IH, assume that for every $i \le k$, $S_i \ge F_{i+2}$. We must prove that this holds for $k+1$. By definition of $S$:
+
+\begin{align*}
+S_{k+1} & \ge 2 + S_0 + S_1 + \ldots + S_{k-1} && \text{[By IH]}\\
+& \ge 2 + F_2 + F_3 + \ldots + F_{k+1} && \text{[$F_0 + F_1 = 1$]} \\
+& \ge 1 + F_0 + F_1 + F_2 + F_3 + \ldots + F_{k+1} \\
+& = 1 + \sum\limits_{i=0}^{k+1} F_i && \text{[By result from (b)]} \\
+& = F_{k+3}
+\end{align*}
+
+\section{Exercise 2 (10+5 pts)}
+
+A tree is a \emph{binomial tree of rank 0} if it only consists of a single node.
+For $i>0$, a tree is a \emph{binomial tree of rank $i$} if its root has $i$ children, and the subtrees rooted at the children are binomial trees of ranks $0, \ldots, i-1$.
+
+\begin{enumerate}[a)]
+\item Draw binomial trees of rank $0, \ldots, 5$.
+\item What happens if we merge two binomial trees $A$ and $B$ of the same rank; that is, making the root of $B$ an additional child of the root of $A$?
+\item Show that a binomial tree of rank $i$ has exactly $2^i$ nodes.\footnote{%
+	The exercise sheet said ``$2^i$ children'', which is incorrect.
+}
+\end{enumerate}
+
+A \emph{binomial heap} is a forest of binomial trees, with the same representation as a Fibonacci heap (pointer to the minimal element, linked list of root elements, etc.).
+Binomial heaps are a simplified version of Fibonacci heaps with slightly worse performance guarantees:
+\begin{enumerate}[a), resume]
+\item Show that the operations insert, union, and min can be realized in constant time, and delete\any{}min in amortized logarithmic time.
+\item Give algorithms for decrease\any{}key and remove that run in $O(\log n)$ worst-case time.
+(Hint: There is a straightforward solution that does not require a subtree cut---if you want a challenge, give a solution through subtree cuts that still runs in $O(\log n)$.)
+\end{enumerate}
+
+\paragraph{Answer:}
+We restate the definition of binomial trees, avoiding a pointless case distinction.
+\begin{quote}
+Let $n\in\NN$ be given.
+A \emph{binomial tree of rank $n$} comprises a root node, $r$, and $n$ children, $c_0, \ldots, c_{n-1}$, where each $c_i$ is a binomial tree of rank $i$.
+\end{quote}
+This definition is obviously equivalent to the original.
+
+\begin{enumerate}[a)]
+
+	\item See \figref{fig:bintrees}.
+
+	\begin{figure}\centering
+	zero:~\Tree [.$\bullet$ ] \quad
+	one:~\Tree [.$\bullet$ $\bullet$ ] \quad
+	two:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ]
+	three:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ]
+	four:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ] ] \\
+	five:~\Tree [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] [.$\bullet$ $\bullet$ [.$\bullet$ $\bullet$ ] ] ] ] ]
+	\caption{Binomial trees of ranks $0, \ldots, 5$.}
+	\label{fig:bintrees}
+	\end{figure}
+	
+	\item Merging two binomial trees of rank $k$ (\ie making one a child of the other) produces a binomial tree of rank $k+1$, by the definition of binomial trees.
+	
+	In (too much) detail, let $T_1 = (r, \{ c_0, \ldots, c_{k-1} \})$ and $T_2$ be binomial trees of rank $k$, where each $c_i$ is a binomial tree of rank $i$.
+	Set
+	\begin{align*}
+		C &:= \{ c_0, \ldots, c_{k-1}, T_2 \} \\
+		T &:= (r, C)
+	\end{align*}
+	Observe that $C$ comprises $k+1$ trees and for $i \in \{0, \ldots, k\}$, $C$ contains a single binomial tree of rank $i$.
+	Thus $T$ is a binomial tree of rank $k+1$.
+
+	\item A binomial tree $T$ of rank $n$ has $2^n$ nodes.
+	
+	\begin{proof}
+		By straightforward structural induction on $T$, using the definition of binomial trees.
+		
+		In (too much) detail, let a binomial tree $T$ of rank $n$ be given.
+		Then $T$ comprises a root node, $r$, and $n$ children, $c_0, \ldots, c_{n-1}$, where each $c_i$ is a binomial tree of rank $i$.
+		Thus (writing $|t|$ for the number of nodes in tree $t$)
+		\begin{align*}
+			|T| &= \overbrace{1}^{\text{root}} + \sum_{i=0}^{n-1} |c_i| \\
+				&= 1 + \sum_{i=0}^{n-1} 2^i &\text{by the IH applied to the $c_i$} \\
+				&= 1 + (2^n - 1) = 2^n \qedhere
+		\end{align*}
+	\end{proof}
+	
+%	\item
+%	For binomial heaps, insert$(e, Q)$, union$(Q_1, Q_2)$, min$(Q)$, and delete\any{}min$(h, k, Q)$ are implemented as for Fibonacci heaps.
+%	The analysis still holds:
+%	Delete\any{}min takes amortized logarithmic time, the rest take (worst-case) constant time.
+%	
+%	\item
+%	The question has two parts.
+%	First, implementing decrease\any{}key$(h, k, Q)$ with worst-case $O(\log n)$ time.
+%	This immediately yields an implementation of remove (the same as for Fibonacci heaps) that operates in worst-case $O(\log n)$ plus \emph{amortized} $O(1)$ time.
+%	
+%	Second, eliminate the amortized complexity for remove.
+	
+\end{enumerate}
+For parts~(d) and~(e), we decided to deviate slightly from the exercise sheet in order to present a lovely algorithm.
+Attribution:
+The key insight---the forthcoming binary invariant---comes from Chris Okasaki's book, \emph{Purely functional data structures.}
+
+\paragraph{The min operation:}
+For clarity, we do not bother maintaining a pointer to a minimal element, or supporting the min operation.
+This can be added, when desired, in $O(1)$ space and (worst case) $O(1)$ time by a trivial wrapper (around \emph{any} implementation of heaps).
+
+\paragraph{Representation:}
+A binomial heap comprises an unbounded array, $A$, of (possibly $\bot$) pointers to binomial trees.
+
+\paragraph{Representation invariant:}
+For each $0 \le i < |A|$, if $A[i] \not= \bot$, then it points to a binomial, heap-ordered tree $t$ of rank $i$.
+
+\paragraph{Binary invariant:}
+A binomial heap storing $n$ elements has $A[i] \not= \bot$ iff bit $i$ is non-zero in the binary representation of $n$.
+
+By part~(c), this invariant is ``exactly right''.
+If bit $i$ is non-zero in the binary representation of $n$, then the tree $A[i]$ (of rank $i$) contains $2^i$ of the $n$ nodes.
+This is lovely!
+It tells us how to write insert and union:
+Use merge to add ``bits'' and implement binary increment and addition using ripple-carry.
+
+\begin{figure}
+\begin{minipage}{0.49\textwidth}
+\begin{lstlisting}[xleftmargin=5mm,keywordstyle=,numbers=none]
+insert($e$, $A$):	% Increment a binary number
+	construct a zero rank binomial tree, $t$, for $e$
+	$i \gets 0$
+	while $i < |A| \land A[i] \not= \bot$ do
+		$t \gets$ merge$(A[i], t)$	% rank $i$ to rank $i+1$
+		$A[i] \gets \bot$
+	done
+	if $i < |A|$ then $A[i] \gets t$ else push_back$(A[i], t)$
+
+union($A$, $A'$):	% Add two binary numbers
+	WLOG assume $|A| > |A'|$
+	$c \gets \bot$
+	for $i \gets 0$ to $|A'| -1$ do
+		$(A[i], c) \gets$ addbit$(A[i], A'[i], c)$
+		if $c = \bot$ then return
+	done
+	for $i \gets |A'|$ to $|A| -1$ do
+		$(A[i], c) \gets$ addbit$(A[i], \bot, c)$
+		if $c = \bot$ then return
+	done
+	push_back$(A, c)$
+\end{lstlisting}
+\end{minipage}
+~~\vrule~~
+\begin{minipage}{0.49\textwidth}
+\begin{lstlisting}[xleftmargin=5mm,keywordstyle=,numbers=none]
+delete_min($A$):
+	If every $A[i]$ is $\bot$, return
+	Find $j$, an index of a minimal root in $A$
+	Construct $A'$ from the children of $A[j]$
+	$A[j] \gets \bot$
+	union($A$, $A'$)
+
+decrease_key($h$, $k$, $A$):
+	Let $v$ be the node referenced by $h$
+	$\key(v) \gets k$
+	while $p(v) \not= \bot \land \key(v) < \key(p(v))$ do
+		$w \gets p(p(v))$
+		swap($v$, $p(v)$)
+		$v \gets w$
+	done
+
+remove($h$, $A$):
+	decrease_key$(h, -\infty, A)$
+	delete_min($A$)
+\end{lstlisting}
+\end{minipage}
+\caption{%
+	Binomial heap operations.
+	See the text for delete\protect\any{}min and see \figref{fig:binheapbit} for bit-level operations.
+}
+\label{fig:binheap}
+\end{figure}
+
+\begin{figure}
+\begin{lstlisting}[xleftmargin=1cm,keywordstyle=,numbers=none]
+addbit($t$, $t'$, $c$)
+	if all of $t$, $t'$, and $c'$ are $\bot$, return $(\bot, \bot)$
+	if one of $t$, $t'$, and $c$ is not $\bot$
+		WLOG assume $t$ not $\bot$ and return $(t, \bot)$
+	if two of $t$, $t'$, and $c$ are not $\bot$
+		WLOG assume $t$, $t'$ are not $\bot$
+		$c \gets$ merge$(t, t')$; return $(\bot, c)$
+	otherwise
+		$c \gets$ merge$(t', c)$; return $(t, c)$
+\end{lstlisting}
+\caption{%
+	Adding three ``bits''.
+	We assume there exists an $i$ such that each of $t$, $t'$, and $c$ are rank $i$ binomial trees or $\bot$.
+	We return a pair $(t'', c')$, where $t''$ is rank $i$ or $\bot$ and $c'$ is rank $i+1$ or $\bot$.
+}
+\label{fig:binheapbit}
+\end{figure}
+
+\paragraph{Implementation:}
+We give the code in Figures~\ref{fig:binheap} and~\ref{fig:binheapbit}.
+Observe that the merge operation on binomial heaps can be implemented in constant time.
+Thus:
+\begin{itemize}
+
+\item
+Insertion is identical in structure to binary increment (analyzed in an earlier exercise sheet) and takes worst-case $O(\log n)$ time.
+Moreover, a sequence of insert operations (intermingled with queries, but not with union) takes amoritzed $O(1)$ time.
+
+\item
+Union takes worst-case $O(\log n)$ time, where $n$ is the size of the larger of the two heaps.
+(The auxiliary function addbit takes constant time.)
+
+\item
+Delete\any{}min takes $O(\log n)$ time because it operates in three $O(\log n)$ stages.
+First, it takes $O(|A|) = O(\log n)$ time to find the target, $j$.
+Since tree $A[j]$ has $j = O(\log n)$ children, constructing $A'$ takes $O(\log n)$ time.
+Since $A$ has size $O(n)$ and $A'$ has size $O(\log n)$, the union takes $O(\log n)$ time.
+
+\item
+Decrease\any{}key takes $O(\log n)$ time.
+The algorithm is simple:
+Adjust the target node's key, then bubble it up toward the root of its binomial tree (as needed) to preserve the heap order invariant.
+This algorithm runs in time $O(\text{height of target tree})$ and an easy induction shows that a binomial tree with $k$ elements has height $O(\log k)$.
+The worst case puts all $n$ elements in the target tree, for $O(\log n)$ time.
+
+\item
+Clearly, remove is $O(\log n)$.
+
+\end{itemize}
+
+\section{Exercise 3 (10 pts)}
+
+Professor Pinocchio claims that the height of a Fibonacci heap with $n$ nodes is $O(\log n)$. Show that the professor is mistaken by giving, for any integer $n$, a sequence of addressable priority queue operations that creates a Fibonacci heap of just one tree that is a linear chain of $n$ nodes.
+
+\paragraph{Answer:}
+
+We can insert and extract a small dummy element (say, 0) to force roots to be combined. And then we use decrease-key/deletion to introduce some unbalance.
+
+\begin{enumerate}
+\item Insert 3, insert 4
+
+\[
+	\Tree [. \node{3};] \quad \Tree [. \node{4};]
+\]
+
+\item Insert 0, Extract-min 0
+
+\[
+	\Tree [.$3$ $4$ ]
+\]
+
+\item Insert 1, insert 2
+
+\[
+	\Tree [.$3$ $4$ ] \quad \Tree [. \node{1};] \quad \Tree [. \node{2};]
+\]
+
+\item Insert 0, Extract-min 0
+
+\[
+	\Tree [.$3$ $4$ ] \quad \Tree [.$1$ $2$ ]
+\]
+
+\newpage This is further combined:
+
+\[
+	\tikz{\Tree [.$1$ [.$3$ [.$4$ ] ] $2$ ]} \]
+
+\item Delete 2
+
+\[
+	\tikz{\Tree [.$1$ [.$3$ [.$4$ ] ] ]} \]
+
+\end{enumerate}
+
+\section{Exercise 4 (10 pts)}
+
+Show that with union by weights, but without path compression, a sequence of $n$ $make\_set$ and $m$ $union$ and $find$ operations takes $O(m \log n)$ time in the worst case. (Hint: prove the lemma from the lecture that the height of any tree is logarithmic in $n$).
+
+\paragraph{Answer:}
+
+Consider a sequence $\sigma$ of $m$ union/find operations on $n$ elements. For each operation $t$, let $T_t(u)$ denote the subtree rooted at $u$ after $t$ operations \emph{without} path compression. We define ${rank}(u) = 2 + h(T_m(u))$, where $h$ is the height.
+
+In the class we proved that for every node $u$, $|T_t(u)| \ge 2^{h(T_t(u))}$, where $|T|$ denotes the number of nodes in $T$. By taking the logarithmic on both sides:
+
+$$\log_2 (2^{h(T_t(u))}) \le \log_2 |T_t(u)|$$
+
+Thus:
+
+$$h(T_t(u)) \le \log_2 |T_t(u)| \le \log_2 n = O(\log n)$$
+
+This shows that at any time, every subtree (including the root) has height $O(\log n)$.
+
+\section{Exercise 5 (10 pts)}
+
+The \emph{off-line minimum problem} asks us to maintain a set $T$ of elements from the domain $\{1, \ldots, n\}$ under the operations $insert$ and $extract\_min$, which returns and deletes the minimum element from the set. We are given a sequence $S$ of $n$ $insert$ and $m$ $extract\_min$ calls, where each key is inserted exactly once. We wish to fill an array $extracted[1,\ldots, m]$ of size $m$, where $extract[i]$ yields the value of the $i$-th call of $extract\_min$ call. The problem is ``off-line'', that is, we can process the entire sequence $S$ before determining any extracted key.
+
+\paragraph{a)} An example sequence is given below. Here, an $insert$ is given a number and an $extract\_min$ is represented by the letter $E$:
+
+$$4,8,E,3,E,9,2,6,E,E,E,1,7,E,5$$
+
+What would be the correct $extract$ array to be returned?
+
+\paragraph{Answer:} The array $[4, 3, 2, 6, 8, 1]$.
+
+\paragraph{b)} Argue that the array returned by this method is correct.
+
+\paragraph{Answer:} The method searches for the call where each element $i$ was inserted, and because this is done in increasing order, we guarantee that $i$ is the minimum element of the following ($j$-th) $extract\_min$ call. Since we know the result of this $j$-th call, it can be eliminated from the list, and the other inserted elements are left for being extracted by the remaining calls.
+
+\paragraph{c)} Describe how to use a union-find data structure to implement the above algorithm efficiently and analyze the worst-case running time of your implementation. 
+
+\paragraph{Answer:} First, we need to add an initialization phase where we read the array and extract the sets using $make\_set$ and $union$. We also maintain a doubly-linked of representative elements of each \textbf{non-empty} set $K_i$ ($i \le m)$: $<K_1 \rightarrow \cdots \rightarrow K_6  \rightarrow K_7>$, so that we can iterate over the sets more easily. Then we just update the algorithm:
+
+\begin{itemize}
+\item 3) Determine $j$ with $i \in K_j$:
+
+This can be replaced by $j = find(i)$ to return the set where $i$ belongs to.
+
+\item 4) if $j \neq m+1$:
+
+This would check if the return value of the find(i) is valid (different from some dummy element).
+
+\item 6 and 7) Set $K_l \gets K_\ell \cup K_j$ and remove the set $K_j$:
+
+This can be replaced by locating $j$ in the linked-list (via some backward pointer to the handle, that we can store initially).
+
+$<\cdots \rightarrow \underbrace{e(K_j)}_\text{here} \rightarrow e(K_\ell) \rightarrow \cdots>$.
+
+Then, we do union of $K_j$ with the next set in the list and then delete $K_j$.
+
+\end{itemize}
+
+\paragraph{Complexity: } We need to add the initialization phase that reads the array and uses union/find/make-set operations ($O(m)$ amortized).
+Then, inside the main loop ($1 \ldots n$), all the operations are pointer manipulation or union/find operations ($O(n)$ amortized).
+
+The complexity of the algorithm is $O(m+n)$ amortized. 
+
+\end{document}

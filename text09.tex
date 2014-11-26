@@ -1,0 +1,134 @@
+\section{Graph Algorithms}
+
+\subsection{Connectivity}
+
+We have a directed graph $G=(V,E)$, \emph{simple} (no loops or multi edges).
+
+$$n = |V|, m = |E|$$
+
+\paragraph{(Directed) Path of length $k$}
+
+\paragraph{(Directed) Cycle of length $k+1$: } Directed path of length $k$ + find edge $(v_{k+1}, v_1)$.
+
+\paragraph{Simple path, simple cycle: } No vertex appears twice on the path/cycle.
+
+\begin{itemize}
+\item Graph $G=(V, E)$ is \emph{strongly connected} if it has a $(v,u)$-path and $(u,v)$ path for all $v,w \in V$.
+
+\item Undirected graph $G$ is $k$-connected ($k$-vertex connected) if removal of at most $k-1$ vertices (and all incident edges) keeps the graph connected. $k$-edge connected similar, but for edge removal.
+
+\item An inclusion-maximal strongly connected subgraph is a strongly connected component. Same for $k$-connected and $k$-edge-connected. \emph{Intuitively, it cannot be extended with more vertices/edges and maintain the same property.}
+\end{itemize}
+
+\subsection{DFS Framework}
+
+\begin{lstlisting}[mathescape]
+Input: Graph directed or indirected, $G=(V,E)$
+Data Structure:
+    Stack S (for vertices on the DFS path)
+    Vertex array "incoming" (for first incoming edge)
+    Vertex & edge markings
+
+for each $s \in V$ do:
+    mark S, set incoming[s] $\gets$ nil, push $s \rightarrow S$
+    root(S)
+    
+    while S is not empty do:
+        $v \gets top(S)$
+        if $\exists$ unmarked $e = (v,w) \in E$ then
+            mark $e$
+            if $w$ is unmarked:
+                mark $w$, set incoming[$w$] $\gets$ e, push $w$
+                traverse(v,e,w)
+        else:
+            $w \gets pop(S)$
+            backtrack(w, incoming[w], top(S))
+\end{lstlisting}
+
+Sequence in which vertices are discovered/marked: $v_1, v_2, \ldots, v_n$.
+\begin{itemize}
+\item \emph{DFS-number} of $v_i$ as $DFS(v_i) = i$.
+\item \emph{DFS-number} of $(v,w$) is $DFS((v,w)) = DFS(v)$.
+\item \emph{DFS-order} $\preceq$ on $V$ or $E$ by:
+\end{itemize}
+
+$$DFS(p) \le DFS(q) \iff p \preceq q$$
+
+$$DFS(p) < DFS(q) \iff p \prec q$$
+
+\paragraph{Edge Classes: } If $(v,w)$ is marked, it becomes a
+\begin{itemize}
+\item \emph{tree edge} if $w$ is unmarked
+\item \emph{back edge} if $w$ is marked, $w \preceq v, w \in S$
+\item \emph{cross edge} if $w$ is marked, .......
+\end{itemize}
+
+\subsection{Undirected DFS}
+
+\begin{itemize}
+\item Edges are traversed independently of direction.
+\item Replace the check of $\exists$ unmarked $e=(v,w) \in E$ with: $e=(v,w) \in E$ or $e=(w,v) \in E$.
+\item In undirected DFS, there are no cross and no forward edges (homework!).
+\end{itemize}
+
+\subsection{Connected Components}
+
+\begin{lstlisting}[mathescape]
+root(s):
+    $c \gets s$. component[S] $\gets c$
+
+traverse(v,e,w):
+    component[e] $\gets c$, component[w] $\gets c$.
+\end{lstlisting}
+
+\begin{itemize}
+\item Component is represented by first discovered vertex.
+\item Output: Array ``component'', pointing to representing vertex of the component
+\item Requires $O(n+m)$ time, $O(n+m)$ space.
+\end{itemize}
+
+\subsection{2-connected Components}
+
+\begin{mylemma}
+For an undirected graph $h$, edges $e, e' \in E$ are in a 2-connected component if, and only if, there is a simple undirected cycle that contains both $e$ and $e'$. The set of 2-connected components is a partition of the $E$.
+\end{mylemma}
+\begin{proof}
+If a cycle exists, then $e$ and $e'$ are in a 2-connected component.
+
+Subdivide $e$ and $e'$ each with a new vertex. Component is still 2-connected.
+Existence of a simple cycle follows from Menger's Theorem.
+\end{proof}
+
+\begin{mytheorem}[Menger's Theorem]
+In a 2-connected undirected graph with at least 2 edges there are two vertex-disjoint paths between every pair of vertices.
+\end{mytheorem}
+
+\begin{proof}[Proof for partition statement]
+For the partition statement, assume by contradiction $e$ is in two 2-connected components. There is a simple undirected cycle between $e'$ in one component and $e''$ in the other component. 
+There are simple cycles, and they exist for every pair in the union of components. But components must be inclusion-maximal. Contradiction.
+\end{proof}
+
+\subsection{Undirected DFS for 2-connected components}
+
+\begin{itemize}
+\item Stack $S_E$ for edges in unfinished (or open) components
+\item Stack $C$ for open components (represented by first edge)
+\item Output: Array ``component'' pointing to representing edge
+\end{itemize}
+
+\begin{lstlisting}[mathescape]
+traverse(v,e,w):
+    push $e \rightarrow S_E$
+    if $e$ is free edge then push $e \rightarrow C$
+    if $e$ is back edge then:
+        while $w \prec$ top(c) do:
+            pop(c)
+
+backtrack(w,e,v):
+    if $e = top(c)$ and $e \neq nil$ then:
+        pop(c)
+        repeat
+            $e' \gets pop(S_E)$
+            component[$e'$] $\gets e$
+        until $e = e'$.
+\end{lstlisting}
