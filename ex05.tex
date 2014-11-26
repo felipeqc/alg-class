@@ -79,6 +79,7 @@
 \newcommand{\ie}{\emph{i.e.,} }
 \newcommand{\eg}{\emph{e.g.,} }
 \usepackage{hyperref}
+\newcommand*{\Sref}[1]{\hyperref[#1]{\S\ref*{#1}}}
 \newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
 
 \title{Exercise Sheet 4---Algorithms and Data Structures}
@@ -230,13 +231,33 @@ This definition is obviously equivalent to the original.
 %	Second, eliminate the amortized complexity for remove.
 	
 \end{enumerate}
-For parts~(d) and~(e), we decided to deviate slightly from the exercise sheet in order to present a lovely algorithm.
+For parts~(d) and~(e), we proceed in two steps.
+
+In \Sref{sec:binheap}, we present and analyze a variant of binomial heaps with slightly different time bounds from those demanded in the exercise:
+\begin{enumerate}
+	
+	\item Insertion operates in worst-case $O(\log n)$ time.
+	A series of insertions (not intermingled with union) operates in amortized $O(1)$ time.
+	
+	\item Union operates in worst-case $O(\log n)$ time.
+
+	\item Delete\any{}min operates in worst-case $O(\log n)$ time.
+\end{enumerate}
+These heaps illustrate the main ideas and are readily understood.
+Indeed, the code follows from a lovely invariant.
+
+In \Sref{sec:binfibheap}, we approach the algorithm hinted at in the exercise.
+We achieve all time bounds, except that removal takes worst case $O(\log n)$ plus amortized $O(\log n)$ time, rather than worst case $O(\log n)$ time.
+(We did not have time to figure out how to improve this situation.)
+
+\subsection{Binomial heaps}\label{sec:binheap}
+
 Attribution:
 The key insight---the forthcoming binary invariant---comes from Chris Okasaki's book, \emph{Purely functional data structures.}
 
 \paragraph{The min operation:}
 For clarity, we do not bother maintaining a pointer to a minimal element, or supporting the min operation.
-This can be added, when desired, in $O(1)$ space and (worst case) $O(1)$ time by a trivial wrapper (around \emph{any} implementation of heaps).
+This can be added, when desired, in $O(1)$ space and (worst case) $O(1)$ time by a trivial adjustment to the code, or a trivial wrapper around \emph{any} implementation of heaps.
 
 \paragraph{Representation:}
 A binomial heap comprises an unbounded array, $A$, of (possibly $\bot$) pointers to binomial trees.
@@ -306,7 +327,6 @@ remove($h$, $A$):
 \caption{%
 	Binomial heap operations.
 	For any node $v$, we write $p(v)$ for $v$'s parent.
-	Notice that in decrease\protect\any{}key, the meaning of handles must be invariant under swap (\eg swap can update handles to affected nodes).
 	See the text for delete\protect\any{}min and see \figref{fig:binheapbit} for bit-level operations.
 }
 \label{fig:binheap}
@@ -359,10 +379,65 @@ Adjust the target node's key, then bubble it up toward the root of its binomial 
 This algorithm runs in time $O(\text{height of target tree})$ and an easy induction shows that a binomial tree with $k$ elements has height $O(\log k)$.
 The worst case puts all $n$ elements in the target tree, for $O(\log n)$ time.
 
+NB the meaning of handles must be invariant under swap.
+We might arrange to have at most one handle per node, to have each node point to its handle (if any), and to have swap update the handles of the affected nodes.
+
 \item
 Clearly, remove is $O(\log n)$.
 
 \end{itemize}
+
+\subsection{Lazy binomial heaps}\label{sec:binfibheap}
+
+We now recover the data structure hinted at in the exercise.
+The representation of these heaps is identical to that for Fibonacci heaps, modulo the switch to binomial trees and the fact that we need no mark bits.
+\begin{itemize}
+	\item Insertion, union, removal, and delete\any{}min are identical to those in Fibonacci heaps.
+	We do not bother reproducing them here.
+	
+	Delete\any{}min uses the min pointer, of course, so we don't suppress it as we did in~\Sref{sec:binheap}.
+
+	\item Decrease\any{}key is identical to that in~\Sref{sec:binheap}.
+\end{itemize}
+The key idea, in relation to the binomial heaps from~\Sref{sec:binheap}, is that delete\any{}min \emph{lazily} builds an array $A$ satisfying the binary invariant.
+Observe that
+\begin{itemize}
+	\item Insert and union take worst-case constant time.
+	\item Decrease\any{}key takes worst-case $O(\log n)$ time (see~\Sref{sec:binheap}).
+	\item If we can show that
+	\[
+		\text{delete\any{}min operates in amortized $O(\log n)$ time,}\tag{\dag}
+	\]
+	then remove takes worst-case $O(\log n)$ time to decrease the key, plus amortized $O(\log n)$ time to delete the minimum element.
+	Thus~(\dag) implies we've moved closer to the stated complexity goals.
+	(We have yet to achieve worst-case $O(\log n)$ time for remove.)
+\end{itemize}
+We give up on worst-case removal.
+It remains to show~(\dag).
+
+The analysis is strictly simpler than the analysis for Fibonacci heaps.
+Our \textbf{credit invariant} stores one token per root.
+Let $R$ be the maximal rank of a node in the binomial heap.
+
+\begin{mylemma}
+	Delete\any{}min needs to pay $O(R)$ tokens to perform all its operations and maintain the credit invariant.
+\end{mylemma}
+
+\begin{proof}
+	Identical to the proof given in lecture for Fibonacci heaps.
+\end{proof}
+
+Thus to achieve~(\dag), it suffices to bound $R$.
+
+\begin{mylemma}
+	$R$ is $O(\log n)$.
+\end{mylemma}
+
+\begin{proof}
+	By part~(c), a binomial tree with $n$ nodes has rank $O(\log n)$.
+	Thus every binomial tree in a binomial heap with $n$ nodes has rank $O(\log n)$.
+	Thus $R = O(\log n)$.
+\end{proof}
 
 \section{Exercise 3 (10 pts)}
 
