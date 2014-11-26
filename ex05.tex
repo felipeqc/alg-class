@@ -249,8 +249,7 @@ A binomial heap storing $n$ elements has $A[i] \not= \bot$ iff bit $i$ is non-ze
 
 By part~(c), this invariant is ``exactly right''.
 If bit $i$ is non-zero in the binary representation of $n$, then the tree $A[i]$ (of rank $i$) contains $2^i$ of the $n$ nodes.
-This is lovely!
-It tells us how to write insert and union:
+This tells us how to write insert and union:
 Use merge to add ``bits'' and implement binary increment and addition using ripple-carry.
 
 \begin{figure}
@@ -266,17 +265,18 @@ insert($e$, $A$):	% Increment a binary number
 	if $i < |A|$ then $A[i] \gets t$ else push_back$(A[i], t)$
 
 union($A$, $A'$):	% Add two binary numbers
-	WLOG assume $|A| > |A'|$
+	WLOG assume $|A| \ge |A'|$
 	$c \gets \bot$
 	for $i \gets 0$ to $|A'| -1$ do
 		$(A[i], c) \gets$ addbit$(A[i], A'[i], c)$
-		if $c = \bot$ then return
+		if $c = \bot$ then return $A$
 	done
 	for $i \gets |A'|$ to $|A| -1$ do
 		$(A[i], c) \gets$ addbit$(A[i], \bot, c)$
-		if $c = \bot$ then return
+		if $c = \bot$ then return $A$
 	done
 	push_back$(A, c)$
+	return $A$
 \end{lstlisting}
 \end{minipage}
 ~~\vrule~~
@@ -305,6 +305,8 @@ remove($h$, $A$):
 \end{minipage}
 \caption{%
 	Binomial heap operations.
+	For any node $v$, we write $p(v)$ for $v$'s parent.
+	Notice that in decrease\protect\any{}key, the meaning of handles must be invariant under swap (\eg swap can update handles to affected nodes).
 	See the text for delete\protect\any{}min and see \figref{fig:binheapbit} for bit-level operations.
 }
 \label{fig:binheap}
