@@ -132,3 +132,114 @@ backtrack(w,e,v):
             component[$e'$] $\gets e$
         until $e = e'$.
 \end{lstlisting}
+
+\begin{mytheorem}
+The DFS algorithm computes the 2-connected components of an undirected graph in time $O(n+m)$.
+\end{mytheorem}
+\begin{proof}
+$Backtrack$ and $traverse$ add and remove each edge at most once for $C$ and $S_E$. Also, framework runs in time $O(n+m)$.
+
+\textbf{Correctness:} By induction over the calls to $traverse$ and $backtrack$.
+
+\begin{itemize}
+\item Tree edge is called \emph{open} if there is no backtracking over it so far
+\item or it is \emph{closed} otherwise.
+\end{itemize}
+
+Open edges induce a path. Every 2-connected-component has a unique first edge. Component is open/closed if first edge is open/closed, respectively.
+
+After $t$ calls of $traverse$ and $backtrack$, we denote $G_t$ the subgraph induced by marked edges.
+
+We denote $G_t^{(i)}$ for $i = 1, \ldots, k_t$. Edge set $E_t^{(i)}$ and first edge $e_t^{(i)}$.
+
+\paragraph{Invariants}
+
+\begin{enumerate}
+\item Edges of closed components point (in component) to first edge.
+\item On $C$ we have $e_t^{(i)} < \cdots < e_t^{(k)}$ in this order.
+\item On $S_E$ we have edges from $E_t^{(1)}, \ldots, E_t^{(k_t)}$ in this order.
+\end{enumerate}
+
+All these invariants are true initially. Assume that these invariants hold until step $t-1$.
+
+\paragraph{Step $t$ in two cases}
+
+\begin{enumerate}
+\item \textbf{Case 1 (call of $traverse(v,e,w)$)}: 
+    \begin{enumerate}
+    \item $e$ is tree edge: $w$ is vertex of degree 1 in $G_t$. $e$ is the only edge of a new open component. This implies that the invariants hold.
+    \item $e$ is back edge: $e$ closes a simple cycle. The simple cycle can be found by traversing all tree edges on the DFS path up to $w$. All these edges belong to the same 2-connected component of $G_t$. All edges $e'$ with $w < e'$ are removed from $C$. Then, invariants hold.
+    \end{enumerate}
+    
+\item \textbf{Case 2 (call of $backtrack(w,e,v)$)}:
+    \begin{enumerate}
+    \item $e = nil$: $w$ was put on $S$ by the outer loop of DFS. Then, all edges of the connected component and all 2-connected components are closed. $C$ and $S_E$ are empty.
+    \item $e \neq top(c)$: Also ok.
+    \item $e$ gets closed: By assumption, $e$ is the first edge of the open component with highest index $\implies$ on top of $C$. There are no cross or forward edges. Component cannot grow and its closed. Therefore, the repeat-loop deletes the correct edges from the stack and by assumption on the ordering of edges on $C$ and $S_E$, the invariants continue to hold.  
+    \end{enumerate}
+\end{enumerate}
+
+\end{proof}
+
+\subsection{2-edge Connected Components}
+
+\begin{mylemma}
+For an undirected graph $G$, two vertices $u,v \in V$ are in a 2-edge-connected component if and only if there is a closed sequence (cycle with repetition of vertices) of edges that contains both $u$ and $v$. The set of 2-edge-connected components is a partition of $V$. 
+\end{mylemma}
+
+\subsubsection{Undirected DFS for 2-edge connected components}
+
+\begin{itemize}
+\item $S_V$: vertices in open components
+\item $C$: open component (represented by first vertex)
+\item Output: Array component pointing to representing vertices
+\end{itemize}
+
+\begin{lstlisting}[mathescape]
+root(s):
+    push $s \rightarrow S_V$, push $s \rightarrow C$
+
+traverse(v,e,w):
+    if $e$ is tree edge then
+        push $v \rightarrow S_V$, push $w \rightarrow C$
+    if $e$ is back edge then:
+        while $w < top(C)$ do:
+            pop(C)
+
+backtrack(w,e,v):
+    if $w = top(C)$ then:
+        pop(C)
+        repeat
+            $u \gets pop(S_V)$, $component[u] \gets w$
+        until $u = w$
+\end{lstlisting}
+
+\begin{mytheorem}
+The DFS algorithm computes the 2-edge-connected components of an undirected graph in time $O(n+m)$.
+\end{mytheorem}
+\begin{proof}
+Exercise 1.
+\end{proof}
+
+\subsection{Strongly Connected Components}
+
+\begin{mylemma}
+For a directed graph $G$, two nodes $u,v \in V$ are in a SCC if and only if there is a closed directed sequence of edges (cycle with repetition of vertices) that contains both $u$ and $v$. The set of SCC forms a partition.
+\end{mylemma}
+\begin{proof}
+Go for it.
+\end{proof}
+
+\subsubsection{Directed DFS for SCC}
+
+Take DFS for 2-edge connected components and replace the ``if $e$ is back edge'' by:
+
+``$e$ is back edge or $e$ is cross edge with $w \in S_V$''.
+
+\begin{mytheorem}
+The DFS algorithm computes the SCCs of a directed graph in time $O(n+m)$.
+\end{mytheorem}
+\begin{proof}
+Exercise. Show that the algorithm correctly treats forward and cross edges.
+\end{proof}
+

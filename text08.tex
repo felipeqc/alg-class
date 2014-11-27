@@ -205,7 +205,6 @@ $\sum\limits_{u} {rank}(u) \le 8n$
 \begin{proof}
 Let $c+r$ be the number of nodes of rank $r$. Any pair of such nodes has disjoint subtrees at time $m$. Since each subtree has at least $2^{t-2}$ nodes, $c_r \le \frac{n}{2^{r-2}}$.
 
-(fix equation)
 $$\sum\limits_{u} {rank}(u) \le \sum\limits_{i=0}^\infty i \cdot \underbrace{|\{u | {rank}(u) = i\}|}_{c_i} \le \sum i \cdot \frac{n}{2^{i-2}} \le 4n \sum \frac{i}{2^i} \le 8n$$
 
 \end{proof}
