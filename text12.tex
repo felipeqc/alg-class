@@ -1,0 +1,137 @@
+\section{Matroids}
+
+Recall minimum spanning trees, that can be solved using a greedy algorithm. Matroids are a broad generalization construction. It captures the notion of linear dependence.
+
+\begin{mydefinition}
+A matroid is a pair $(S, I)$, where $S$ is a finite set and $I$ is a family of subsets of $S$, such that:
+\begin{enumerate}
+\item if $J \in \mathcal{I}$ and $I \subseteq J$, then $I \in \mathcal{I}$.
+\item if $I, J \in \mathcal{I}$ and $|I| < |J|$, then there is an $x \in J-I$ with $I \cup \{x\} \in \mathcal{I}$.
+\end{enumerate}
+
+$I \in \mathcal{I}$ is called \emph{independent set}, and $I' \subseteq S$ with $I' \notin \mathcal{I}$ is a \emph{dependent set}.
+\end{mydefinition}
+
+\paragraph{Examples}
+\begin{enumerate}
+\item $V$ is a vector space, finite $S \subseteq V$, $\mathcal{I} \subseteq 2^S$ family of linearly independent subsets of $S$. That's why $I \in \mathcal{I}$ is called an independent set.
+\item $S$ are rows of a matrix $A$, $\mathcal{I} \subseteq 2^S$ family of linear independent subsets of $S$.
+\item $G = (V, E)$ undirected connected graph, $S = E$, $\mathcal{I}$ is the set of forests of $G$. Also called \emph{graphical matroid}.
+\item $G = (V, E)$ undirected connected graph, $S = E$, $\mathcal{I} \subseteq 2^E$ such that $E' \in \mathcal{I}$ with $G' = (V, E-E')$ stays connected.
+\item $S$ set of elements, $\mathcal{I} \subseteq 2^S$ containing all sets $J \subseteq S$ with $|J| \le k$ for some given $k > 0$. Also called \emph{uniform matroid}.
+\end{enumerate}
+
+\begin{mydefinition}
+A \emph{weighted matroid} has a given cost function $c: S \rightarrow \mathbb{R}$.
+\end{mydefinition}
+
+\begin{mydefinition}
+A \emph{maximal independent set} $J \in I$ is such that $\forall x \in S-J, J \cup \{x\} \notin \mathcal{I}$, and is called \emph{basis}.
+\end{mydefinition}
+
+Matroid are exactly the structures in which a greedy algorithm fins a basis of minimum cost.
+
+\begin{lstlisting}[mathescape]
+Greedy algorithm matroid:
+    $J \gets \emptyset$
+    while $\exists x \in S$ such that $J \cup \{x\} \in I$ do
+        let $X = \{x \in S | J \cup \{x\} \in \mathcal{I}\}$ and pick $x^* = \arg\min_{x \in X} c(x)$.
+        $J \gets J \cup \{x*\}$ 
+\end{lstlisting}
+
+\begin{mytheorem}
+A set system $(S, \mathcal{I})$ satisfying axiom (i) of matroids is a matroid (i.e. satisfies (ii)) if and only if for all cost functions the greedy algorithm finds a basis
+of minimum cost.
+\end{mytheorem}
+
+We show that a greed algorithm works in a more general sense.
+
+\begin{mydefinition}
+A \emph{cycle} of a matroid $(S, \mathcal{I})$ is an inclusion-minimal dependent set.
+\end{mydefinition}
+
+\begin{mydefinition}
+A \emph{cut} of a matroid $(S, \mathcal{I})$ is an inclusion-minimal subset of $S$ intersecting all bases.
+\end{mydefinition}
+
+For graphic metroids, \emph{cycles} in the metroid are exactly simple cycles of $G$. A cut in the metroid is a subset of the cuts in the graph, because it has to be inclusion-minimal (captures only the ``essential'' cuts).
+
+\subsection{Greedy and Dual Greedy algorithms}
+
+\paragraph{Blue rule:} Find a cut with no blue element. Then, pick an element of this cut of minimum cost and color it blue.
+
+\paragraph{Red rule:} Find a cycle with no red element. Then, pick an element of the cycle of maximum cost and color it red.
+
+\begin{mytheorem}
+If we start with an uncolored weighted matroid, and apply the blue and red rules (in any order) until neither applies, then the blue elements are a basis of minimum cost.
+\end{mytheorem}
+
+For the proof we use duality.
+
+\begin{mydefinition}
+For a matroid $(S, \mathcal{I})$, the \emph{dual matroid} is $(S, \mathcal{I}^*)$ with $\mathcal{I}^* = \{ J \subseteq S | J \cap B = \emptyset \text{ for some basis $B$ of $\mathcal{I}$} \}$. $J^*$ is basis in $\mathcal{I}^*$ iff $S-J^*$ is basis in $\mathcal{I}$. Note: $\mathcal{I}^{**} = \mathcal{I}$.
+\end{mydefinition}
+
+For example, (3) and (4) above are dual (graphic metroid and sets of edges that upon removal keep $G$ connected).
+
+\paragraph{Note:}
+\begin{itemize}
+\item Usually $J \in \mathcal{I}$ does not imply $J \in \mathcal{I}^*$. Empty set is in both matroids. 
+\item Cuts in $(S, \mathcal{I})$ are cycles in $(S, \mathcal{I}^*)$.
+\item Blue rule in $(S, \mathcal{I})$ is red rule in $(S, \mathcal{I}^*)$ with reversal ordering of costs.
+\end{itemize}
+
+\begin{mydefinition}
+An \emph{acceptable coloring} $(B, R)$ with $B \in \mathcal{I}$, $R \in \mathcal{I}^*$ is \emph{total} if $B \cup R = S$, i.e., both $R$ and $B$ are bases in the matroid and its dual. It \emph{extends} acceptable coloring $(B', R')$ if $B' \subseteq B, R' \subseteq R$.
+\end{mydefinition}
+
+\begin{mylemma}
+Every acceptable coloring has a total extension.
+\end{mylemma}
+\begin{proof}
+Let $U^*$ be a basis of $\mathcal{I}^*$ and $R\subseteq U^*$. Then, let $U = S - U^*$, so $U$ is a basis of $\mathcal{I}$. Since $|B| < |U|$, select $x \in U-B$ and add it to $B$ such that $B \cup \{x\} \in \mathcal{I}$. This is possible by axiom (ii) of matroids. Since all bases have same cardinality, again by axiom (ii), the resulting set $\hat{B}$ is a basis disjoint from $R$. Then, total extension is given by $(\hat{B}, S - \hat{B})$.
+\end{proof}
+
+\begin{mylemma}
+A cut and a cycle cannot intersect in one element.
+\end{mylemma}
+\begin{proof}
+Suppose they do intersect in element $X$. Color cycle without $x$ blue, and color the cut without $x$ red. This is an acceptable coloring, that can be extended to total, by previous lemma. Then, it is impossible to color $x$. So either cycle is blue (not in $\mathcal{I}$), or cut is red (not in $\mathcal{I}^*$). Contradiction.
+\end{proof}
+
+\begin{mydefinition}
+Suppose $B \in \mathcal{I}$, $ B \cup \{x\} \notin \mathcal{I}$. Then, $B \cup \{x\}$ contains a minimal dependent subset $C$, the \emph{fundamental cycle} of $x$ and $B$. Note: $x \in C$.
+\end{mydefinition}
+
+\begin{mylemma}
+For a total acceptable coloring $(B,R)$,
+\begin{enumerate}
+\item let $x \in R$ and $y$ in a fundamental cycle of $x$ and $B$. If we exchange colors of $x$ and $y$, the resulting coloring is acceptable.
+\item let $y \in B$ and $x$ in a fundamental cut of $y$ and $R$. If we exchange colors of $x$ and $y$, the resulting coloring is acceptable.
+\end{enumerate}
+\end{mylemma}
+\begin{proof}
+By duality, we show only (i). If $y = x$, then the coloring will be the same. Otherwise, $C - \{y\} \in \mathcal{I}$, because $C$ is inclusion-minimal. We extend $C - \{y\}$ by adding elements of $B$ until we get a basis $B'$. Then $B' = (B - \{y\}) \cup \{x\}$, and the total acceptable coloring $(B', S-B')$ results from exchanging colors of $x$ and $y$.
+\end{proof}
+
+\begin{mydefinition}
+A total acceptable coloring is \emph{optimal} if $B$ is a minimum-cost basis, or equivalently, $R$ is a maximal-cost basis in the dual matroid.
+\end{mydefinition}
+
+\begin{mylemma}
+If $(B,R)$ has an optimal total extension, then this is maintained after the execution of the blue or red rule.
+\end{mylemma}
+\begin{proof}
+By duality, we show for the blue rule. Let the optimal total extension be $(\hat{B}, \hat{R})$. $A$ is cut without blue elements, $x \in A$ is the minimum-cost element. If $x \in \hat{B}$, then done, so let $x \in \hat{R}$. $C$ is the fundamental cycle of $x$ and $\hat{B}$. Then, $|A \cap C| \ge 2$, so there is $y \in A \cap C, y \neq x$. Also, $y \notin B, y \in \hat{B}$. By exchange lemma, we switch colors of $x$ and $y$ in $(\hat{B}, \hat{R})$, and this new total acceptable coloring $(\hat{B}', \hat{R}')$ extends $(B \cup \{x\}, R)$. $\hat{B}'$ has minimum cost since $c(y) \ge c(x)$, by blue rule.
+\end{proof}
+
+\begin{mylemma}
+If an acceptable coloring $(B, R)$ is not total, then either the blue or red rule can be applied.
+\end{mylemma}
+\begin{proof}
+Let $x$ be an uncolored element. $(B,R)$ has total extension $(\hat{B}, \hat{R})$. By duality, assume $x \in \hat{B}$. Then $C$ is a fundamental cut of $x$ and $\hat{R}$. Since every $y \in C$ with $y \neq x$ are in $\hat{R}$, then $y \notin B$. Here the blue rule applies to $C$.
+\end{proof}
+
+
+%\begin{proof}[\textbf{Proof of Theorem 2:} ]
+%\end{proof}
