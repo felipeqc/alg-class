@@ -1,0 +1,80 @@
+— 1
+Let G be a directed graph, where each edge is colored red or blue.
+Let u and v be two vertices of G.
+
+— 1a
+Design an efficient algorithm to decide whether there exists a directed
+path from u to v that contains at least twice as many red edges as blue.
+
+• There are at most E/3 blue edges (2E/3 red) on any path.
+
+• Inefficient algorithm: generate all paths p : u →* w, for each one
+check if R(p) ≥ 2B(p).
+
+• Inefficient algorithm: Use DFS starting from u to label every node w with
+a /set/ of triples <p, r, b> s.t. p : u →* w a path from u to w, r the number
+of red edges on the path, and b the number of blue edges on the path.
+
+	When DFS traverses edge (x,y),
+		if (x,y) red then
+			for every <p,r,b> ∈ set[x]
+				add <p·(x,y), r+1, b> to set[y]
+		else if (x,y) blue then
+			for every <p,r,b> ∈ set[x]
+				add <p·(x,y), r, b+1> to set[y]
+	This isn't quite right, since it has to account for back and cross edges.
+	Also, it looks too complicated.
+
+— 1b
+Design an efficient algorithm for finding a path from u to v that contains
+as few red edges as possible.
+
+We can use Dijkstra to solve this in O(E + V log V):
+
+	Define c(e) := 1 if e red; 0 ow.
+	Run Dijkstra's algorithm with source u.
+	Return the shortest path to v, if any.
+
+— 1c
+
+— 2
+
+The counterexample depends on how you implement Dijkstra.
+My implementation builds a heap up-front, then empties it:
+
+	∀v. π[v] ← ⊥, d[v] ← ∞
+	d[s] ← 0
+	Q ← makequeue(V, d)
+	while Q ≠ ∅
+		v ← delete_min(Q)
+		∀(v,w) ∈ E.
+			r ← d[v] + c(v,w)
+			if d[w] > r
+				π[w] ← v
+				d[w] ← r	; reduce_key(w,Q,r)
+
+Now consider the graph with vertices {A, B, C, D},
+and edges and costs
+	s	t	c
+	A	C	0
+	A	B	1
+	A	D	2
+	B	C	1
+	D	B	-5
+
+Running Dijkstra with source A relaxes from (1) A, C, B, (2) D.
+Only (1) and (2) change the shortest path forest.
+After (1) it looks like
+	\Tree [.$0A$ $2D$ $0C$ $1B$ ]
+After (2) it looks like
+	\Tree [.$0A$ [.$2D$ $-3B$ ] $0C$ ]
+So when the algorithm terminates, it reports that the shortest
+path from A to C is direct and costs zero. But the shortest path
+goes through D and costs -2.
+
+Attribution: The example comes from stackexchange. (The simpler
+examples we tried would have foiled the version of Dijkstra's
+algorithm given in lecture, but did not foil the preceding version.)
+
+— 3
+
