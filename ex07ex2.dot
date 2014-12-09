@@ -2,11 +2,9 @@
 	dot -Tpdf ex07ex2.dot > ex07ex2.pdf && open ex07ex2.pdf
 */
 digraph G{
+	graph[rankdir=LR]
 	node[shape=plaintext]
-	A -> C [label="0"]
 	A -> B [label="1"]
-	A -> D [label="2"]
-	B -> C [label="1"]
-	D -> B [label="-5"]
-	{rank=same; A B C}
+	A -> C [label="0"]
+	B -> C [label="-10"]
 }

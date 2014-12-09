@@ -125,13 +125,12 @@ We weren't ``finished'' with $v$, after all.
 
 \begin{figure}
 \centering\includegraphics{ex07ex2.pdf}
-\caption{Counterexample for Dijkstra with negative weights.
-	Attribution: This specific counterexample adapated from stackexchange.}
+\caption{Counterexample for Dijkstra with negative weights.}
 \label{fig:dijkstraeg}
 \end{figure}
 
 It's easy to give a counterexample, once we fix the code.
-We prefer to build the heap up-front:
+We prefer to build the heap up-front, and to only relax edges to nodes that are not in the heap:
 \begin{lstlisting}[numbers=none,xleftmargin=1cm]
 dijkstra$(s)$:
 	$\pi \gets \text{array}(|V|, \bot)$; $d \gets \text{array}(|V|, \infty)$; $d[s] \gets 0$
@@ -143,18 +142,19 @@ dijkstra$(s)$:
 				relax$(v, w)$	% adjusts priority in $Q$
 \end{lstlisting}
 We omit the evident code for relax.
+(Note that the test $w \in Q$ can be implemented in $O(1)$ time and space using mark bits in nodes.
+After makeheap, we mark every node as in $Q$.
+When deleteMin returns $v$, we clear $v$'s mark.)
 Now consider what happens when we run this code on the graph in \figref{fig:dijkstraeg} with source $A$.
-We dequeue the nodes in order $A$, $C$, $B$, and $D$.
-Relaxing from $A$ produces the ``shortest path forest'' (\ie $\pi$ and $d$)
+We dequeue the nodes in order $A$, $C$, and $B$.
+After initialization, $d = \{ A \mapsto 0; C, B \mapsto \infty \}$ and we dequeue $A$.
+After relaxing from $A$, we have the ``shortest path forest'' (\ie $\pi$ and $d$)
 \[
-	\Tree [.$0A$ $2D$ $0C$ $1B$ ]
+	\Tree [.$0A$ $0C$ $1B$ ]
 \]
-The forest remains unchanged until we relax from $D$ and get
-\[
-	\Tree [.$0A$ [.$2D$ $-3B$ ] $0C$ ]
-\]
-This (terminal) forest says that the shortest path from $A$ to $C$ has zero costs and comprises the edge $A \edge C$.
+Thereafter, the forest never changes.
+On termination, the forest says that the shortest path from $A$ to $C$ has zero cost and comprises the edge $A \edge C$.
 That's wrong.
-The shortest path is $A \edge D \edge B \edge C$ with cost $2 - 5 + 1 = -2$.
+The shortest path  $A \edge B \edge C$ has cost $-9$.
 
 \end{document}
