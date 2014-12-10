@@ -108,32 +108,8 @@ Let $u$ and $v$ be two vertices of $G$.
 \end{enumerate}
 
 \paragraph{Answer for (1a).}
-Here and in~(1c), we represent sets of vertices $S \subseteq V$ using bit vectors or by reserving bits in each vertex.
-This makes initialization ($S \gets \emptyset$) linear, update ($S \gets S \cup \{ x \}$) constant, and intersection ($S \cap S'$) linear.
-We omit the details.
 
-We identify two subproblems.
-\begin{itemize}
-	\item If, along a path $p$ from $u$ to $v$, we touch a cycle $C$ that contains one more red edge than blue edges, then we win.
-	We can use $p$, running round $C$ up to $2|p|$ times to achieve our goal.
-
-	\item Assuming we have dealt with such cycles, we can perform a DFS or BFS, keeping track of how many red and blue edges we've passed and noticing if we reach $v$ with enough red edges.
-\end{itemize}
-We punt on the first subproblem.
-For the second, we use a variant on DFS:
-\begin{lstlisting}[numbers=none,xleftmargin=1cm]
-search$(s)$: $M \gets \emptyset$; dfs$(u, 0, 0)$; output NO
-check$(x, r, b)$: if $x = v \land r \ge 2b$ then output YES and halt
-dfs$(x, r, b)$:
-	check$(x, r, b)$
-	$M \gets M \cup \{ x \}$
-	for $y \in \text{Adj}[x]$
-		if $y \not\in M \land (x,y)\text{ red}$ then dfs$(y, r+1, b)$
-		else if $y \not\in M \land (x,y)\text{ blue}$ then dfs$(y, r, b+1)$
-		else if $y \in M \land (x,y)\text{ red}$ then check$(y,r+1,b)$\end{lstlisting}
-The set $M$ marks visited vertices.
-Reaching $(x, r, b)$ means we've found a path from $u$ to vertex $x$ containing $r$ red and $b$ blue edges.
-Notice that we check (but, of course, do not recurse into) \emph{red} back and cross edges.
+We can use Bellman-Ford algorithm to solve this problem. Define a penalty $c(e) := +2$ if $e$ red; and a bonus $c(e) := -1$ otherwise. Then we run Bellman-Ford algorithm to find the desired path. In case there is a cycle with infinitely many blue edges, the algorithm will also detect it.
 
 \paragraph{Answer for (1b).}
 We use Dijkstra's algorithm to solve this in $O(E + V \log V)$ time.
@@ -142,6 +118,10 @@ We use Dijkstra's algorithm to solve this in $O(E + V \log V)$ time.
 	Return the shortest path to $v$, if any.
 
 \paragraph{Answer for (1c).}
+Here, we represent sets of vertices $S \subseteq V$ using bit vectors or by reserving bits in each vertex.
+This makes initialization ($S \gets \emptyset$) linear, update ($S \gets S \cup \{ x \}$) constant, and intersection ($S \cap S'$) linear.
+We omit the details.
+
 Assume a function search$(G, x)$ that runs in time $O(V+E)$ and returns the set of vertices reachable from $x$ by paths containing exactly one red edge.
 Given such a function, we proceed as follows.
 \begin{itemize}
@@ -224,11 +204,19 @@ The shortest path  $A \edge B \edge C$ has cost $-9$.
 Consider the following algorithm for solving the single-source shortest path problem in directed graphs with general edge costs:
 
 \begin{lstlisting}[mathescape]
-SSSP(V ,E,c,s):    Improved = {s}    while Improved $\neq \emptyset$ do        B = Improved
+SSSP(V ,E,c,s):
+    Improved = {s}
+    while Improved $\neq \emptyset$ do
+        B = Improved
         Improved = $\emptyset$
-        while B $\neq \emptyset$            choose and remove some v from B
-            for each w in Out(v) do                d’ = d[v] + c((v,w))
-                if d’ < d[w] then                    d[w] = d’                    parent[w] = v                    insert w into Improved
+        while B $\neq \emptyset$
+            choose and remove some v from B
+            for each w in Out(v) do
+                d’ = d[v] + c((v,w))
+                if d’ < d[w] then
+                    d[w] = d’
+                    parent[w] = v
+                    insert w into Improved
 \end{lstlisting}
 
 Assume Out(v) denotes the set of out-neighbors of v, and sets B and Improved are implemented such that insertions, deletions, choosing some element, and test for emptiness only need constant time each.
@@ -242,18 +230,27 @@ No, it doesn't terminate if there are negative cycles. When there is a negative 
 \begin{lstlisting}[mathescape, commentstyle=\color{red}, keywordstyle=\color{blue}]
 SSSP(V,E,c,s):
     foreach $v \in V$ do
-        count[v] = 0 % number of improvements    Improved = {s}    while Improved $\neq \emptyset$ do        B = Improved
+        count[v] = 0 % number of improvements
+    Improved = {s}
+    while Improved $\neq \emptyset$ do
+        B = Improved
         Improved = $\emptyset$
-        while B $\neq \emptyset$            choose $\text{and}$ remove some v from B
-            foreach w in Out(v) do                d’ = d[v] + c((v,w))
+        while B $\neq \emptyset$
+            choose $\text{and}$ remove some v from B
+            foreach w in Out(v) do
+                d’ = d[v] + c((v,w))
                 if d’ < d[w] then
-                    if count[w] < $n-1$ % Limit number of improvements for an edge                        d[w] = d’                        parent[w] = v                        insert w into Improved
+                    if count[w] < $n-1$ % Limit number of improvements for an edge
+                        d[w] = d’
+                        parent[w] = v
+                        insert w into Improved
                         count[w] = count[w] + 1
                     else
                         d[w] = $-\infty$
 \end{lstlisting}
 
-\paragraph{b)} Show that there are arbitrarily large graphs for which SSSP() is asymptotically faster than the Bellman-Ford algorithm
+
+\paragraph{b)} Show that there are arbitrarily large graphs for which SSSP() is asymptotically faster than the Bellman-Ford algorithm
 
 \paragraph{Answer:}
 
@@ -282,7 +279,8 @@ The Bellman-Ford algorithm will invariably relax all the edges $(n-1)$ times, bu
 \end{tikzpicture}
 \end{center}
 
-\paragraph{c)} Show that there are arbitrarily large graphs for which SSSP() has the same asymptotic running time as the Bellman-Ford algorithm.
+
+\paragraph{c)} Show that there are arbitrarily large graphs for which SSSP() has the same asymptotic running time as the Bellman-Ford algorithm.
 
 \paragraph{Answer:}
 
@@ -325,7 +323,11 @@ Due to recent strikes in German railway companies, Saarstahl is considering to i
 
 \paragraph{b)} An ordered semigroup is a set S together with an operation $\oplus$, a neutral element 0, and a linear ordering $\le$ such that for all $x, y, z \in S$ we have
 \begin{itemize}
-\item $x \oplus y \in S$,\item $(x \oplus y)=(y \oplus x)$,\item $(x \oplus y) \oplus z=x \oplus (y \oplus z)$,\item $x \oplus 0=x$, and\item $x \le y \implies x \oplus z \le y \oplus z$.
+\item $x \oplus y \in S$,
+\item $(x \oplus y)=(y \oplus x)$,
+\item $(x \oplus y) \oplus z=x \oplus (y \oplus z)$,
+\item $x \oplus 0=x$, and
+\item $x \le y \implies x \oplus z \le y \oplus z$.
 \end{itemize}
 
 Show how the Bellman-Ford algorithm can be applied when edge weights in a graph come from an ordered semigroup.
