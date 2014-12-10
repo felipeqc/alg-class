@@ -107,6 +107,34 @@ Let $u$ and $v$ be two vertices of $G$.
 	\item Design an efficient algorithm for finding a path from $u$ to $v$ that contains exactly two red edges, if such a path exists, or otherwise reports failure.
 \end{enumerate}
 
+\paragraph{Answer for (1a).}
+Here and in~(1c), we represent sets of vertices $S \subseteq V$ using bit vectors or by reserving bits in each vertex.
+This makes initialization ($S \gets \emptyset$) linear, update ($S \gets S \cup \{ x \}$) constant, and intersection ($S \cap S'$) linear.
+We omit the details.
+
+We identify two subproblems.
+\begin{itemize}
+	\item If, along a path $p$ from $u$ to $v$, we touch a cycle $C$ that contains one more red edge than blue edges, then we win.
+	We can use $p$, running round $C$ up to $2|p|$ times to achieve our goal.
+
+	\item Assuming we have dealt with such cycles, we can perform a DFS or BFS, keeping track of how many red and blue edges we've passed and noticing if we reach $v$ with enough red edges.
+\end{itemize}
+We punt on the first subproblem.
+For the second, we use a variant on DFS:
+\begin{lstlisting}[numbers=none,xleftmargin=1cm]
+search$(s)$: $M \gets \emptyset$; dfs$(u, 0, 0)$; output NO
+check$(x, r, b)$: if $x = v \land r \ge 2b$ then output YES and halt
+dfs$(x, r, b)$:
+	check$(x, b)$
+	$M \gets M \cup \{ x \}$
+	for $y \in \text{Adj}[x]$
+		if $y \not\in M \land (x,y)\text{ red}$ then dfs$(y, r+1, b)$
+		else if $y \not\in M \land (x,y)\text{ blue}$ then dfs$(y, r, b+1)$
+		else if $y \in M \land (x,y)\text{ red}$ then check$(y,r+1,b)$\end{lstlisting}
+The set $M$ records visited vertices.
+Reaching $(x, r, b)$ means we've found a path from $u$ to vertex $x$ containing $r$ red and $b$ blue edges.
+Notice that we check (but, of course, do not recurse into) \emph{red} back and cross edges.
+
 \paragraph{Answer for (1b).}
 We use Dijkstra's algorithm to solve this in $O(E + V \log V)$ time.
 	Define $c(e) := 1$ if $e$ red; $0$ otherwise.
@@ -114,10 +142,6 @@ We use Dijkstra's algorithm to solve this in $O(E + V \log V)$ time.
 	Return the shortest path to $v$, if any.
 
 \paragraph{Answer for (1c).}
-We represent sets of vertices $S \subseteq V$ using bit vectors or by reserving $i$ bits in each vertex.
-This makes initialization ($S \gets \emptyset$) linear, update ($S \gets S \cup \{ x \}$) constant, and intersection ($S \cap S'$) linear.
-We omit the details.
-
 Assume a function search$(G, x)$ that runs in time $O(V+E)$ and returns the set of vertices reachable from $x$ by paths containing exactly one red edge.
 Given such a function, we proceed as follows.
 \begin{itemize}
