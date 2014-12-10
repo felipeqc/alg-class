@@ -63,6 +63,7 @@
   tabsize=4,                       % sets default tabsize to 2 spaces
   title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
   mathescape,
+  belowskip=-\baselineskip,
 }
 
 \DeclareMathOperator{\prob}{prob}
@@ -111,6 +112,43 @@ We use Dijkstra's algorithm to solve this in $O(E + V \log V)$ time.
 	Define $c(e) := 1$ if $e$ red; $0$ otherwise.
 	Run Dijkstra's algorithm with source $u$.
 	Return the shortest path to $v$, if any.
+
+\paragraph{Answer for (1c).}
+We represent sets of vertices $S \subseteq V$ using bit vectors or by reserving $i$ bits in each vertex.
+This makes initialization ($S \gets \emptyset$) linear, update ($S \gets S \cup \{ x \}$) constant, and intersection ($S \cap S'$) linear.
+We omit the details.
+
+Assume a function search$(G, x)$ that runs in time $O(V+E)$ and returns the set of vertices reachable from $x$ by paths containing exactly one red edge.
+Given such a function, we proceed as follows.
+\begin{itemize}
+	\item
+	$O(V+E)$: $S_1 \gets \text{search}(G, u)$
+
+	\item
+	$O(V+E)$: $S_2 \gets \text{search}(G^\text{op}, v)$, where $G^\text{op}$ has edges reversed
+
+	\item
+	$O(V):$ Output YES if $S_1 \cap S_2 \not= \emptyset$; otherwise NO.
+\end{itemize}
+The search function is implicitly parameterized by a graph $G=(V,E)$.
+It's a simple variant on DFS and uses an additional set $M$ of marked nodes:
+\begin{lstlisting}[numbers=none,xleftmargin=1cm]
+search$(s)$:
+	$S \gets \emptyset$; $M \gets \emptyset$
+	dfs$(s, 0)$
+	return $S$
+save$(x, b)$: if $b=1$ then $S \gets S \cup \{ x \}$
+dfs$(x, b)$:
+	save$(x, b)$
+	$M \gets M \cup \{ x \}$
+	for $y \in \text{Adj}[x]$
+		if $b=1 \land (x,y)$ red
+			continue
+		$b' \gets$ if $(x,y)$ red then $1$ else $0$
+		if $y \in M$ then save$(y, b')$ else dfs$(y, b')$\end{lstlisting}
+The search proceeds in two stages.
+When $b=0$, red edges cause us to flip $b$.
+When $b=1$, we save visited vertices (as well as vertices reachable by back and cross edges) in $S$ and we avoid traversing red edges.
 
 \section*{Exercise 2 (5 pts)}
 
