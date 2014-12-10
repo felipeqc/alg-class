@@ -125,13 +125,13 @@ For the second, we use a variant on DFS:
 search$(s)$: $M \gets \emptyset$; dfs$(u, 0, 0)$; output NO
 check$(x, r, b)$: if $x = v \land r \ge 2b$ then output YES and halt
 dfs$(x, r, b)$:
-	check$(x, b)$
+	check$(x, r, b)$
 	$M \gets M \cup \{ x \}$
 	for $y \in \text{Adj}[x]$
 		if $y \not\in M \land (x,y)\text{ red}$ then dfs$(y, r+1, b)$
 		else if $y \not\in M \land (x,y)\text{ blue}$ then dfs$(y, r, b+1)$
 		else if $y \in M \land (x,y)\text{ red}$ then check$(y,r+1,b)$\end{lstlisting}
-The set $M$ records visited vertices.
+The set $M$ marks visited vertices.
 Reaching $(x, r, b)$ means we've found a path from $u$ to vertex $x$ containing $r$ red and $b$ blue edges.
 Notice that we check (but, of course, do not recurse into) \emph{red} back and cross edges.
 
