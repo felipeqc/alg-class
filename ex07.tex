@@ -51,7 +51,7 @@
   columns=fullflexible,	% not monospace
   keywordstyle=,       % keyword style
   language=Octave,                 % the language of the code
-  morekeywords={then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  morekeywords={forall, to, else, then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
   numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
   numbersep=5pt,                   % how far the line-numbers are from the code
   rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
@@ -219,4 +219,127 @@ On termination, the forest says that the shortest path from $A$ to $C$ has zero 
 That's wrong.
 The shortest path  $A \edge B \edge C$ has cost $-9$.
 
+\section*{Exercise 3 (15 pts)}
+
+Consider the following algorithm for solving the single-source shortest path problem in directed graphs with general edge costs:
+
+\begin{lstlisting}[mathescape]
+SSSP(V ,E,c,s):    Improved = {s}    while Improved $\neq \emptyset$ do        B = Improved
+        Improved = $\emptyset$
+        while B $\neq \emptyset$            choose and remove some v from B
+            for each w in Out(v) do                d’ = d[v] + c((v,w))
+                if d’ < d[w] then                    d[w] = d’                    parent[w] = v                    insert w into Improved
+\end{lstlisting}
+
+Assume Out(v) denotes the set of out-neighbors of v, and sets B and Improved are implemented such that insertions, deletions, choosing some element, and test for emptiness only need constant time each.
+
+\paragraph{a)} Does this program always terminate? If no, correct it appropriately.
+
+\paragraph{Answer:}
+
+No, it doesn't terminate if there are negative cycles. When there is a negative cycle between two nodes, the shortest path keeps improving. We can fix the algorithm by limiting the number of improvements to $n-1$:
+
+\begin{lstlisting}[mathescape, commentstyle=\color{red}, keywordstyle=\color{blue}]
+SSSP(V,E,c,s):
+    foreach $v \in V$ do
+        count[v] = 0 % number of improvements    Improved = {s}    while Improved $\neq \emptyset$ do        B = Improved
+        Improved = $\emptyset$
+        while B $\neq \emptyset$            choose $\text{and}$ remove some v from B
+            foreach w in Out(v) do                d’ = d[v] + c((v,w))
+                if d’ < d[w] then
+                    if count[w] < $n-1$ % Limit number of improvements for an edge                        d[w] = d’                        parent[w] = v                        insert w into Improved
+                        count[w] = count[w] + 1
+                    else
+                        d[w] = $-\infty$
+\end{lstlisting}
+
+\paragraph{b)} Show that there are arbitrarily large graphs for which SSSP() is asymptotically faster than the Bellman-Ford algorithm
+
+\paragraph{Answer:}
+
+The Bellman-Ford algorithm will invariably relax all the edges $(n-1)$ times, but SSSP() will perform much better in graphs with faster convergence, like this star graph. Here, each edge will not improve anymore after the first relaxation.
+
+\begin{center}
+\begin{tikzpicture}[main_node/.style={circle,fill=blue!30,minimum size=2em,inner sep=3pt]}]
+
+    \node[main_node] (1) at (0,0) {s};
+    \node[main_node] (2) at (-1, 0)  {};
+    \node[main_node] (3) at (1, 0) {};
+    \node[main_node] (4) at (0, 1) {};
+    \node[main_node] (5) at (0, -1) {};
+    \node[main_node] (6) at (0.7, 0.7) {};
+    \node[main_node] (7) at (-0.7, -0.7) {};
+    \node[main_node] (8) at (0.7, -0.7) {};
+    \node[main_node] (9) at (-0.7, 0.7) {};
+    \draw (1) -- (2);
+    \draw (1) -- (3);
+    \draw (1) -- (4);
+    \draw (1) -- (5);
+    \draw (1) -- (6);
+    \draw (1) -- (7);
+    \draw (1) -- (8);
+    \draw (1) -- (9);
+\end{tikzpicture}
+\end{center}
+
+\paragraph{c)} Show that there are arbitrarily large graphs for which SSSP() has the same asymptotic running time as the Bellman-Ford algorithm.
+
+\paragraph{Answer:}
+
+SSSP() will have the same asymptotic running time as Bellman-Ford in graphs that require $(n-1)$ relaxation rounds for all edges, in order to detect negative cycles.
+Here, the path from $S$ to every node will be improved $(n-1)$ times until all distances become $-\infty$.
+
+\begin{center}
+\begin{tikzpicture}[main_node/.style={circle,fill=blue!30,minimum size=2em,inner sep=3pt]}]
+
+    \node[main_node] (1) at (0,0) {s};
+    \node[main_node] (2) at (1, 0)  {};
+    \node[main_node] (3) at (2, 0) {};
+    \node[main_node] (4) at (4, 0) {};
+    \node[main_node] (5) at (5, 0) {};
+    \begin{scope}[every path/.style={->}]
+    \draw (1) -- (2);
+    \draw (2) -- (3);
+    \draw (4) -- (5);
+    \end{scope}
+    \begin{scope}[every path/.style={dotted}]
+       \draw (3) -- (4);
+    \end{scope}
+
+\begin{scope}[every path/.style={->}]    
+    %\path (2) edge [bend left=60] node [below] {$-1$} (1);
+    %\path (3) edge [bend right=60] node [above] {$-1$} (1);
+    %\path (4) edge [bend left=60] node [below] {$-1$} (1);
+    \path (5) edge [bend right=60] node [above] {$-10000$} (1);      
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\section*{Exercise 4 (15 pts)}
+
+Due to recent strikes in German railway companies, Saarstahl is considering to increase the use of trucks for transportation. They want to send trucks from Völklingen to Rotterdam harbor laden as heavily as possible with steel products, but each road segment has a maximum weight limit on trucks that use this road.
+
+\paragraph{a)} Give an efficient algorithm for finding a route that allows to load a truck with maximum possible weight.
+
+\paragraph{Answer:} We can represent the problem with a graph where the vertices represent the cities, and each edge $e$ represents a road segment of maximum weight limit $w(e)$. To solve the problem, we associate to each edge a cost $-w(e)$, and then we can apply the shortest path algorithm starting from Volklingen to find the best path that leads to Rotterdam.
+
+\paragraph{b)} An ordered semigroup is a set S together with an operation $\oplus$, a neutral element 0, and a linear ordering $\le$ such that for all $x, y, z \in S$ we have
+\begin{itemize}
+\item $x \oplus y \in S$,\item $(x \oplus y)=(y \oplus x)$,\item $(x \oplus y) \oplus z=x \oplus (y \oplus z)$,\item $x \oplus 0=x$, and\item $x \le y \implies x \oplus z \le y \oplus z$.
+\end{itemize}
+
+Show how the Bellman-Ford algorithm can be applied when edge weights in a graph come from an ordered semigroup.
+
+\paragraph{Answer:}
+
+We can just pretend this ordered semigroup are the integer numbers we are already used to. Whenever we use the integer $0$, we replace it with the neutral element of the group. And whenever we use $+$ (addition) and $\le$ (less-than-or-equal-to), we replace them with $\oplus$ and the order $\le$ from the group, respectively. Also, the absence of an edge can be represented by a large dummy cost (with respect to $\le$).
+
+\paragraph{c)} Under which conditions can Dijkstra’s algorithm be applied when edge weights in a graph come from an ordered semigroup? Under which conditions can we use the APSP algorithm from the lecture?
+
+\paragraph{Answer:}
+
+To apply Dijkstra's algorithm, we need to guarantee the absence of negative edges, with an extra constraint $0 \le x$.
+
+To use the APSP algorithm from the lecture, we need to guarantee non-negative cycles.
+I think there is no way to encode this property by restricting the set of possible edge costs, since this does not capture reachability in the graph. But we can definitely be conservative and prevent negative cycles by also forcing $0 \le x$.
 \end{document}
