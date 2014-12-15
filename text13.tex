@@ -1,0 +1,140 @@
+\section{Network Flows}
+
+We consider directed capacitated network $G = (V, E, c, s, t)$.
+\begin{itemize}
+\item $V$ vertices, $E$ edges, $s,t \in V$, $s$ \emph{source}, $t$ \emph{sink}
+\item $c: E \rightarrow \mathbb{R}_{\ge 0}$ denote \emph{edge capacities}
+\end{itemize}
+
+\begin{mydefinition}
+A \emph{flow} F is a function $f: E \rightarrow \mathbb{R}$ that satisfies
+\begin{enumerate}
+\item Capacity Constraint: $\forall e \in E: 0 \le f(e) \le c(e)$ 
+\item Conservation of Flow: $\forall v \in V - \{s,t\}: \sum_{(x,v) \in E} f((x,v)) = \sum_{(v,y) \in E} f((v,y))$
+\end{enumerate}
+
+\end{mydefinition}
+
+\begin{mydefinition}[A different view]
+A \emph{flow} is a function $f: V \times V \rightarrow \mathbb{R}$ with
+\begin{enumerate}
+\item $\forall (u,v) \in E: f(u,v) \le c(u,v)$, and, $\forall (u,v) \notin E: f(u,v) \le 0$
+\item $f(u, v) = - f(v,u)$
+\item $\forall u \in V - \{s,t\}: \sum_{v \in V} f(u,v) = 0$
+\end{enumerate}
+\end{mydefinition}
+
+\begin{mydefinition}[Extension to vertex sets]
+Let $U, W \subseteq V$, then $f(U,W) = \sum_{u \in U} \sum_{w \in W} f(u,w)$.
+\end{mydefinition}
+
+\begin{mydefinition}
+The \emph{value} of a flow $|f| = f(\{s\}, V) = f(V, \{t\})$.
+\end{mydefinition}
+
+\begin{mydefinition}
+An $s$-$t$-cut in graph $G$ is a partition of the vertex set $V$ into sets $S, T$ such that $S \cap T \neq \emptyset$, $S \cup T = V$, and $s \in S$, $t \in T$.
+\end{mydefinition}
+
+\begin{mylemma}
+If $(S,T)$ is an $s$-$t$-cut in $G$, then $f(S,T) = |f|$.
+\end{mylemma}
+\begin{proof}
+We first show that for $s$-$t$-cuts $(X \cup \{x\}, Y)$ and $(X, \{x\} \cup Y)$.
+We are going to show that:
+
+\begin{align*}
+f(X \cup \{x\}, Y) &= f(X, \{x\}\cup Y) \\
+f(X,Y) + f(x,Y) &= f(X,x) + f(X,Y) \\
+f(x,Y) &= f(X,X) \\
+f(x,Y) + f(x,X) &= 0 \\
+f(x, X \cup Y) &= 0 && \text{[Conservation of flow]}
+\end{align*}
+
+Hence, all $s$-$t$-cuts have $f(S,T) = f(\{s\},V) = |f|$.
+\end{proof}
+
+\begin{mycorollary}
+For any $s$-$t$-cut, we have that the value of the flow is upper bounded by the capacity of the cut:
+
+$$|f| = f(S,T) = \sum_{u \in S} \sum_{v \in T} f(u,v) \le \sum_{u \in S} \sum_{v \in T} c((u,v)) = c(S,T)$$
+\end{mycorollary}
+
+\begin{mytheorem}[Max-Flow-Min-Cut [Ford \& Fulkerson]]
+There is a flow $f$ such that $|f| = \min \{c(S,T) | (S,T) \text{is a $s$-$t$-cut}\}$.
+\end{mytheorem}
+
+\begin{mydefinition}[Residual Graph]
+For a flow $f$ in network $G$, the residual graph $G_f$ has \emph{residual capacity}
+
+\begin{align*}
+\forall (u,v) \in V \times V, \\
+& c_f(u,v) = \underbrace{c(u,v)}_{\text{$0$ for $(u,v) \notin E$}} - \; f(u,v)
+\end{align*}
+\end{mydefinition}
+
+$G_f$ contains all edges $(u,v)$ with $c_f(u,v) > 0$. Intuitively, it  ``contains opposite edges''.
+
+\paragraph{Observation:} Suppose we have a flow $f$ for $G$, and that we have a flow $f'$ for $G_f$, then $f + f'$ is a flow for $G$, such that $|f + f'| = |f| + |f'|$.
+
+With the residual network, we can increase some flow and easily verify correctness.
+
+\begin{enumerate}
+\item Find a path from $s$ to $t$ in the residual graph
+\item Identify smallest residual capacity on that path
+\item Send this much flow.
+\end{enumerate}
+
+\begin{mydefinition}
+An $s$-$t$-path $p = <e_1, \ldots, e_k>$ is called \emph{augmenting path}. The flow change on $p$ is $|f_p| = u = \min\{c_p(e_i) | 1 \le i \le k\}$. 
+
+Then, $f_p(v_i, v_{i+1}) = u, f_p(v_{i+1}, v_i) = -u$ with $e_i = (v_i, v_{i+1})$, $v_1 = s$, $v_{k+1} = t$. And $f_p(u,v) = 0$ otherwise.
+\end{mydefinition}
+
+\subsection{Ford-Fulkerson Algorithm}
+
+\begin{lstlisting}[mathescape]
+    Initially $f \gets 0$
+    while $\exists$ $s$-$t$-path in $G_f$ do
+        Augment along $p: f \gets f + f_p$.
+\end{lstlisting}
+
+\begin{enumerate}
+\item \textbf{Does this terminate?}
+    In general, no, but for integer-valued capacities, yes. Every cut provides an upper bound on $|f|$, and we increase in unit amounts.
+ 
+\item \textbf{Number of iterations?}
+    At most $|f_{\max}|$
+\end{enumerate}
+
+\begin{mytheorem}[Max-Flow Min-Cut Theorem]
+The following statements are equivalent:
+\begin{enumerate}
+\item $f$ is a maximum flow.
+\item $f$ does not admit an augmenting path in $G_f$.
+\item There exists an $s$-$t$-cut $(S,T)$ with $f(S,T) = c(S,T)$. 
+\end{enumerate}
+\end{mytheorem}
+\begin{proof}
+First, $(3) \implies (1)$. Since $\forall$ $s$-$t$-cut $(S,T)$, $|f| \le c(S,T)$.
+Second, $(1) \implies (2)$. By Ford-Fulkerson algorithm.
+Third, $(2) \implies (3)$. This means that in $G_f$, $s$ is not connected to $t$. For every $s$-$t$-path in $G$, consider the first edge $e=(u,v)$ with $c_f(u,v) = 0 = c(u,v) - f(u,v)$. Here $c(u,v) = f(u,v)$. Define $S = \{ v \in V | \exists \text{ $s$-$v$-path in $G_f$}\}$. Let $T = V - S$, then $(S,T)$ is an $s$-$t$-cut and $|f| = f(S,T) = c(S,T)$.  
+\end{proof}
+
+\subsection{Edmonds-Karp Algorithm}
+
+Run the Ford-Fulkerson Algorithm and pick a path in $G_f$ with smallest number of edges.
+
+\begin{mylemma}
+In the Edmonds-Karp Algorithm, the shortest path distance $\mu_f(s,v)$ for all $v \in V$ in the residual network increases monotonically with every flow augmentation.
+\end{mylemma}
+\begin{proof}
+Increase by $f_p$ yields $f(u,v) = c(u,v)$. Edges disappears, reverse edge appears.
+Since $p$ is a shortest path, it rows top down. By pushing flow, we loose top-down edges in the process. This implies no vertex can decrease its level. After at most $m$ augmentations, distance $\mu_f (s,t)$ increases by at least 1. $\mu_f(s,t)$ can only increase to at most $n-1$. Therefore, the number of iterations is bounded by $n \cdot m$.
+
+Each BFS-call to find augmenting paths takes time $O(m)$.
+\end{proof}
+
+\begin{mylemma}
+The Edmonds-Karp Algorithm computes a maximum flow in time $O(n\cdot m^2)$.
+\end{mylemma}

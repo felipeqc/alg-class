@@ -1,0 +1,153 @@
+\section{Preflow-push Algorithm}
+
+\paragraph{Recall:} $G=(V,E,c,s,t)$ is a directed capacitated network. We have a flow $f$:
+
+\begin{enumerate}
+\item $\forall u,v \in V: f(u,v) = - f(u,v)$
+\item $\forall u,v \in V: f(u,v) \le c(u,v)$
+\item $\forall u\in V - \{s,t\}: \sum_{x \in V} f(x,u) = 0$
+\end{enumerate}
+
+Now we consider a different approach based on preflow. A \emph{preflow} $f: V \times V \rightarrow \mathbb{R}$ satisfies:
+\begin{enumerate}
+\item $f(u,v) = - f(v,u)$
+\item $f(u,v) \le c(u,v) \gets$ capacity for $(u,v) \in E$, or $0$ for $(u,v) \notin E$.
+\item $\forall u \in V - \{s\}, \sum_{x \in V} f(x,u) \ge 0$
+\end{enumerate}
+
+Condition (3) means that interior vertices can drop flow but cannot generate it. Incoming flow $\ge$ outgoing flow.
+
+Let $\Delta_f(v) = \sum_{x \in V} f(x,v)$ be the \emph{excess} of preflow $f$ at $v \in V$.
+
+\paragraph{Note:} Preflow is flow if $\forall v \in V - \{s,t\}, \Delta_f(v) = 0$ and $|f| = \Delta_f(t) = -\Delta_f(s)$.
+
+\bigskip 
+
+We define the residual graph $G_f$ for preflow $f$ exactly as before ($c_f(u,v) = c(u,v) - f(u,v)$).
+
+\subsection{Labelings}
+
+Labelings give a notion of height, where nodes are pushed up, forcing the flow into other nodes.
+
+Preflow-Push Algorithm pushes more flow than possible. Eventually flow finds its way downhill.
+A labeling $h: V \rightarrow \{0, 1, 2, \ldots\}$ assigns a \emph{height} to every vertex. The labeling is compatible with preflow $f$ if:
+
+\begin{enumerate}
+\item $h(t) = 0, h(s) = n$
+\item For $(v,w) \in E_f$, from $G_f$, we have $h(v) \le h(w) + 1$. \quad (Steepness condition)
+\end{enumerate}
+
+\begin{mylemma}
+If preflow $f$ is compatible with labeling $h$, then there is no $s$-$t$-path in the residue network.
+\end{mylemma}
+\begin{proof}
+Consider a simple $s$-$t$-path in the residue network $G_f$. Each edge decreases the height by at most 1, but the number of edges in a simple $s$-$t$-path is at most $n-1$.
+\end{proof}
+
+\paragraph{Note:} Flow $f$ is compatible with $h$ implies that $f$ is a maxflow. Ford-Fulkerson maintains flow and achieves optimality (= compatibility). Preflow-push will maintain compatiple preflow and labelling, and achieves flow.
+
+\begin{lstlisting}[mathescape]
+Preflow-Push(h):
+    Initialize  $h(t) = 0,h(s) = n, h(v) = 0, \forall v \in V - \{s,t\}$
+                $f(s,v) = c(s,v) \forall (s,v) \in E$, and $f(u,v) = 0$ otherwise
+                $f(v,s) = -c(s,v)$
+                
+    while $\exists v \neq t$ with $\Delta_f(v) > 0$:
+        Pick $v$ with $\Delta_f(v) > 0$
+        if $\exists w$ with $h(w) < h(v)$ and $(v,w) \in E_f$:
+            Push(f,h,v,w)
+        else:
+            Relabel(f,h,v)
+
+Push(f,h,v,w):
+    Let $\delta = \min(\Delta_f(v), c(v,w) - f(v,w))$
+    Set $f(v,w) \gets f(v,w) + \delta$, $f(w,v) \gets f(w,v) - \delta$
+
+Relabel(f,h,v):
+    Increase $h(v) \gets h(v) + 1$
+\end{lstlisting}
+ 
+\begin{mylemma}
+Throughout the algorithm:
+\begin{enumerate}
+\item Labels are non-negative integers
+\item $f$ is preflow and if capacities are integral, $f$ is integral.
+\item $f$ and $h$ are compatible
+\end{enumerate}
+
+If the algorithm terminates, then it returns a flow ($\forall v \neq s,t: \Delta_f(v) = 0$), and since (3) holds, $f$ is a maxflow.
+\end{mylemma}
+\begin{proof}
+Push can only add one edge and this backward edge $(w,v)$ will be added to $G_f$. And this one satisfies the steepness condition, because $h(w) < h(v)$.
+
+Relabel increases $h(v)$, so it increases the steepness of all $(v,w) \in E_f$. But Relabel is called only when $\forall (v,w) \in E_f$, we have $h(w) \ge h(v)$.
+
+It follows that all push and relabel operations maintain compatibility.
+\end{proof}
+
+We need to consider now whether the algorithm terminates and the total number of iterations.
+
+\subsection{Number of Relabel operations}
+
+\begin{mylemma}
+Let $f$ be a preflow. If $\Delta_f(v) > 0$ then there is a $v$-$s$-path in $G_f$.
+\end{mylemma}
+\begin{proof}
+Let $A = \{v \in V | \exists \text{ $v$-$s$-path in $G_f$}\}$ be the set of nodes that can reach the source. We want to show that $\Delta_f(v) > 0 \implies v \in A$. Let $B = V - A$.
+
+We know that $s\in A$, and if we have an edge $(x,y) \in E, x \in A, y \in B$, we must have $f(x,y) = 0$. Otherwise, $(y,x) \in E_f$.
+
+$\forall v \in B, \Delta_f(v) > 0$, since $s \notin B$ and then:
+
+\begin{align*}
+0 &\le \sum\limits_{v \in B} \Delta_f(v) \\
+&= \sum\limits_{v \in B} \sum\limits_{x \in V} f(x,v) \\
+&=  \underbrace{\sum\limits_{v \in B} \sum\limits_{x \in B} f(x,v)}_{=0 \text{, $f(x,y) = -f(y,x)$}} + \underbrace{\sum\limits_{v \in B} \sum\limits_{\substack{x \in A\\(x,v) \in E}} f(x,v)}_{=0} + \underbrace{\sum\limits_{v \in B} \sum\limits_{\substack{x \in A\\(x,v) \notin E}} f(x,v)}_{\le 0, \text{ since no edges in $G$}} \\
+&\le 0
+\end{align*}
+
+So, $\forall v \in B$, $\Delta_f(v) = 0$.
+\end{proof}
+
+\begin{mylemma}
+Throughout the algorithm, $\forall v \in V(v): h(v) \le 2n -1$. The number of relabel operations is less than $2n^2$.
+\end{mylemma}
+\begin{proof}
+$h(s) = n, h(t) = 0$ throughout. Consider $v \in V$ and $f,h$ after Relabel($f,h,v$).
+Since $\Delta_f > 0$, there is a $v$-$s$-path $P$ in $G_f$ of length at most $n-1$.
+By steepness condition (note: $f,h$ compatible), we know that $h(v) - h(s) \le n-1$. 
+\end{proof}
+
+\subsection{Number of Push operations}
+
+Push is \emph{saturating} if $\delta = c(v,w) - f(v,w)$.
+
+\begin{mylemma}
+The number of saturating push operations is at most $2nm$.
+\end{mylemma}
+\begin{proof}
+Consider an edge $(v,w) \in E_f$. After a saturating push, $h(v) = h(w) + 1$ and $(v,w) \notin E_f$. $h(w)$ must increase by $2$ before pushing back is possible. Only then $(v,w)$ will appear again in $E_f$ and pushing becomes possible.
+
+This implies that, for the next saturating push, we must increase $h(w)$ by $2$. By the previous lemma, this happens only at most $n-1$ times. So for each $(v,w) \in E$ and $(w,v)$ with $(v,w) \in E$. So, there are at most $2nm$ saturating pushes.
+\end{proof}
+
+\begin{mylemma}
+The number of non-saturating push operations is at most $4n^2 m$.
+\end{mylemma}
+\begin{proof}
+For $f$ and $h$, consider a potential function $\phi(f,h) = \sum_{v; \Delta_f(v) > 0} h(v)$. Initially, $\phi(f,h) = 0$. Throughout the algorithm, $\phi(f,h) \ge 0$.
+
+We are going to charge each operation.
+
+\begin{itemize}
+\item For a non-saturating push, we decrease $\phi(f,h)$ by at least 1. After push over $(v,w)$, $v$ has $\Delta_f(v) = 0$ and $w$ has $h(w) \le h(v) - 1$.
+\item For a relabel operation, we increase $\phi(f,h)$ by 1. At most $2n^n$, so total increase due to these operations is $2n^2$.
+\item For a saturating push, it keeps $h$ but changes $f$. After push over $(v,w)$, $w$ gets $\Delta_f(w) > 0$. So the increase, is at most $h(w) \le 2n-1$. We know that there are at most $2nm$ operations, so total increase due to these operations is at most $2nm \cdot (2n-1)$. 
+\end{itemize}
+
+The maximum number of non-saturating push operations is at most $4n^2m - 2nm + 2n^2 \le 4n^2 m$. \end{proof}
+
+If in each step, we pick vertex with excess at maximum height, then the number of non-saturating push operations decreases to at most $4m^3$. Using a suitable set of data structures, the algorithm can be implemented to run in time $O(n^3)$.
+
+
+
