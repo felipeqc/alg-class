@@ -1,0 +1,185 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}	% for pdf image
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=,    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=,       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={forall, to, else, then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=,     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape,
+  belowskip=-\baselineskip,
+}
+
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\Sref}[1]{\hyperref[#1]{\S\ref*{#1}}}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+\newcommand{\edge}{\longrightarrow}
+\newcommand{\redge}{\longleftarrow}
+
+\title{Exercise Sheet 7b---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+\section*{Exercise 1 (10 pts)}
+
+We want to schedule $n$ jobs, to be executed on $m$ identical machines. Each job
+$i$ takes a certain number of days (not necessarily integer) to execute, denoted by
+$t_i$. In addition, job $i$ has release date $r_i$ when it becomes available for execution, and a due date $d_i$ before which it has to be finished (dates are represented as integers). We have $d_i \ge r_i + t_i$ for all $1 \le i \le n$.
+Each job can be executed by at most one machine at a time, and each machine can work on only one job at a time. However, a job can be interrupted and resumed later (perhaps on a different machine). Represent the scenario using a flow network and design an algorithm that
+
+\begin{itemize}
+\item finds a valid schedule, or
+\item reports that no such schedule exists.
+\end{itemize}
+
+\noindent Argue that your algorithm is correct. What is the running time of the algorithm?
+
+\paragraph{Answer.}
+
+We can model this scheduling problem as a max-flow problem as follows:
+
+\medskip
+
+First, we partition the schedule in inclusion-maximal sub-intervals, where in each sub-interval the set of active jobs (that have been released and are not past their deadline) are different. That is, we form a sequence of $k$ sub-intervals $<[I_0, I_1), [I_1, I_2), $ $\ldots,$$ [I_{k-1}, I_k)>$, where each sub-interval $[I_w, I_{w+1})$ intersects the scheduling window $[r_i, d_i)$ of some job $i$. This is necessary because in each sub-interval, different jobs can be executed.
+
+\noindent Then we create the following nodes:
+
+\begin{itemize}
+\item \textbf{Job node $J_i$ ($1 \le i \le n$):} Each job i needs to receive $t_i$ execution units in $[r_i, d_i)$.
+\item \textbf{Interval node $I_w^{w+1}$ ($0 \le w \le k-1$):} The number of processors is limited, so each interval $[I_w, I_{w+1})$ can only use $m \cdot (I_{w+1} - I_w)$ execution units.  
+\end{itemize}
+
+\noindent Having defined the nodes, we create the following edges:
+\begin{enumerate}
+\item \textbf{Source to job node $J_i$}: Maximum capacity $t_i$, representing the execution required by each job $i$.
+\item \textbf{Job node $J_i$ to interval node $I_w^{w+1}$}: Maximum capacity equal to the length of $[I_w, I_{w+1}) \cap [r_i, d_i)$, that is, the total time that job $i$ is allowed to use in the sub-interval.
+\item \textbf{Interval node $I_w^{w+1}$ to sink}: Maximum capacity $m \cdot (I_{w+1} - I_w)$, representing the maximum execution that the interval can handle (limited by the number of processors).
+\end{enumerate}
+
+
+If the max-flow at the sink is be equal to $\sum_{i} t_i$, then the jobs are schedulable. Otherwise, this means that some job is not receiving enough service to complete its cost $t_i$ (edge from source), given the execution constraints of the other jobs (represented by the edges between jobs and intervals). So, if the max-flow is less than $\sum_{i} t_i$, the set is not schedulable.
+
+The algorithm can be solved with max-flow algorithm in time $O(|V|^3)$ with push-relabel (note that job costs are not integer, so we cannot use Ford-Fulkerson).
+The number of vertices is at most $\max\{d_i\} + n + 2$, thus the complexity is $O((\max\{d_i\} + n)^3)$.
+
+
+\section*{Exercise 2 (10 pts)}
+
+In a basketball tournament $n$ teams play against each other (possibly multiple times) in a pre-determined sequence. The winner of a game gets one point, the loser gets no points, and there are no draws. We assume that at a certain moment during the tournament, the score of the $i$-th team is ${score}(i)$, and the number of times the
+$i$-th and the $j$-th team still need to play against each other is ${games}(i, j)$.
+
+\begin{itemize}
+\item Given access to the tables scores and games, design an algorithm to determine whether a certain team still has a chance to win the tournament. What is the running time of your algorithm?
+
+\paragraph{Answer:}
+
+We define game nodes $G_{i,j}$ representing each possible game between two teams $i$ and $j$. And we also define team nodes $T_i$ representing each team $i$.
+
+Assume that we want team $x$ to win.
+
+
+Then, we use the following formulation for the capacity:
+
+\begin{enumerate}
+\item \textbf{Sink to game node $G_{i,j}$:} We use maximum capacity ${games}(i, j)$, the remaining number of games between teams $i$ and $j$, which is exactly how many points each of the two points can still obtain.
+
+\item \textbf{Game node $G_{i,j}$ to team node $T_k$ $(k \in \{i,j\})$:} We use maximum capacity $\infty$, just to represent the fact that the points relative to this game can go to either team $i$ or team $j$.
+
+\item \textbf{Team node $T_k$ to sink:} Let ${remaining}(i)$ be the number of remaining games for team $i$ (calculated by summing ${games}$). We assign to this edge  maximum capacity ${score}(x) + {remaining}(x) - {score}(k)$, to bound the maximum number of games that team $x$ can win against team $k$.
+
+\bigskip
+
+\noindent Since the edges from each team $k$ to the sink represent the maximum number of games that team $x$ can win against team $k$, if those edges are saturated, then team $k$ wins every game and ends the tournament in first place. What bounds this result is exactly the constraints given by ${score}(k)$ and the games still to be played, encoded in the flow problem.
+
+Therefore, team $x$ wins iff the max-flow is equal to the sum of the capacities of the edges incident on the sink.
+
+\end{enumerate}
+
+\item Will the approach also work for a chess tournament, where the winner gets two
+points, and in a draw both players get one point each? How about a football tournament (winner three points, loser no points, draw both one point each)?
+
+\paragraph{Answer:}
+
+For chess, we can simply increase the value of each game from $1$ to $2$, and this cost of two can be split arbitrarily between the two teams.
+
+For football, we can add extra nodes to represent the possible outcomes of each game. If a game is a win/lose then we just pass directly the 2 points to the respective winner, but if it is a tie, we use two edges with maximum capacity of 1 from an intermediate state to both teams, so that the amount of points that are passed is restricted.
+
+\paragraph{Answer:}
+\end{itemize}
+
+\end{document}
