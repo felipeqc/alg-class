@@ -1,0 +1,214 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}	% for pdf image
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=,    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=,       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={forall, to, else, then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=,     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape,
+  belowskip=-\baselineskip,
+}
+
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\Sref}[1]{\hyperref[#1]{\S\ref*{#1}}}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+\newcommand{\edge}{\longrightarrow}
+\newcommand{\redge}{\longleftarrow}
+
+\title{Exercise Sheet 8---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+\section*{Exercise 1 (10 pts)}
+
+Consider a bipartite graph $G = (A \cup B, E)$.
+\begin{itemize}
+\item Let $M_1$ and $M_2$ be two matchings in $G$. Show that there is always a matching that matches all the vertices of A matched by $M_1$ and all vertices of $B$ matched by $M_2$.
+
+\paragraph{Answer.} Note that either $M_1$ is a maximum matching, or it is not.
+
+\paragraph{Case (i)} $M_1$ is a perfect matching. Then, $M_1$ matches all the vertices in $M_2$, which trivially proves the property we want.
+
+\paragraph{Case (ii)} $M_1$ is not a perfect matching. Then by Berge's lemma, $M_1$ admits an augmenting path. Thus we can extend $M_1$ obtain larger and larger matchings $M_1'$ until we obtain a perfect matching, which will therefore contain all vertices in $M_2$.%Assume by contradiction that there is no matching that matches all vertices in $M_1$ and $M_2$.
+
+%Consider any edge $e = (a,b) \in M_2$. And let $v$ be either $a$ or $b$. Then there are three cases for $v$: (a) $v \notin P$, (b) $v \in M$, or (c) $v \in P \setminus M$.
+%In (a), $e$ can be simply added to $M_1$ and produce a larger matching that contains the two vertices in $e$. In case (b), $e$
+
+\bigskip
+
+\item Let $M$ be a matching in $G$. Show that there is always a maximum matching $M^∗$ that matches all the vertices matched by $M$.
+
+\paragraph{Answer.}
+
+Since $M^{*}$ is a maximum matching, then for every disjoint component $C$ in the graph, $C$ doesn't admit an augmenting path. By Berge's Lemma, there is a longest alternating path $P$ in $C$ such that either (a) $P$ has an odd number of edges and all vertices of $C$ are matched, or (b) has an even number of edges and one end-point vertex $v \in C$ is unmatched.
+
+In case (a), if a vertex of $M$ is contained in $C$, then it is also matched by $M^{*}$. In case (b), if a vertex $v$ matched in $M$ is unmatched in $M^{*}$, then it can only be the end-point vertex $v$ that is unmatched in $C$. Since the alternating path has even length, then we can simply pick the complementary set of edges and obtain a maximum matching $M^{*}_2$ of same size, but where the vertex $v$ in $M$ is also matched in $M^{*}_2$ (and some other vertex $v' \notin M$ becomes unmatched).
+
+\end{itemize}
+
+
+
+\section*{Exercise 2 (10 pts)}
+
+\paragraph{Answer.}
+
+Consider the following game. Given an undirected bipartite graph $G = (V, E)$, two players alternately pick distinct vertices $v_1, v_2, \ldots$ from $V$. For $i = 1, 2, \ldots$, vertex $v_{i+1}$ must be adjacent to vertex $v_i$. The last player that can pick a vertex wins the game. Show that the first player has a winning strategy if and only if G has no perfect matching.
+
+\paragraph{Answer.}
+(Sorry, I didn't manage to finish this one.)
+
+First note that the paths taken in the game are always alternating paths, which contain an underlying matching.
+
+If $G$ has a perfect matching, then the only alternating path with odd length that cannot be prolonged with an extra edge already contains the maximum matching, where all vertices have been visited. So, the game can only terminate in a player 2's round. So player 1 always loses.
+
+%Therefore, the second player can always force the game to end with the longest alternating path of odd length (and win the game), or continue with a longer path of even length 
+%ldots, v_n>$ that contains every vertex in the graph. So, if the first when  
+
+
+
+%Consider any final sequence of vertices picked by the first player, such that there are no more adjacent vertices to pick:
+
+%$$<v_1, v_2, \ldots, v_{2k}> \text{for } k \in \mathbb{N}$$
+
+%Note that $(v_1,v_2), (v_3,v_4), \ldots, (v_{2k-1}, v_{2k}))$ form a matching of size $k$. But since $2k$ is even, then 
+
+
+
+
+\section*{Exercise 3 (10 pts)}
+
+In a $k$-regular undirected graph $G$ every vertex has degree $k$. Show that a $k$-regular bipartite graph has a perfect matching.
+
+\paragraph{Answer.}
+
+Consider a $k$-regular bipartite graph $G = (A \cup B, E)$ (no edge weights).
+
+Now, let's define a new graph $G'$ where there is a source vertex $s$ that is connected to every vertex in $A$, and there is a sink vertex $t$ that is connected to every vertex in $B$.
+
+Since $G$ is a $k$-regular bipartite graph, we have that every vertex $v$ in $(A \cup B)$ in $G'$ is $k$-edge-connected. Since $|A| \ge k$ and $|B| \ge k$, $s$ and $t$ must also be at least $k$-edge-connected.
+
+If we try to disconnect any single vertex in $G'$, we can see that the minimum cut in $G'$ has at least $k$ edges. Therefore, by the max-flow-min-cut theorem, the maximum flow between $s$ and $t$ saturates at least $k$ edges between $s$ and $A$, and $k$ edges between $B$ and $t$. By conservation of flow, there must also be $k$ saturated edges between $A$ and $B$. That is, there is a matching $M$ of size $k$ in graph $G = (A \cup B, E)$.
+
+\section*{Exercise 4 (10 pts)}
+
+Suppose you are given an algorithm to compute a minimum-cost perfect matching in any bipartite graph $G = (A \cup B, E)$ with non-negative edge costs $c_e \ge 0$. Show how you can use the algorithm to design algorithms that compute a\begin{itemize}
+\item minimum-cost maximum matching,
+
+\paragraph{Answer.}
+
+In case the graph does not have a perfect matching, then we can still compute a maximum matching using the same algorithm. For every vertex $v \in A$ and $u \in B$ such that there is no edge $(v,u) \in E$, we add a dummy edge with weight $+ \infty$ (a very large number). Now, the graph is complete and it is guaranteed to have a perfect matching.
+With this change, because of the very large weights, no real edge would be discarded in favor of a dummy edge in the computed matching. And at the end, we can simply ignore the dummy edges in the solution.
+
+\item maximum-cost perfect matching,
+
+\paragraph{Answer.}
+
+Since there is no negative edge cost, we can update the edge cost from $c_e$ to $M - c_e$, where $M$ is a sufficiently large number (for example, $\sum_e c_e$), so that the total order between edge costs is reversed. Then, we apply the same algorithm in the modified graph.
+
+\item minimum-cost perfect matching for general (possibly negative) edge costs.
+
+This case is more complicated, since the algorithm for computing the minimum-cost matching is based on shortest-paths.
+But we can use the same potential function from all-pairs-shortest-paths to update the edge weights to positive values, such that the shortest-paths between every node is maintained. Then, we simply apply the minimum-cost perfect matching algorithm.
+At the end, we change the edge weights to the original values to output the matching cost.
+
+\end{itemize}
+
+\paragraph{Answer.}
+
+\section*{Exercise 5 (10 pts)}
+
+For a bipartite graph $G = (A \cup B, E)$ consider the family of subsets$\mathcal{X} =\{X \subseteq A \; | \; \text{$G$ has a matching $M$}$ $\text{that matches all vertices of $X$}\}$. Show that $(A, \mathcal{X})$ is a matroid.
+
+\paragraph{Answer.}
+
+There are three requirements for $(A, \mathcal{X})$ to be a matroid:
+
+\paragraph{Empty set} First, we show that $\emptyset \in \mathcal{X}$. This holds because $G$ has a matching $M$ that matches all vertices of $\emptyset \subseteq A$, when $M = \emptyset$ is the a set with no edges.
+
+\paragraph{Hereditary property} Let $S \in \mathcal{X}$ be any independent set. Now, consider any $S' \subset S$.
+Since $S$ is independent set, $G$ has a matching $M$ that matches all vertices of $S$.
+But $S' \subset S$, therefore the same matching $M$ matches all vertices in $S'$ as well.
+This implies that $S'$ is also an independent set.
+
+\paragraph{Augmentation property} Suppose that $S$ and $S'$ are two independent sets of $\mathcal{X}$ and $|S| > |S'|$.
+Note that $G$ has a matching $M$ that matches all vertices of $S$, and $G$ has a matching $M'$ that matches all vertices of $S'$. Since $|S| > |S'|$, then there exists at least one vertex $v$ that is matched in $S$ but not in $S'$.
+From the property that we prove in exercise 1-(a), we can construct a larger matching $M''$ that contains every vertex in $M$ and every vertex in $M'$. Therefore $G$ has a matching $M''$ that matches all vertices in $S \cup S'$. So there exists an augmented independent set $S\cup S'$, with $|S\cup S'| > S'$.
+
+
+\end{document}
