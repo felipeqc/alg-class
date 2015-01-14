@@ -1,0 +1,118 @@
+\section{Maximum Matching in General Graphs}
+
+\paragraph{Bipartite Graphs:} Reduce to max-flow, but does not work for general graphs.
+
+\subsection{Edmonds Algorithm}[Paths, Trees and Flowers (1965)]
+
+Let $M$ be a matching.
+
+\begin{itemize}
+\item Alternating path: edges in and out of the matching
+\item Augmenting path: Alternating path that starts and ends with free (unmatched) vertices, that can increase the matching size.
+\end{itemize}
+
+\begin{mylemma}
+$M$ is a maximum matching $\iff$ $M$ admits no augmenting path.
+\end{mylemma}
+\begin{proof}
+$M$ admits augmenting paths $\iff$ if $M$ is not maximum.
+
+First, assume that $M$ admits augmenting path, then $M \oplus P$ increase matching size by 1.
+
+Now, suppose $M$ is not maximum. Let $M^*$ be a maximum matching. Consider $M \oplus M^*$. In the symmetric difference, each vertex id incident to at most one edge from $M$ and at most one from $M^*$.
+
+Each component of $M \oplus M*$ is one of the following: 
+\begin{enumerate}
+\item Isolated vertex. 
+\item Path that starts with edge in $M$, alternates, and ends with an edge in $M^*$.
+\item Path that starts with edge in $M^*$, alternates, and ends with an edge in $M$.
+\item Cycle with even number of edges
+\item Path that starts with edge in $M$, alternates, and ends with $M$.
+\item Path that starts with edge in $M^*$, alternates, and ends with $M^*$.
+\end{enumerate}
+
+The first have the same number of edges from $M$ and $M^*$. (5) has more edges from $M$ than $M^*$. And (6) has more edges from $M^*$ than $M$.
+
+The only component that satisfies $|M| < |M^*|$ is (6), which happens to be an augmenting path.
+\end{proof}
+
+\subsection{Maximum Matching Algorithm}
+
+\begin{lstlisting}[mathescape]
+    $M \gets \emptyset$
+    while there is augmenting path $P$:
+        $M \gets M \oplus P$
+    return $M$
+\end{lstlisting}
+
+How to find an augmenting path?
+
+\paragraph{Easy for bipartite graphs: } Start at an unmatched vertex $v$, then follow all incident unmatched edges. If the next vertex is free, we found an augmenting path. Otherwise, follow the matching edge to unique neighbor. Continue exploring unmatched edges.
+
+Can be implemented using DFS, looking for alternating paths. But this doesn't work in general graphs, because there can be cycles with odd number of vertices.
+
+DFS doesn't visit a node twice, which may prevent finding the augmenting path. But if we allow that edges are visited more than once, it also doesn't work.
+Because it allows edges with repeated vertices (not a matching).
+
+\paragraph{Edmunds idea:} Shrink cycles into super-vertices. Odd-cycle is called a blossom.
+
+\begin{lstlisting}[mathescape]
+    Start with free vertex. Label it 0.
+    Search the graph for an alternating path:
+        Labels alternate between 0 and 1
+        If we are at 0-vertex:
+            Search for unmatched edges to an already-seen 0-vertex.
+            Shrink the blossom.
+            Continue search.
+        If we find unvisited tree-vertex, then augmenting paths exist.
+    Unshrink blossoms in reversed order
+    Construct augmenting path in odd cycles
+\end{lstlisting}
+
+\begin{itemize}
+\item Unmatched 1-vertex: found augmenting path
+\item From a 0-vertex. If we find a visited
+    \begin{itemize}
+    \item 0-vertex: found odd cycle, blossom!
+    \item 1-vertex: found even cycle, ignore!
+    \end{itemize}
+\end{itemize}
+
+\begin{mytheorem}
+Let $H$ be obtained from $G$ by shrinking a blossom. Then, $H$ contains augmenting path $\iff$ $G$ contains augmenting path.
+\end{mytheorem}
+\begin{proof}
+First, ``$\implies$''. In $H$, the path starts with 0-vertex and alternates until the base of the blossom. In $G$, the path starts with 0-vertex and alternates until we reach the odd cycle.
+
+\begin{itemize}
+\item If augmenting path in $H$ avoids base, then it exists in $G$ as well.
+\item If augmenting path in $H$ goes through base, then we unshrink and go clockwise or counter-clockwise (only one is possible) to reach exist vertex of odd cycle in $G$. 
+\end{itemize}
+
+This shows how to construct path in $G$ if it exists in $H$.
+
+Now, ``$\impliedby$''. If $G$ contains augmenting path, then $H$ contains augmenting path.
+
+Consider $G$ and the augmenting path. We flip only the stem, which yields $G'$.
+Note: $G$ has augmenting path $\implies$ $G'$ has augmenting path. Matching size is unchanged.
+
+If $H'$ doesn't contain augmenting path $\iff$ $G'$ doesn't contain augmenting path.
+
+\begin{enumerate}
+\item If augmenting path avoids blossom, it also exists in $H'$
+\item If augmenting path ends at base in $G'$, then it also ends in $H'$ as well (base is free)
+\item If augmenting path contains part of blossom in $G'$, then truncating path at base gives augmenting path in $H'$.
+\end{enumerate}
+\end{proof}
+
+More detailed description of the algorithm on the website
+
+\begin{itemize}
+\item Shrinking in blossom can be done in $O(m + n)$. The number of shrinks is $O(n)$.
+\item Each augmenting path resolution increases matching size by 1.
+\item Matching size $\le n/2$.
+\item Loose bound: $n \cdot n \cdot (m + n) = O(m n^2) = O(n^4)$.
+\item With fancy data structures: $O(n^3)$.
+\item The best known algorithm is $O(m \cdot \sqrt{n})$ (Vazirani)
+\end{itemize}
+

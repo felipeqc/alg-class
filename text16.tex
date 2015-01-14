@@ -1,0 +1,154 @@
+\section{Matching}
+
+\subsection{Minimum-Cost Maximum Matchings}
+
+\begin{itemize}
+\item Maximum matching is not unique. Some might be better than others.
+\item Bipartite graph $G = (A \cup B, E)$.
+\item Edge cost $c(e) \ge 0$, $\forall e \in E$.
+\item Cost of a matching $M \subseteq E$ denote by ${cost}(M) = \sum_{e\in M} c(e)$
+\item Goal: Find a maximum matching $M$ with smallest ${cost}(M)$. 
+\end{itemize}
+
+Here, we consider finding a \emph{perfect} matching with smallest cost.
+
+\begin{mylemma}
+Any algorithm to find a min-cost perfect matching can be used to find a min-cost maximum matching.
+\end{mylemma}
+
+\begin{lstlisting}[mathescape]
+Algorithm for Min-Cost Perfect Matching
+
+    Let $G = (A \cup B, E)$ with $k = |A| = |B|$.
+    Construct the flow network $G'$ as before, all edges get capacity 1.
+    Let $f = 0$, $M = \emptyset$, $G_f$ residual network for $f$
+    While $|f| < k$ and $\exists$ augmenting path in $G_f$:
+        In $G_f$,assign cost $c(e)$ to $e \in E_f$ if $e \in E$
+              assign cost $-c(e)$ to $e' \in E_f$ if $e'$ is reverse edge of $e \in E$
+              assign cost $0$ to all $e \in E_f$ with $e \cap \{s,t\} \neq \emptyset$.
+        Let $P$ be a min-cost $s$-$t$-path in $G_f$
+        Augment $f$ via $P$ as much as possible
+    If $|f| = k$ return $M = \{(u,v) \in E | f(u,v) = 1\}$
+    Else, return $M = \emptyset$
+\end{lstlisting}
+
+\subsection{Some Observations}
+
+\begin{itemize}
+\item Augmenting paths are \emph{alternating paths}
+\item $P$ alternates between $(u,v)\in E$ with $f(u,v) = 0$ $((u,v) \notin M)$ and $(u,v)\in E$ with $f(u,v) = 1$ $((u,v) \in M)$
+\item $f$ gets augmented by $1$ in each iteration, remains integer-values
+\item Corresponding matching $M = \{ (u,v) \in E | f(u,v) = 1\}$ increases in size by 1
+\item Cost of $P$ represents the cost update of $M$: $+c(e)$ for $e$ entering $M$ and $-c(e)$ for $e$ leaving $M$
+\end{itemize}
+
+\subsection{Notation}
+
+\begin{itemize}
+\item ${cost}(P)$ is total cost of augmenting path $P$
+\item $G_M$ is residual network for integer-valued flow $f$ corresponding to matching $M$, where we do not include any $(v,s)$ or $(t,v)$ for any vertex $v$.
+\end{itemize}
+
+\begin{mylemma}
+Let $M$ be a matching and $P$ be an $s$-$t$-path in $G_M$. Let $M'$ be a matching obtained from augmenting $M$ along $P$. Then $|M'| = |M| + 1$ and ${cost}(M') = {cost}(M) + {cost}()$.
+\end{mylemma}
+
+\subsection{Analyzing Negative Cycles}
+
+\begin{mylemma}
+Let $M$ be a perfect matching. $M$ has minimum cost if and only if $G_M$ has no negative-cost directed cycle.
+\end{mylemma}
+\begin{proof}
+\begin{enumerate}
+\item Negative cycle $C$ in $G_M$ $\implies$ $M$ is not min-cost.
+
+$M$ is perfect matching, so $G_M$ has no edges adjacent $s$ or $t$ and $C$ does not include $\{s,t\}$. We can augment $M$ along $C$, so we swap edges in and out.
+New $M'$ is perfect, and ${cost}(M') = {cost}(M) + {cost}(C) < {cost}(M)$.
+
+\item No negative cycle in $G_M$ $\implies$ $M$ is min-cost.
+
+Suppose $M$ is not min-cost. $\exists$ perfect $M'$ with ${cost}(M') < {cost}(M)$. Consider the symmetric difference $(M \cup M') - (M \cap M')$, edges in exactly on of $M$ and $M'$. This is composed of vertex-disjoint cycles.
+
+Since ${cost}(M') < {cost}(M)$, there is one cycle $C$ with ${cost}(C)<0$.
+\end{enumerate}
+\end{proof}
+
+We show that the algorithm produces intermediate flows and matchings $M$ such that $G_M$ has no negative-cost cycle. This implies:
+\begin{itemize}
+\item The augmenting path of minimum cost is well-defined
+\item The final perfect matching is min-cost.
+\end{itemize}
+
+Algorithm produces intermediate flows and matchings $M$ such that $G_M$ has no negative-cost cycle.
+
+\subsection{Maintaining Vertex Prices}
+
+Recall: Vertex potentials in APSP
+
+\noindent Let $h: V \rightarrow \mathbb{R}$ be a \emph{price} of vertex $v \in V$.
+
+\paragraph{Economic interpretation}
+
+\begin{itemize}
+\item $A$ is a set of agents, $B$ is a set of jobs
+\item $c(e)$ for $e=(u,v)\in E$ is the cost of assigning agent $u$ to do job $v$
+\item $h(u)$ for $u \in A$ is a ''signing bonus`` paid to $u$ to do any job
+\item $h(v)$ for $v \in B$ is a ''reward`` gained by $v$ being done by any agent
+\end{itemize}
+
+\noindent Net cost of $(u,v) \in M$ is the reduced cost $c_h((u,v)) = h(u) + c((u,v)) - h(v)$.
+
+A price function $h$ is \emph{compatible} with respect to $M$ if:
+\begin{enumerate}
+\item $\forall$ unmatched $u \in A$, we have $h(u) = 0$.
+\item $\forall (u,v) \in E$ we have $h(u) + c((u,v)) \ge h(v)$, i.e., $c_h((u,v))\ge 0$.
+\item $\forall (u,v) \in M$ we have $h(u) + c((u,v)) = h(v)$, i.e., $c_h((u,v)) = 0$.
+\end{enumerate}
+
+\noindent Intuitively, compatible prices imply $M$ is cheap: $\forall e \in M$, reward equals cost, $\forall e \notin M$, more cost than reward (no cheap alternative).
+
+\begin{mylemma}
+If $M$ has compatible prices, then $G_M$ has no negative cycles.
+\end{mylemma}
+\begin{proof}
+Extend $c_h$ to all edges from $G_M$: $c_h(e) = h(u) + c(e) - h(v)$, $\forall e = (u,v) \in E_M$.
+Consider compatible prices for $e \in E_M$. If $e \in M$, then reverse edge $e'$ in $G_M$ and $c_h(e) = - c_h(e') = 0$. If $e \notin M$, then $e$ in $G_M$ and $c_h(e) \ge 0$.
+
+Set $h(s)$ large enough so that $c_h(e) = h(s) + 0 - h(v) \ge 0,  \forall v \in A$.
+
+Set $h(t)$ negative enough so that $c_h(e) = h(v) + 0 - h(t) \ge 0,  \forall v \in B$.
+
+This implies that compatible prices yield non-negative reduced costs.
+
+Consider a directed cycle $C$:
+
+$${cost}(C) = \sum\limits_{e \in C} c(e) = \underbrace{\sum\limits_{e \in C} c_h(e)}_\text{prices cancel out} \ge 0.$$
+\end{proof}
+
+\paragraph{Advantages:}
+\begin{itemize}
+\item Non-negative reduced costs $\implies$ Dijkstra's algorithm to find paths to all $v \in B$ with optimal reduced cost.
+\item Reduced cost of $s$-$v$-path $P$:
+
+$${cost}(P) = h(s) + \underbrace{\sum_{e \in P}c(e)}_\text{prices for internal vertices cancel out} - h(v)$$
+\end{itemize}
+
+We find the minimum cost $s$-$t$-path in $G_M$ as follows:
+\begin{enumerate}
+\item Compute optimal $s$-$v$-paths w.r.t. reduced cost $\forall v \in B$
+\item For each $v \in B$ with $(v,t) \in E_M$, check ${cost}_h(P) - h(s) + h(v) = {cost}(P + (v,t))$, and choose the cheapest one. 
+\end{enumerate}
+
+\begin{mylemma}
+Let $M$ be a matching and $h$ a compatible price function. Using one run of Dijkstra's algorithm and $O(n)$ extra time, we can find the min-cost augmenting path in $G_M$.
+\end{mylemma}
+
+\subsection{Updating Prices}
+
+\begin{mylemma}
+Let $M$ be a matching, $h$ be a compatible price function, and $M'$ be obtained from augmenting along a min-cost $s$-$t$-path in $G_M$. Then,
+$$h'(v) = \mu_{h,M} (s,v) + h(v)$$
+is a compatible price function for $M'$, where $\mu_{h,M}$ is the shortest-path cost in $G_M$ w.r.t. reduced costs $c_h$.
+\end{mylemma}
+
+
