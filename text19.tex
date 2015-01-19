@@ -1,0 +1,133 @@
+\subsection{Greedy Algorithm for Set Cover}
+
+A fundamental covering problem:
+\begin{itemize}
+\item Set $E$ of elements, subsets $S_1, \ldots, S_M \subseteq E$, with $\bigcup\limits_{i=1}^{m} S_i = E$.
+\item Subset $S_i$ has cost or weight $w_i \ge 0$.
+\end{itemize}
+
+\paragraph{Goal:} Fins a min-weight set-cover of $E$, i.e., collection $C$ of sets such that $\bigcup\limits_{S_i \in C} S_i = E$ and $\sum\limits_{S_i \in C}w_i$ is minimized.
+
+\paragraph{Intuition:} Add sets greedily such that \emph{additional elements} are covered at low weight.
+
+$\frac{w_i}{|S_i \cap R|}$ represents the weight per additional element covered by $S_i$.
+
+\begin{lstlisting}[mathescape]
+    Start with $R \gets E$ and $C \gets \emptyset$.
+    while $R \neq \emptyset$:
+        Select $S_i \notin C$ that minimizes $\frac{w_i}{|S_i \cap R|}$.
+        $C \gets C \cup \{S_i\}$, $R \gets R \setminus S_i$
+    return $C$
+\end{lstlisting}
+
+\begin{itemize}
+\item No simple lower-bounds on $w(C^*)$. We use per-element accounting.
+\item Consider $c_e = \frac{w_i}{|S_i \cap R|}$ for all $e \in S_i \cap R$ as the per-element cost at the time greedy picks $S_i \in C$.
+\item Accounting of set weight to elements newly covered in each step
+\item $\sum_{e \in E} = \sum_{S_i \in C} w_i = w(C)$
+\end{itemize}
+
+For any set $S_1, \ldots, S_M$, how much more does Greedy pay in terms of this per-element cost?
+
+If we could show that for all $k = 1, \ldots, m$,
+
+$$\frac{\sum_{e \in S_k} c_e}{w_k} \le \alpha,$$
+
+then, $w(C) = \sum\limits_{e \in E} \le \sum\limits_{S_k \in C^*} \sum\limits_{e \in S_k} c_e \le \sum\limits_{S_k \in C^*} \alpha \cdot w_k = \alpha \cdot w(C^*)$.
+
+\begin{mytheorem}
+For every set $S_k$, we have $\sum\limits_{e \in S_k} c_e \le H(|S_k|) \cdot w_k$, i.e., $\alpha \le \max_{k} H(|S_k|) \le 1 + \ln n$, where $n = |E|$ and $H$ is the harmonic number $1 + \frac{1}{2} + \cdots + \frac{1}{|S_k|}$.
+\end{mytheorem}
+\begin{proof}
+Consider any set $S_k$. Simplify notation:
+\begin{itemize}
+\item $d = |S_k$
+\item Let elements of $S_k$ be named $e_1, \ldots, e_d \in E$ (first $d$ elements of $E$)
+\item Also, naming such that $i \le j \iff$ $e_i$ was covered in the same or an earlier iteration of Greedy than $e_j$. Ties broken arbitrarily.
+\end{itemize}
+
+Consider iteration where $e_j$ is covered, for some $j \le d$. At the beginning of the iteration, $e_j, e_{j+1}, \ldots, e_d \in R$.
+
+Hence, $|S_k \cap R| \ge d -j+1$ and $\frac{w_k}{|S_k \cap R|} \le \frac{w_k}{d-j+1}$.
+
+Adding this up for every element $e \in S_k$:
+
+$$\sum\limits_{e \in S_k} c_e = \sum\limits_{j=1}^d c_{e_j} \le \sum\limits_{j=1}^d \frac{w_k}{d-j+1} = \frac{w_k}{d} + \frac{w_k}{d-1} + \cdots + \frac{w_k}{1} = H(d) \cdot w_k.$$
+\end{proof}
+
+\subsection{Tightness Example for Greedy}
+
+Two big sets with $\frac{n}{2}$ elements each. Then, consider other sets with $\frac{n}{4}$, $\frac{n}{8}$, $\ldots$ elements. Ties are always broken in favor of inner elements (smaller sets).
+
+\begin{mytheorem}[Dinur, Steurer '14]
+No polynomial-time algorithm can achieve an approximation favor of $c \cdot \ln (n)$ for any constant $c < 1$, unless P = NP.
+\end{mytheorem}
+
+\subsection{Pricing Method for Vertex Cover}
+
+Consider an undirected graph $G = (V,E)$ with vertex weights $w_v \ge 0$, for all $v \in V$
+
+\paragraph{Goal:} Find a \emph{min-weight vertex cover} of $E$, i.e., a collection $C \subset V$ such that $\bigcup\limits_{v \in C} \{\{e,v\} \in E\} = E$ and $\sum\limits_{v \in C} w_v$ is minimized. Every edge has at most one incident vertex in $C$.
+
+\paragraph{Special case of set cover:} Interpret every vertex $v \in V$ as a set $S_v = \{ \{v,v\} \in E\}$ of incident edges. Greedy gives $O(\ln d)$ where $d$ is max-degree.
+
+\subsection{Pricing (or Primal-Dual) Method}
+
+\begin{itemize}
+\item Interpret $w_v$ as costs to be paid for by edges.
+\item Greedy analyzed using similar idea: $c_e$ is the share paid by element $e \in E$
+\item ``Budget balance'': Cost are paid. $\sum\limits_{e \in E} c_e = w(C) = \sum\limits_{S_i \in C} w_i$.
+\item ``Approximate Fairness'': For every set $S_k$, the elements pay at most $H(n) \cdot w_k$.
+\item We now use a different technique that applies ``approximate budget balance'' and ``(exact) fairness''.
+\end{itemize}
+
+We maintain prices $p_e \ge 0$, $\forall e \in E$.
+
+\paragraph{Fairness} For every $v \in V$, $\sum\limits_{e = \{u,v\}} p_e \le w_v$. If $\sum\limits_{e = \{u,b\}} p_e = w_v$, the vertex $v$ is called \emph{tight}.
+
+\begin{mylemma}
+For every vertex $C^*$, and every non-negative and fair prices $p_e$, then $\sum_{e \in E} p_e \le w(C^*)$.
+\end{mylemma}
+\begin{proof}
+$w(C^*) = \sum\limits_{v \in C^*} w_v \ge \underbrace{\sum\limits_{v \in C^*} \sum\limits_{e = \{u,v\}} p_e}_\text{$C^*$ vertex cover. Every edges counted at least once.} \ge \sum\limits_{e \in E} p_e$.
+\end{proof}
+
+\subsection{Pricing Algorithm}
+
+\begin{lstlisting}[mathescape]
+    Set $p_e \gets 0$ for every $e \in E$
+    $C \gets \emptyset$.
+    while $\exists e = \{u,v\}$ such that neither $u$ nor $v$ is tight
+        Select such edge $e$, increase $P_e$ until $u$ or $v$ becomes tight
+    Set $e = \{v \in V | v \text{ is tight} \}$, return $C$.
+\end{lstlisting}
+
+\paragraph{Approximate Budget Balance}
+
+\begin{mylemma}
+The Pricing Algorithm computes $p$ and $C$ such that
+$$w(C) = \sum\limits_{v \in C} w_v \le 2 \cdot \sum\limits_{e \in E} p_e.$$
+\end{mylemma}
+\begin{proof}
+All vertices in $C$ are tight: $\sum\limits_{v \in C} w_v = \sum\limits_{v \in C} \sum\limits_{e = \{e,v\}} p_e$. Each edges contributes to at most two vertices: $\sum\limits_{v \in C} \sum\limits_{e = \{u,v\}} p_e \le 2 \sum\limits_{e \in E} p_e$.
+\end{proof}
+
+\begin{mytheorem}
+The Pricing Algorithm computes a vertex cover $C$ with $w(C) \le 2 \cdot w(C^*)$.
+\end{mytheorem}
+\begin{proof}
+\begin{enumerate}
+\item $C$ is a vertex cover. If not, $\exists e = \{u,v\}$ and both $u,v$ are not tight. Thus, the while loop did not finish. Contradiction.
+\item Now assemble fairness and approximate budget balance
+$$w(C) \le 2 \sum\limits_{e \in E} p_e \le 2 w(C^*)$$.
+\end{enumerate}
+\end{proof}
+
+It is unlikely that a factor $2 - \epsilon$ (for constant $\epsilon > 0$) can be obtained in polynomial time (related to Unique Games Conjecture).
+
+\subsection{Local Search for Max-Cut}
+
+\noindent Max Cut: Undirected graph $G=(V,E)$, with \emph{integer} edge weights $w_e \ge 0$, $\forall e \in E$.
+
+\paragraph{Goal:} Find partition of $V$ into sets $A,B$ that maximizes the weight $w(A,B)$ of edges in the cut $(A,B)$.
+

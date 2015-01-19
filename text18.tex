@@ -1,0 +1,177 @@
+\section{Approximation Algorithms}
+
+\begin{itemize}
+\item Almost all interesting practical problems are NP-hard.
+\item Unlikely to have efficient algorithms for such problems unless P = NP.
+\item There are several alternatives for efficient algorithms:
+\begin{itemize}
+\item Use additional structure from ``real-world'' instances that we want to solve (\emph{fixed parameter tractability}).
+\item Average-case analysis
+\item \textbf{Provably near-optimal solutions}
+\end{itemize}
+\end{itemize}
+
+\subsection{Example: Greedy Algorithm for Load Balancing}
+
+\begin{itemize}
+\item We have $m$ machines $M_1, \ldots, M_m$, and $n$ jobs.
+\item Job $j$ has processing time $t_j > 0$, same for all machines (identical machines)
+\item Assignment $A(i)$ gives the set of jobs assigned to machine $M_i$
+\item Total load on machine $M_i$ is denoted by $t_i = \sum\limits_{j \in A(i)}{t_j}$. 
+\end{itemize}
+
+\paragraph{Goal:} Find an assignment that allocates every job to some machines and minimizes the \emph{makespan} $T = \max \limits_{i} T_i$.
+
+This problem is strongly NP-hard (it doesn't depend on the values of the parameters). This can be shown via reduction to 3-PARTITION.
+
+\newpage
+
+\subsection{Greedy Algorithm}
+
+\begin{lstlisting}[mathescape]
+    $T_i \gets 0$
+    For all $M_i$:
+        $A(i) \gets \emptyset$
+        
+        For $j = 1, \ldots, n$ do
+            Let $M_i$ be the machine with smallest $T_i$
+            Assign $A(i) \gets A(i) \cup \{j\}$
+            $T_i \gets T_i + t_j$
+\end{lstlisting}
+
+In order to relate this with the optimal solution, we know that computing the optimal makespan $C^*$ is hard, but a lower-bound is possible.
+
+\paragraph{Bounds}
+\begin{enumerate}
+\item Total balance. Every machine gets same $T_i$:
+
+$$T_i^* \ge \frac{1}{m} \sum\limits_j t_j$$
+
+But this lower bound is not enough, because if there is a single big job, it cannot be split.
+
+\item Another bound:
+
+$$T_i^* \ge \max \limits_j t_j$$
+\end{enumerate}
+
+\begin{mytheorem}
+Greedy algorithm computes an assignment with makespan $T \le 2 T^*$.
+\end{mytheorem}
+\begin{proof}
+Compare makespan of greedy with the two lower bounds in (1) and (2).
+Consider $M_i$ that attains the makespan $T_i = T$. Suppose $j$ is the job added last to $M_i$.
+
+$M_i$ was chosen for $j$ because its load $T_i - t_j$ was smallest at that moment. Then:
+
+$$T_i - t_j \le \min_{k\neq i} T_k \le \frac{1}{m} \sum \limits_k T_k = \frac{1}{m} \sum_j t_j \le T^*,$$
+by (1).
+
+On the other hand, $t_j \le T^*$ by (2). Therefore,
+
+$$T_i = (T_i - t_j) + t_j \le 2 \cdot T^*$$
+\end{proof}
+
+\subsection{Tightness of the analysis}
+
+Consider $m$ machines and $n = m(n-1) +1$ jobs. The processing times are $t_1 = \cdots = t_{n-1} = 1$ and $T_n = m$.
+
+Greedy: makespan $2m -1$
+Optimal: makespan $m$
+
+$$\frac{T}{t^*} = 2 - \frac{1}{m}$$
+
+\subsection{Improved algorithm}
+
+Let's use the intuition from the example: allocate larger jobs first.
+
+\begin{lstlisting}[mathescape]
+    $T \gets 0$
+    For all $M_i$:
+        $A(i) \gets \emptyset$
+    Sort jobs in non-increasing order of $t_j (t_1 \ge t_2 \ge \cdots \ge t_m)$
+    For $j = 1, \ldots, n$ do:
+        Let $M_i$ be the machine with smallest $T_i$
+        $A(i) \gets A(i) \cup \{j\}$
+        $T_i \gets T_i + t_j$
+\end{lstlisting}
+
+\begin{mytheorem}
+Sorted Greedy computes an assignment with makespan $T \le \frac{3}{2} T^*$.
+\end{mytheorem}
+\begin{proof}
+We have another lower bound:
+
+If $n \le m$, then greedy algorithm is optimal. Otherwise, 
+
+$$T^* \ge 2 t_{m+1}$$
+
+Since at least one machine must get at least 2 jobs from the set of the first $m+1$ jobs, and each of them has $t_j \ge t_{m+1}$.
+
+Similarly as before, consider $M_i$ with $T_i = T$.
+If $M_i$ has only one job, assignment is optimal. Otherwise, let $j$ be the last job added to $M_i$.
+
+Since $j \ge m+1$, $t_j \le t_{m+1} \le \frac{T^*}{2}$.
+
+This gives $T_i = (T_i - t_j) + t_j \le T^* + \frac{T^*}{2} \le \frac{3}{2} T^*$
+\end{proof}
+
+\paragraph{List Scheduling} There is a PTAS (polynomial-time approximation scheme). For any constant $\epsilon > 0$, it obtains a $(1 + \epsilon)$-factor in a time that is polynomial in $n$ and $m$, where the exponent of the polynomial in $n$ and $m$ depends on $\frac{1}{\epsilon}$.
+
+
+\subsection{Greedy Algorithm for TSP}
+
+A ``classic'' problem: Traveling Salesman Problem.
+
+\begin{itemize}
+\item Consider $n$ vertices, with all possible $n(n-1)$ directed edges
+\item Edge $e = (u,v)$ has cost $c(u,v) \ge 0$.
+\item Metric cost with triangle inequality $\forall u,w,v \in V, c(u,v) \le c(u,w) + c(w,v)$.
+\item Symmetric costs: $\forall u,v \in V, c(u,v) = c(v,u)$
+\end{itemize}
+
+\paragraph{Goal:} Find shortest tour (simple cycle that goes through all vertices) that minimizes the cost $c(C) = \sum\limits_{(u,v) \in C} c(u,v)$.
+
+Optimal tour: $C^*$
+
+\subsection{MST-tour}
+
+\begin{enumerate}
+\item Assume all edges are undirected with $c(u,v)$ same for $\{u,v\}$.
+\item Build a minimum spanning tree $T^*$.
+\item Traverse $T^*$ in DFS-order, and compose a tentative tour $C^t$.
+\item Construct a final tour $C$ by short-cutting $C^t$ over repeatedly visited vertices. Then return $C$.
+\end{enumerate}
+
+Note that graph is complete, so this algorithm always finds a tour.
+
+\begin{mytheorem}
+Algorithm MST-Tour computes a TSP-tour with $c(C) \le 2 c(c^*)$.
+\end{mytheorem}
+\begin{proof}
+Consider any edge $(u,v)$ in the optimal tour $C^*$. And then delete the edge to obtain $C^* \setminus \{(u,v)\}$. This leaves us with a tree T (path that contains all vertices), such that $T$ is a spanning tree.
+
+$$C(T^*) \le c(T) = c(C^*) - c(u,v) \le c(c^*)$$
+
+On the other hand, consider $C^t$. This had cost $c(C^t) = 2c(T^*)$ since every edge of the MST is visited twice (traverse and backtrack). Finally, short-cutting only improves cost due to triangle inequality. Thus:
+
+$$c(C) \le c(C^t) = 2c(T^*) \le 2c(C^*)$$
+\end{proof}
+
+\subsection{Christofidos Algorithm}
+
+\begin{enumerate}
+    \item Construct MST $T^*$
+    \item Let $U$ be the set of vertices that have odd degree in $T^*$
+    \item Find a perfect matching $M_u^*$ of minimum cost among vertices of $U$ (possible in poly-time). Note that there are even number of odd degrees vertices.
+    \item Add $M_u^*$ to $T^*$, then construct Euler Tour (possible since all vertices have even degree).
+    \item Construct tour $C$ by shortcutting Euler tour. Return $C$.
+\end{enumerate}
+
+\begin{mytheorem}
+Christofidos Algorithm computes a TSP tour with cost at most $\frac{3}{2} c(c^*)$.
+\end{mytheorem}
+\begin{proof}
+$c(M_U^*) \le 1/2 c(c^*)$. Hence, $c(T^*) + c(M_U^*) \le 3/2 c(C^*)$.
+Euler tour visits each edge exactly once. Shortcutting only improves tour by triangle inequality.
+\end{proof}
+
