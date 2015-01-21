@@ -1,0 +1,142 @@
+\section{Max Cut Problem and Local Search}
+
+Consider an undirected graph $G= (V,E)$ with edge weights $w_e \ge 0$, $\forall e \in E$, integer.
+
+\paragraph{Goal:} Partition $V$ into sets $A,B$ such that $w(A,B) = \sum\limits_{e = \{u,v\}, u \in A, v \in B} w_e$ is maximized.
+
+\subsection{Local Search}
+
+\begin{itemize}
+	\item Define a \emph{neighborhood} for each possible solution
+	\item Neighborhood of cut $(A,B)$: All cuts $(A', B')$ such that $\exists v \in V$ and either (1) $A' = A \cup \{v\}, B' = V \setminus A'$, or (2) $B' = B \cup \{v\}, A' = V \setminus B'$.
+	\item Move a single vertex from $A$ to $B$ or vice-versa.
+	\item Local search: Move to some neighboring cut if it increases weight of the cut as long as such an improving move exists. Terminates in a \emph{local optimum}.
+\end{itemize}
+
+How good are local optima for Max Cut?
+
+\begin{mytheorem}
+Let $(A,B)$ be a local optimum for Max-Cut, and let $(A*,B*)$ be a globally	optimal cut. Then $w(A^*, B^*) \le 2w(A,B)$. 
+\end{mytheorem}
+\begin{proof}
+	An obvious upper bound: $w(A*, B*) = \sum\limits_{e \in E} w_e$.
+	
+	Consider any vertex $v \in A$. If $\sum\limits_{e = \{v,u\}, u \in A} w_e > \sum\limits_{e = \{u,v\}, u \in B} w_e$ then switching $v$ to $b$ increases the cut.
+	Since we have a local optimum:
+	
+	$$\sum\limits_{e=\{v,u\}, u\in B} w_e \ge \sum\limits_{e=\{v,u\}, u\in A} w_e$$
+	or 
+	$$\sum\limits_{e=\{v,u\}, u\in B} w_e \ge \frac{1}{2}\sum\limits_{e=\{v,u\}, u\in V} w_e.$$
+	
+	The same holds for vertices in $B$. Thus,
+	
+	$$\sum\limits_{e \in E} w_e = \frac{1}{2} \sum\limits_{v \in V} \sum\limits_{e = \{u,v\}, u \in V} w_e \le \underbrace{\sum\limits_{v \in V} \sum\limits_{e = \{u,v\}, u \in B} w_e}_{w(A,B)} + \underbrace{\sum\limits_{v \in V} \sum\limits_{e = \{u,v\}, u \in A} w_e}_{w(A,B)} = 2w(A,B).$$
+\end{proof}
+
+Local search is not a polynomial-time algorithm, there could be $w(A*,B*)$ many improvement steps. So let's use \emph{big-improvement steps}. We only make a step if it improves the cut by at least $\frac{2\epsilon}{n}\cdot w(A,B)$, for some constant $\epsilon>0$.
+
+\begin{theorem}
+	Let $(A,B)$ be a partition without big-improvement steps. Then,
+	 $$(w(A^*, B^*) \le (2 + \epsilon) w(A,B).$$
+\end{theorem}
+\begin{proof}
+	Proof similar to previous proof, add $\frac{2 \epsilon}{n} \cdot w(A,B)$ to each inequality.
+\end{proof}
+
+\begin{theorem}
+	Any sequenc eof big-improvement steps terminates after at most $O(\frac{n}{\epsilon} \cdot \log W)$ steps, where $W = \sum\limits_{e \in E}w_e$.
+\end{theorem}
+\begin{proof}
+	Each step improves $w(A,B)$ by at least a factor of $\left (1 + \frac{\epsilon}{n}\right )$. Since $\forall x \ge 1, \left ( 1 + \frac{1}{x} \right )^x \ge 2$, it follows that $\left ( 1 + \frac{\epsilon}{n}\right)^{\frac{n}{\epsilon}} \ge 2$. Thus, cut weight at least doubles every $\frac{n}{\epsilon}$ steps. As $w(A^*,B^*)\le W$, we need at most $O(\log W)$ repetitions until ww reach a local optimum.
+\end{proof}
+
+Max-Cut is PLS-complete (complexity class of local-search).
+
+\section{Polynomial Approximation Schemes (PTAS)}
+
+An ``easy'' NP-complete problem: \emph{knapsack}
+
+\begin{itemize}
+	\item $n$ items, each has weight $w_i \ge 0$ and a value $v_i \ge 0$
+	\item Knapsack has capacity $W$. We need to pack items into the knapsack to maximize the value of packed items.
+\end{itemize}
+
+\paragraph{Goal:} Find a subset $S$ of items with $\sum\limits_{i \in S} w_i \le W$ that maximizes $\sum\limits_{i \in S} v_i$.
+
+\paragraph{PTAS:} Obtain a solution $S$ such that $v(S) = \sum\limits_{i \in S} v_i$ that satisfies $v(S^*) \le (1 + \epsilon) v(S)$ for optimum $S^*$ in time polynomial in $n$, $\sum\limits_{i} \log w_i + \log v_i$ and $\log W$, for any constant $\epsilon > 0$.
+
+\subsection{Dynamic Programming for Knapsack}
+
+\begin{itemize}
+	\item Compose solution by solving subproblems to find $\overline{{OPT}}(i,V)$.
+	\item $\overline{{OPT}}(i,V)$: Smallest knapsack weight $W'$ such that $\exists S \subset \{1, \ldots, i\}$ with $w(S) =W$, $v(S) \ge V$.
+	\item Let $v_{max} = \max_i v_i$, then $\sum\limits_{i} v_i \le n \cdot v_{max}$, so there are at most $n^2 v_{max}$ subproblems to find all $\overline{OPT}(i, V)$.
+	\item Not polynomial: $v_{max}$ is exponential in input size, since it depends on binary encoding of numbers. So we call this \emph{pseudo-polynomial}.
+	\item Find $v(S^{*})$ from the values of all $\overline{OPT}(i,V)$. Largest value $v$ such that $\overline{OPT}(n,V) \le W$.
+\end{itemize}
+
+We build a recurrence to obtain $\overline{OPT}(n,V)$ from subproblems $\overline{OPT}(i,V')$ with $i \le n$, $V' \le V$. Let $o$ be the optimal set for $\overline{OPT}(n,V)$:
+
+\begin{itemize}
+	\item If $n \notin o$, then $\overline{OPT}(n,V) = \overline{OPT}(n-1,V)$.
+	\item If $n \in o$ and $o = \{n\}$, then $\overline{OPT}(n,V) = w_n$.
+	\item If $n \in o$ and $o \neq \{n\}$, then $\overline{OPT}(n,V) = w_n + \overline{OPT}(i-1,V - v_n)$.
+\end{itemize}
+
+Hence, after we solved all subproblems $\overline{OPT}(j,V')$ with $j \le i$, $V' \le V$, we obtain:
+
+$$\overline{OPT}(i,V) = \left\{
+	\begin{array}{ll}
+		w_i + \overline{OPT}(i-1, \max \{0, V-v_i\})  & \mbox{if } \sum\limits_{j=1}^{i-1} v_j < V \\
+		\min( \overline{OPT}(i-1, V), w_i + \overline{OPT}(i-1, \max\{0, V-v_i\})) & \mbox{otherwise}
+	\end{array}
+\right.$$
+
+\subsection{Algorithm Knapsack-Value-DP}
+
+\begin{lstlisting}[mathescape]
+	Set $\overline{OPT}(i,0) \gets 0$, $\forall i=1,\ldots, n$
+	Set	$\overline{OPT}(1,V) \gets w_i$, $\forall V=1,\ldots, v_1$
+	
+	For $i=2, \ldots, n$:
+		For $V = 1, \ldots, \sum\limits_{j=1}^{i} v_j$:
+			Compute $\overline{OPT}(i,V)$ as shown above.
+	
+	Return maximum $V$ such that $\overline{OPT}(u,v) \le W$.
+\end{lstlisting}
+
+To obtain an optimum solution $S^*$, we trace back the steps that led to the optimal $\overline{OPT}(u,v)$ and include items depending on the choice in the recurrence.
+
+\begin{mytheorem}
+	Algorithm Knapsack-Value-DP takes $O(n^2 \cdot v_{max})$ time and correctly computes the optimal values of all subproblems and $v(S^*)$.	
+\end{mytheorem}
+
+\paragraph{Problem:} Algorithm pseudo-polynomial running time.
+
+\paragraph{Idea:} Scalle all values $v_i$ down to $\hat{v_i}$ so that $\hat{v_{max}} = O(\frac{n}{\epsilon})$. Then the running time becomes $O(\frac{n^3}{\epsilon})$, poly-time for constant $\epsilon > 0$. But how good is the solution?
+
+Formally, for some $b$ (chosen later), let $\tilde{v_i} = \left \lceil \frac{v_i}{b} \right \rceil \cdot b$.
+\begin{itemize}
+	\item $\tilde{v_i}$ integer, so $v_i \le \tilde{v_i} \le v_i + b$.
+	\item $\tilde{v_i}$ multiples of $b$
+\end{itemize}
+
+\paragraph{Equivalent:} $S$ optimal for weights $w_i$ and values $\hat{v_i} = \frac{\tilde{v_i}}{b} = \left \lceil \frac{v_i}{b} \right \rceil$ if and only if $S$ optimal for weights $w_i$ and values $\tilde{v_i}$.
+
+\subsection{Knapsack PTAS}
+
+\begin{lstlisting}[mathescape]
+	Set $b \gets \frac{\epsilon}{2n} \cdot v_{max}$.
+	Run Knapsack-Value-DP with item values $\hat{v_i} = \left \lceil \frac{v_i}{b} \right \rceil$ and obtain optimum $\hat{S}$.
+	Return $\hat{S}$.
+\end{lstlisting}
+
+\begin{mytheorem}
+Knapsack-PTAS runs in $O(\frac{n^3}{\epsilon})$ and returns feasible $\hat{S}$ with $\sum\limits_{i \in \hat{S}} w_i \le W$.	
+\end{mytheorem}
+
+\begin{mytheorem}
+Knapsack-PTAS returns $\hat{S}$ with $v(S^*) \le (1+\epsilon) \cdot v(\hat{S})$.	
+\end{mytheorem}
+
+
