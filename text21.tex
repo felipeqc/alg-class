@@ -1,0 +1,153 @@
+\section{Geometric Algorithms (in $\mathbb{R}^2$)}
+
+\paragraph{Notation:}
+\begin{itemize}
+	\item Point $P=(x,y), x, y \in \mathbb{R}$
+	\item Line segments $\overline{pq} = \{\lambda \cdot p + (1 - \lambda) \cdot q | \lambda \in [0,1]\}$
+	\item Directed line segment $\overrightarrow{pq}$.
+\end{itemize}
+
+\paragraph{Geometric Primitives (examples)}
+
+\begin{itemize}
+	\item ${CCW}(p_0, p_1, p_2) = {CCW}(\overrightarrow{p_0 p_1}, \overrightarrow{p_0 p_2}) = +1$ if $\overrightarrow{p_0 p_2}$ is counterclockwise from $\overrightarrow{p_0 p_1}$, $-1$ if clockwise and $0$ if they overlap (collinear).
+	\item ${intersect}(\overline{p_1 p_2}, \overline{p_3 p_4}) = 1$ if segments intersect, and 0 otherwise.
+\end{itemize}
+
+We show $O(1)$-algorithms for (i) and (ii) without division or trigonometric functions.
+
+\paragraph{Cross Product}: $p_1 \times p_2 = \det \left ( \begin{smallmatrix} x_1 & x_2\\ y_1 & y_2 \end{smallmatrix} \right ) = x_1 y_2 - x_2 y_1$.
+
+\begin{mylemma}
+${sign}(p_1 \times p_2) = {CCW}(0,p_1,p_2)$.	
+\end{mylemma}
+\begin{proof}
+	Rotating by angle $\alpha$ does not change the result of ${CCW}(0, \cdot, \cdot)$.
+	Let $R = \left ( \begin{smallmatrix} \cos \alpha & - \sin \alpha\\ \sin \alpha & \cos \alpha \end{smallmatrix} \right )$	 be such that $R_{p_1} = \tilde{p_1} = (r_1, 0)$ with $r_1>0$.
+	
+	Now, $CCW(0, \tilde{p_1}, \tilde{p_2}) = {sign}(\tilde{y_2}) = {sign}(\tilde{x_1} \tilde{y_2} - \tilde{x_1} \tilde{y_1})$.
+	
+	Finally, $\tilde{x_1} \tilde{y_2} - \tilde{x_2} \tilde{y_1} = x_1 y_2 - x_2 y_1 = p_1 \times p_2$. (via calculation and $\sin^2 \alpha + \cos^2 \alpha = 1$.
+\end{proof}
+
+\begin{mylemma}
+	${CCW}(p_0, p_1, p_2) = {sign}((p_1 - p_0) \times (p_2 - p_0))$.
+\end{mylemma}
+\begin{proof}
+	Translate by $-p_0$.
+\end{proof}
+
+\paragraph{Types of Intersection}
+\begin{itemize}
+	\item $p_1$ lies on $\overline{p_3 p_4}$.
+	\item $\overline{p_1 p_2}$ and $\overline{p_3 p_4}$ intersect in their interiors.
+\end{itemize}
+
+\begin{myproposition}
+$p_i$ lies on $\overline{p_j p_k}$ iff ${CCW}(p_i, p_j, p_k) = 0$ (collinear) and $x_i \in [\min(x_j, x_k), \max(x_j, x_k)]$ and 	$y_i \in [\min(y_j, y_k), \max(y_j, y_k)]$.
+\end{myproposition}
+
+\begin{myproposition}
+$\overline{p_1 p_2}$ and $\overline{p_3 p_4}$ intersect in interiors iff ${CCW}(p_1, p_2, p_3) \cdot {CCW}(p_1,p_2,p_4) = -1$ and ${CCW}(p_3, p_4, p_1) \cdot {CCW}(p_3,p_4,p_2) = -1$.
+\end{myproposition}
+
+\paragraph{${Segment\_intersect}(\overline{p_1 p_2}, \overline{p_3 p_4})$}:
+\begin{lstlisting}[mathescape]
+	$d_1 \gets {CCW}(p_3, p_4, p_1)$
+	$d_2 \gets {CCW}(p_3, p_4, p_2)$
+	$d_3 \gets {CCW}(p_1, p_2, p_3)$
+	$d_4 \gets {CCW}(p_1, p_2, p_4)$
+	if $(d_1 \cdot d_2 = -1)$ and $(d_3 \cdot d_4 = -1)$ return true
+	if $(d_1 = 0)$ and $\min(x_3,x_4) \le x_1 \le \max (x_3,x_4)$
+		and $\min(y_3,y_4) \le y_1 \le \max (y_3,y_4)$:
+			return true
+	Similar for $p_2,p_3,p_4$...
+	return false
+\end{lstlisting}
+
+\paragraph{Problem:} Given $n$ line segment $S=\{s_1, \ldots, s_n\}$, is there a pair of segments in $S$ that intersects?
+\paragraph{Trivial solution:} Check all $n \choose 2$ pairs, $O({n \choose 2}) = O(n^2)$. But we show a $O(n \log n)$ algorithm.
+
+\paragraph{Simplifying Assumptions}
+\begin{enumerate}
+	\item No segment is vertical.
+	\item No 3 segments intersect in a common point.
+	\item No endpoint lies on another segment.
+	\item No two endpoints coincide. 
+\end{enumerate}
+
+\subsection{Sweep-Line Algorithm}
+
+\begin{enumerate}
+	\item Move an (imaginary) vertical line (sweep line) form left to right.
+	\item Maintain the \emph{vertical ordering} of segments intersecting the sweep line.
+\end{enumerate}
+
+\paragraph{Observations:}
+\begin{itemize}
+	\item Vertical ordering changes only at endpoints of segments or at intersection points.
+	\item If $a$ and $b$ intersect, they are neighbors in the vertical ordering just before the intersection.
+\end{itemize}
+
+\paragraph{Idea:} Check only neighbors on sweep line for intersection! Count number of neighbor pairs until first intersection.
+\begin{itemize}
+	\item For any left endpoint, we have at most 2 new neighbor pairs.
+	\item For any right endpoint, we have at most 1 new neighbor pair.
+\end{itemize}
+Thus, there can be at most $3n$ pairs to be checked. But how do we maintain the vertical ordering?
+
+\paragraph{Algorithm} Use two data structures:
+\begin{enumerate}
+	\item Sweep-line-states $T$: Stores segments sorted in vertical ordering at current position.
+	\item Event-point-schedule $E$: Stores points where the vertical ordering changes, called \emph{events points}, sorted by $x$ coordinate.
+\end{enumerate}
+
+\paragraph{Major Primitive:}
+
+${order\_at}(s_1, s_2, x_0) = +1$ if $s_1$ lies above $s_2$ along $x=x_0$, $-1$ if $s_1$ lies below $s_2$ along $x=x_0$, $0$ if $s_1$ and $s_2$ intersect at $x=x_0$, and ${undefined}$ if $x_0$ is not in x-range of $s_1$ or $s_2$.
+
+\paragraph{Operations needed for $T$:}
+
+\begin{enumerate}
+	\item Insert new segments at appropriate position for the given $x$-coordinate: ${insert}(T,s,x_0)$.
+	\item Remove segment from $T$: ${remove}(T,s)$.
+	\item For a segment $s$ in $T$, return the segment immediately above or below $S$ (if it exists): ${above}(T,s,x_0)$ and ${below}(T,s,x_0)$.
+\end{enumerate}
+
+Use a 2--4 tree to store segments in vertical order, using ${order\_at(\cdot, \cdot, x_0)}$ to compare segments. This allows ${insert}$, ${remove}$, ${above}$, ${below}$ in $O(\log n)$ time.
+
+\begin{lstlisting}[mathescape]
+${Any\_segment\_intersect}(S)$:
+	$T \gets \emptyset$
+	$E \gets $ sorted array of endpoints, ties broken arbitrarily.
+	for each $p \in E$ in $x$-order:
+		$x_0 \gets $ $x$-coordinate of $p$
+		if $p$ is left endpoint of segment $s$:
+			${insert}(T,s,x_0)$
+			$s^+ \gets {above}(T,s,x_0)$
+			$s^- \gets {below}(T,s,x_0)$
+			if ${intersect}(s,s^+)$ or ${intersect}(s,s^-)$:
+				return true
+		if $p$ is right endpoint of segment $s$:
+			$s^+ \gets {above}(T,s,x_0)$
+			$s^- \gets {below}(T,s,x_0)$
+			${remove}(T,s)$
+			if $(s^-, s^+)$ intersect:
+				return true
+	return false
+\end{lstlisting}
+
+This algorithm runs in $O(n \log n)$ time.
+
+\begin{mylemma}
+${Any\_segment\_intersect}(S)$ returns true iff there is a pair of intersecting segments.
+\end{mylemma}
+\begin{proof}
+\begin{itemize}
+		\item ``$\implies$'': Clear.
+		\item ``$\impliedby$'': Fix intersection $q$ of $a$ and $b$ with minimal $x$-coordinate. Let $p$ be the first event-point such that $a$ and $b$ become neighbors on $T$. $p$ is left of $q$. If the algorithm does not handle $p$< it has terminated earlier and must return true. If it handles $p$, the algorithm will check for an intersection of $a$ and $b$.
+
+	\end{itemize}
+
+\end{proof}
+
