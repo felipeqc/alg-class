@@ -1,0 +1,142 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}	% for pdf image
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=,    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=,       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={forall, to, else, then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=,     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape,
+  belowskip=-\baselineskip,
+}
+
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\Sref}[1]{\hyperref[#1]{\S\ref*{#1}}}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+\newcommand{\edge}{\longrightarrow}
+\newcommand{\redge}{\longleftarrow}
+
+\title{Exercise Sheet 9---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+
+
+\section*{Exercise 1 (10 pts)}
+Some of your friends are working in a company that uses a scheduling system with a piece of old code that they can't change. When a batch of jobs arrives, the code implements the (non-sorted) greedy 2-approximation algorithm from the lecture. In the last decade since the code was written, hardware has gotten much faster, so these days computing an optimum solution for their instances seems possible. Unfortunately, the people in charge of system internals don’t allow to change the code, since it interacts with so many other parts that it’s not worth the risk of screwing up the whole system.Your friends have come up with a workaround: Write a separate program to compute the optimal solution and then feed the jobs to the greedy algorithm in an order that will cause it to allocate them optimally. The greedy algorithm uses the machine number as tie-breaking rule in case several machines currently have the smallest load. Their question to you is this: For every instance of the load balancing problem on identical machines, is there an order of jobs such that if the greedy algorithm assigned jobs in this order, it produces an assignment with optimal makespan?Prove the conjecture or provide a counterexample.
+
+\paragraph{Answer.}
+
+\section*{Exercise 2 (10 pts)}
+The friends from the last exercise quit their jobs. They believe they are ready for the next level in their careers, and hope to get there with their start-up that manages a cloud computing system. Users of the system come with a computational task, pay for access to the system, and then have the freedom to choose any one of the m identical machines to start their task. They also have the possibility to stop their task and restart it on another machine. Users are usually impatient, and it seems they strategically pick machines to minimize completion time. Your friends have little trust in markets and wonder if it is such a good idea to give users the possibility to allocate tasks selfishly.
+\begin{itemize}
+	\item In an attempt to convince them, we model their system as a load balancing game on m identical machines. In the game, there are $n$ users, each user $u_j$ controls assignment of task $j$ with processing time $t_j$. In an assignment $A$ such that user $u_j$ puts task $j$ on machine $i$, the task finishes at time $c_j(A) = T_i = \sum_{k \in A(i)} t_k$. A Nash equilibrium is an assignment such that no user gets an incentive to unilaterally move its task to another machine. More formally, in Nash equilibrium $cj(A) \le t_j + \sum_{k \in A(i′)} t_k$ for all $i′ = 1,\ldots,m$. Note that in a game there might be several different assignments that represent a Nash equilibrium. Prove that every Nash equilibrium has a makespan at most twice of the optimal makespan $T \le 2T^\ast$ (that is, the price of anarchy is 2).	\item Your friends seem to be happy about the price of anarchy, but to be fully convinced they would also like to minimize reallocation. Design a polynomial-time algorithm to compute an assignment that is a Nash equilibrium.
+
+\end{itemize}
+
+\paragraph{Answer.}
+
+\section*{Exercise 3 (10 pts)}
+Consider the fractional knapsack problem where you can split items into arbitrary pieces. You should now pick n numbers $x_i \in [0, 1]$ such that $\sum_i x_i w_i \le W$ and $\sum_i x_i v_i$ is maximized.
+\begin{itemize}
+	\item Design an algorithm to solve the fractional knapsack problem optimally in polynomial time and prove that it computes an optimal solution $x^\ast$.
+	
+	\paragraph{Answer.}
+	
+	
+		\item Consider the following algorithm for the non-fractional knapsack problem. Run your algorithm for the fractional problem and set $S = \{i | x_i^{\ast} = 1\}$. Show that there is no constant $c$ independent of $n$, $v$, $w$ and $W$ such that $v(S^\ast) \le c \cdot v(S)$, even when we restrict to instances with $w_i \le W$ for all items $i$ and without ties in $\frac{v_i}{w_i}$.
+	
+	\paragraph{Answer.}
+		\item Show how to adjust the algorithm and the definition of $S$ such that the statement holds for $c = 2$. Show that the analysis is tight.
+	
+	\paragraph{Answer.}
+\end{itemize}
+
+\paragraph{Answer.}
+
+\section*{Exercise 4 (10 pts)}
+Instead of matching into pairs, we here consider the 3-dimensional matching problem. We are given disjoint sets $X$, $Y$, $Z$ and a set $T \subseteq X \times Y \times Z$ of ordered triples. A subset $M \subseteq T$ is a 3-dimensional matching if each element of $X \cup Y \cup Z$ is contained in at most one triple. The goal is to find a 3-dimensional matching $M$ of maximum cardinality. Give a polynomial-time 3-approximation algorithm that finds $M$ with $|M^\ast| ≤ 3|M|$.
+
+\paragraph{Answer.}
+
+\section*{Exercise 5 (10 pts)}
+The pricing method for vertex cover obtains a 2-approximation. Show how to adjust it to obtain an optimal vertex cover in bipartite graphs in polynomial time by relating prices to flows and vertex covers to cuts.
+
+\paragraph{Answer.}
+
+\end{document}
