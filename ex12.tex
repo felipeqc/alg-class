@@ -21,6 +21,8 @@
 \usepackage{mathtools}
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}	% for pdf image
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm}
 
 \newtheorem{theorem}{Theorem}
 
@@ -102,6 +104,40 @@ Tutorial time: Monday 14:00
 
 \paragraph{Answer.}
 
+There is always an order such that applying the greedy algorithm leads to the optimal solution.
+For example, assume that the following example is an optimal assignment $S^\ast$. 
+
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar stacked,
+	bar width=15pt,
+	%nodes near coords,
+    enlargelimits=0.15,
+    %legend style={at={(0.5,-0.20)},
+    %  anchor=north},
+    ylabel={Time},
+    xlabel={Machines},
+    symbolic x coords={$m_1$, $m_2$, $m_3$},
+    xtick=data,
+    x tick label style={rotate=45,anchor=east},
+    ]
+\addplot+[ybar] plot coordinates {($m_1$,3) ($m_2$,0) ($m_3$,0)};
+\addplot+[ybar] plot coordinates {($m_1$,0) ($m_2$,4) ($m_3$,0)};\addplot+[ybar] plot coordinates {($m_1$,0) ($m_2$,0) ($m_3$,1)};\addplot+[ybar] plot coordinates {($m_1$,2) ($m_2$,0) ($m_3$,0)};\addplot+[ybar] plot coordinates {($m_1$,0) ($m_2$,3) ($m_3$,0)};
+\addplot+[ybar] plot coordinates {($m_1$,2) ($m_2$,0) ($m_3$,5)};
+\end{axis}
+\draw (0,1) -- (7,1);
+\node[draw] at (8,1) {Sweep-line $\uparrow$};
+\end{tikzpicture}
+\end{figure}
+
+Let's define a total order of jobs such that $j_i \prec j_k$ iff in the optimal assignment $S^\ast$, the start time of $j_i$ is earlier than the start time of $j_k$ (ties broken with machine number). We can think of this as a horizontal sweep-line going from bottom to top in the figure.
+
+If we apply greedy in this order, every time the sweep-line intersects with the start time of a job, this job will be added to the ``most empty'' processor, producing the same allocation as the optimal assignment.
+
+
 \section*{Exercise 2 (10 pts)}
 The friends from the last exercise quit their jobs. They believe they are ready for the next level in their careers, and hope to get there with their start-up that manages a cloud computing system. Users of the system come with a computational task, pay for access to the system, and then have the freedom to choose any one of the m identical machines to start their task. They also have the possibility to stop their task and restart it on another machine. Users are usually impatient, and it seems they strategically pick machines to minimize completion time. Your friends have little trust in markets and wonder if it is such a good idea to give users the possibility to allocate tasks selfishly.
 \begin{itemize}
@@ -112,27 +148,95 @@ Tutorial time: Monday 14:00
 \paragraph{Answer.}
 
 \section*{Exercise 3 (10 pts)}
-Consider the fractional knapsack problem where you can split items into arbitrary pieces. You should now pick n numbers $x_i \in [0, 1]$ such that $\sum_i x_i w_i \le W$ and $\sum_i x_i v_i$ is maximized.
+Consider the fractional knapsack problem where you can split items into arbitrary pieces. You should now pick $n$ numbers $x_i \in [0, 1]$ such that $\sum_i x_i w_i \le W$ and $\sum_i x_i v_i$ is maximized.
 \begin{itemize}
 	\item Design an algorithm to solve the fractional knapsack problem optimally in polynomial time and prove that it computes an optimal solution $x^\ast$.
 	
+	\paragraph{Answer.} We can use the following algorithm:
+	
+	\begin{enumerate}
+		\item Sort the elements according to $\frac{v_i}{w_i}$ in decreasing order (best cost-benefit).
+		\item Start filling the knapsack with tasks in this order until it becomes full.
+	\end{enumerate}
+	
+	\paragraph{Proof} Assume by contradiction that $x^\ast$ is not an optimal solution. First, note that the algorithm only returns when the knapsack is full, thus $\sum_i x_i w_i = W$.
+	    Since $x^\ast$ is not optimal, there exists a better solution $x'$ such that for two tasks $i\neq j$, $x_i'=x_i^\ast - \epsilon$, $x_j' = x_j^\ast + \epsilon$ and $\frac{v_i}{w_i} > \frac{v_j}{w_j}$.
+	    
+	    Assume $w_i < w_j$. Then, because $\frac{v_i}{w_i} > \frac{v_j}{w_j}$, it follows that $v_i - v_j > 0$. This implies that $v(S') = v(S) - \epsilon \cdot (v_i - v_j) < v(S^\star)$. Contradiction.
+	    
+	    
+	    Assume $w_i \ge w_j$. Then, because $\frac{v_i}{w_i} > \frac{v_j}{w_j}$, it follows that $v_i - v_j > 0$. This implies that $v(S') = v(S^\ast) - \epsilon \cdot (v_i - v_j) < v(S^\ast)$. Contradiction.
+	
+		\medskip
+	
+	\item Consider the following algorithm for the non-fractional knapsack problem. Run your algorithm for the fractional problem and set $S = \{i | x_i^{\ast} = 1\}$. Show that there is no constant $c$ independent of $n$, $v$, $w$ and $W$ such that $v(S^\ast) \le c \cdot v(S)$, even when we restrict to instances with $w_i \le W$ for all items $i$ and without ties in $\frac{v_i}{w_i}$.
+	
 	\paragraph{Answer.}
 	
+	Consider each item $i$ in decreasing order (according to $\frac{v_i}{w_i}$). We can have an example where $w_1 + w_2 = W + 1$, and where for each $3 \le i \le n$, $v_i = w_i = 1$.
+	Although the fractional knapsack has solution $v_1 + (1-w_1)\cdot v_2$, the modified algorithm would drop the second item and produce $v(S) = v_1$. However, the optimal solution for the non-fractional problem would be $v(S^\ast) = v_1 + (W - w_1)\cdot 1 = v_1 + W - w_1$, where we fill the knapsack with the small items.
 	
-		\item Consider the following algorithm for the non-fractional knapsack problem. Run your algorithm for the fractional problem and set $S = \{i | x_i^{\ast} = 1\}$. Show that there is no constant $c$ independent of $n$, $v$, $w$ and $W$ such that $v(S^\ast) \le c \cdot v(S)$, even when we restrict to instances with $w_i \le W$ for all items $i$ and without ties in $\frac{v_i}{w_i}$.
+	We cannot find a constant $c$ for the approximation because $\frac{v_1 + W - w_1}{v_1}$ can be made arbitrarily large if we increase $W$ while maintaining $w_1 + w_2 = W+ 1$.
 	
+	\medskip
+	
+	\item Show how to adjust the algorithm and the definition of $S$ such that the statement holds for $c=2$. Show that the analysis is tight.
 	\paragraph{Answer.}
-		\item Show how to adjust the algorithm and the definition of $S$ such that the statement holds for $c = 2$. Show that the analysis is tight.
+
+	We can do the allocation as follows:
 	
-	\paragraph{Answer.}
+		\begin{enumerate}
+		\item Sort the items according to $\frac{v_i}{w_i}$ in decreasing order.
+		\item Keep putting items in the knapsack, until item $k$ doesn't fit.
+		\item Return $\max\{\sum\limits_{i<k} v_i, v_k\}$.
+	\end{enumerate}
+
+Let $S^G$ and $S^\ast$ be the greedy solution and the optimal solutions to the non-fractional knapsack, and let $S^f$ be the optimal solution to the fractional knapsack.
+
+Note that $v(S^f) = \sum\limits_{i < k}{v_i} + \alpha \cdot v_k$, where $\alpha$ is the fraction of the task $k$ that does not fit.
+
+Since the non-fractional solution can never be better than the fractional solution:
+
+$$v(S^\ast) \le v(S^f) = \sum\limits_{i < k}{v_i} + \alpha \cdot v_k \le \sum\limits_{i<k} v_i + v_k \le 2 \max \left \{\sum\limits_{i<k} v_i, v_k \right \} \le 2 v(S^G).$$
+
+To show the analysis is tight, consider the following example.
+Capacity $W = 2x$, and the items are $(v_1 = x + 2, w_1 = x + 1)$, $(v_2=x, w_2=x), (v_3=x-1, w_3 = x)$.
+
+The optimal algorithm returns $v_2 + v_3 = 2x-1$ with maximum weight $2x$, while the greedy algorithm returns $v_1 = x+2$ and total weight $x+1$, without being able to add more items. Thus, the approximation factor converges to $2$ for large values of $x$.
+
 \end{itemize}
 
-\paragraph{Answer.}
+
 
 \section*{Exercise 4 (10 pts)}
-Instead of matching into pairs, we here consider the 3-dimensional matching problem. We are given disjoint sets $X$, $Y$, $Z$ and a set $T \subseteq X \times Y \times Z$ of ordered triples. A subset $M \subseteq T$ is a 3-dimensional matching if each element of $X \cup Y \cup Z$ is contained in at most one triple. The goal is to find a 3-dimensional matching $M$ of maximum cardinality. Give a polynomial-time 3-approximation algorithm that finds $M$ with $|M^\ast| ≤ 3|M|$.
+Instead of matching into pairs, we here consider the 3-dimensional matching problem. We are given disjoint sets $X$, $Y$, $Z$ and a set $T \subseteq X \times Y \times Z$ of ordered triples. A subset $M \subseteq T$ is a 3-dimensional matching if each element of $X \cup Y \cup Z$ is contained in at most one triple. The goal is to find a 3-dimensional matching $M$ of maximum cardinality. Give a polynomial-time 3-approximation algorithm that finds $M$ with $|M| \le 3|M^\ast|$.
 
 \paragraph{Answer.}
+
+We can use a greedy algorithm to obtain a maximal 3-dimensional matching.
+
+\begin{lstlisting}[mathescape]
+	$M \gets \{t\}$, where $t$ is any triple in set $T$.
+	For each triple $t'$ in $T \setminus \{t\}$:
+		For each triple $t$ in $S$:
+			if $t'$ intersects $t$:
+				break
+		$M \gets M \cup \{t'\}$
+\end{lstlisting}
+
+Let $M$ be any maximal 3-dimensional matching, and let $M^\ast$ be the maximum 3-dimensional matching.
+
+For each triple $t = \{x,y,z\} \in M^\ast$, there can be only two cases:
+\begin{enumerate}
+	\item Neither of the three vertices $\{x,y,z\}$ are covered by $M$. But this case is impossible, since $M$ is maximal.
+	\item At least one of the three vertices $\{x,y,z\}$ is covered by $M$.
+\end{enumerate}
+
+Since for each of three vertices in $M^\ast$, at least one is in $M$, then $|M| \le 3|M^\ast|$.
+
+------------------------------------------------------------------------------------------
+
+I was also wondering if we cannot compute bipartite matchings for pairs $(x,y,-)$, $(x,-,z)$ and $(-,y,z)$, and then try to intersect them to obtain the 3-dimensional matching with better approximation factor. For example, we could start by computing the maximum bipartite matching in $X \cup Y$, convert these edges into vertices and them compute a bipartite matching between these vertices and vertices in $Z$. But I don't know if this works.
 
 \section*{Exercise 5 (10 pts)}
 The pricing method for vertex cover obtains a 2-approximation. Show how to adjust it to obtain an optimal vertex cover in bipartite graphs in polynomial time by relating prices to flows and vertex covers to cuts.
