@@ -146,6 +146,32 @@ If we apply greedy in this order, every time the sweep-line intersects with the 
 \end{itemize}
 
 \paragraph{Answer.}
+Attribution: We consulted notes on \emph{Selfish load balancing} by Berthold V\"ocking.
+
+Here's a simple characterization for Nash equilibria:
+\begin{equation}\label{eq:nash}
+	T_{i'} \ge T_i - t_j	\qquad \text{when $j \in A(i)$}
+\end{equation}
+
+\begin{proof}[Price of anarchy]
+	Let $i^\ast \in 1..m$ be a machine with highest load (if there are no machines, $T = 0$ and we're done).
+	Let $j^\ast \in A(i^\ast)$ be a job with minimal cost (if there are no jobs in $A(i^\ast)$, then $T = T_{i^\ast} = 0$ and we're done).
+	Assume there's at least one more job $A(i^\ast) \ni k \not= j^\ast$; otherwise $T = T_{i^\ast} = t_{j^\ast}$ so that (since every assignment must place job $j^\ast$) $T^\ast = T$ and we're done.
+	By the choice of $i^\ast$, $j^\ast$, and $k$, we have $T = T_{i^\ast} \ge t_{j^\ast} + t_k \ge 2t_{j^\ast}$; that is:
+	\begin{equation}\label{eq:nashij}
+		t_{j^\ast} \le \frac{1}{2}T
+	\end{equation}
+	Thus for every $i$
+	\begin{equation}\label{eq:nashi}
+		T_i \underset{\eqref{eq:nash}}{\ge} T_{i^\ast} - t_{j^\ast} \underset{(i^\ast)}{=} T - t_{j^\ast} \underset{\eqref{eq:nashij}}{\ge} T - \frac{1}{2}T = \frac{1}{2}T
+	\end{equation}
+	To continue, we recall a bound on $T^\ast$ from lecture:
+	\begin{align*}
+		T^\ast &\ge \frac{1}{m} \sum_{j=1}^n t_j = \frac{1}{m} \sum_{i=1}^m T_i = \frac{1}{m} \Bigl(T_{i^\ast} + \sum_{i \not= i^\ast} T_i\Bigr) = \frac{1}{m} \Bigl(T + \sum_{i \not= i^\ast} T_i\Bigr)\\
+		&\underset{\eqref{eq:nashi}}{\ge} \frac{1}{m} \bigl(T + (m-1)\frac{1}{2} T\bigr) = \frac{m+1}{2m} T
+	\end{align*}
+	so that $T \le \frac{2m}{m+1} T^\ast = 2T^\ast - \frac{2}{m+1}T^\ast \le 2T^\ast$.
+\end{proof}
 
 \section*{Exercise 3 (10 pts)}
 Consider the fractional knapsack problem where you can split items into arbitrary pieces. You should now pick $n$ numbers $x_i \in [0, 1]$ such that $\sum_i x_i w_i \le W$ and $\sum_i x_i v_i$ is maximized.
