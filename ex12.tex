@@ -159,14 +159,13 @@ If we apply greedy in this order, every time the sweep-line intersects with the 
 		\item Start filling the knapsack with tasks in this order until it becomes full.
 	\end{enumerate}
 	
-	\paragraph{Proof} Assume by contradiction that $x^\ast$ is not an optimal solution. First, note that the algorithm only returns when the knapsack is full, thus $\sum_i x_i w_i = W$.
-	    Since $x^\ast$ is not optimal, there exists a better solution $x'$ such that for two tasks $i\neq j$, $x_i'=x_i^\ast - \epsilon$, $x_j' = x_j^\ast + \epsilon$ and $\frac{v_i}{w_i} > \frac{v_j}{w_j}$.
-	    
-	    Assume $w_i < w_j$. Then, because $\frac{v_i}{w_i} > \frac{v_j}{w_j}$, it follows that $v_i - v_j > 0$. This implies that $v(S') = v(S) - \epsilon \cdot (v_i - v_j) < v(S^\star)$. Contradiction.
-	    
-	    
-	    Assume $w_i \ge w_j$. Then, because $\frac{v_i}{w_i} > \frac{v_j}{w_j}$, it follows that $v_i - v_j > 0$. This implies that $v(S') = v(S^\ast) - \epsilon \cdot (v_i - v_j) < v(S^\ast)$. Contradiction.
+	\paragraph{Proof} Assume by contradiction that $x^\ast$ is not an optimal solution. First, note that the algorithm only returns when the knapsack is full, i.e., $\sum_i x_i^\ast w_i = W$.
 	
+	    Since $x^\ast$ is not optimal, there exists a better solution $x'$ such that for two tasks $i\neq j$, $x_i'=x_i^\ast - \epsilon$, $x_j' = x_j^\ast + \epsilon$ and $v(x') > v(x^\ast)$. This implies that $v_j > v_i$.
+	    
+	    However, since the algorithm above used all tasks with largest ratio $\frac{v}{w}$, it also follows that $\frac{v_i}{w_i} > \frac{v_j}{w_j}$.
+	    
+	    This implies that $w_i < w_j$. However, since $\sum_i x_i^\ast w_i = W$, exchanging task $i$ for task $j$ of larger weight would overflow the knapsack's capacity. Contradiction.
 		\medskip
 	
 	\item Consider the following algorithm for the non-fractional knapsack problem. Run your algorithm for the fractional problem and set $S = \{i | x_i^{\ast} = 1\}$. Show that there is no constant $c$ independent of $n$, $v$, $w$ and $W$ such that $v(S^\ast) \le c \cdot v(S)$, even when we restrict to instances with $w_i \le W$ for all items $i$ and without ties in $\frac{v_i}{w_i}$.
