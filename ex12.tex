@@ -173,6 +173,15 @@ Here's a simple characterization for Nash equilibria:
 	so that $T \le \frac{2m}{m+1} T^\ast = 2T^\ast - \frac{2}{m+1}T^\ast \le 2T^\ast$.
 \end{proof}
 
+The algorithm applies the so-called \emph{max-weight best response policy}:
+\begin{lstlisting}[mathescape]
+	For each job $j$, sorted by decreasing $t_j$.
+		$i \gets$ the least loaded machine
+		$A(i) \gets A(i) \cup \{ j \}$
+\end{lstlisting}
+The jobs are considered in order of decreasing cost and each user makes a (locally) optimal choice when her job is considered.
+The algorithm runs in time $O(n \log n)$: sort the $n$ jobs, then run $n$ iterations of the loop each taking $O(\log n)$ when using a priority queue to track machines by their current load.
+
 \section*{Exercise 3 (10 pts)}
 Consider the fractional knapsack problem where you can split items into arbitrary pieces. You should now pick $n$ numbers $x_i \in [0, 1]$ such that $\sum_i x_i w_i \le W$ and $\sum_i x_i v_i$ is maximized.
 \begin{itemize}
