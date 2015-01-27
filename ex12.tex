@@ -277,4 +277,17 @@ I was also wondering if we cannot compute bipartite matchings for pairs $(x,y,-)
 
 \paragraph{Answer.}
 
+A minimum-cost vertex cover $C$ is a set of vertices of minimum vertex-weight such that every edge in the graph is covered by $C$. Note that because $C$ has minimum cost, it also must have minimum cardinality (otherwise we could reduce the total cost by removing one edge, while maintaining the vertex cover property).
+
+	\medskip
+
+	Because $C$ has minimum cardinality, and because a single vertex is enough to cover one edge, $C$ uses exactly one vertex $v$ to cover each edge $(v,u) \in E$. For all the vertices in $C$, the corresponding set of edges $\bigcup_{v \in C}\{(v,u)\}$ forms a cut.
+	
+	\medskip
+	
+	We cannot identify $C$ easily just using the fact that it intersects a cut in the graph. However, by assigning capacities to edges in a particular way, we can force the minimum-cut (or max-flow) in the graph to be exactly the cut incident on the vertex cover $C$.
+
+	Let's assign to each each $e = (u,v) \in E$ a capacity $c(e) = c((u,v)) = \min\{w_u, w_v\}$. We also connect a source and sink to the vertices in the  bipartite graph as usual. Note that this corresponds to the pricing method, where we enforce linear constraints for the price (flow) subject to the share (capacity).
+	
+	{\color{red} TODO: fix this}
 \end{document}
