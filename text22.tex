@@ -1,0 +1,145 @@
+\section{Convex Hulls}
+
+A \emph{polygon} $P$ is a closed, piece-wise linear curve in the plane (no crossing). We consider the interior region and the boundary.
+
+$\bar{P} := {interior} \cup {boundary}$ of $P$.
+
+\noindent A simple polygon is \emph{convex}, if for any $p, q \in \bar{P}$, $\overline{pq} \subseteq \bar{P}$.
+
+\medskip
+
+\noindent An ordered list of points ($p_1, \ldots, p_n$) with $n \ge 3$ induces a polygon with edges $\overline{p_1 p_2}, \overline{p_2 p _3}$, $\ldots$, $\overline{p_{n-1} p_n}$, $\overline{p_n p_1}$ (connecting the dots).
+
+\medskip
+
+Given $P \triangleq (p_1, \ldots, p_n)$, deciding whether $P$ is:
+
+\begin{itemize}
+	\item Simple: $O(n \log n)$ (sweep line)
+	\item Convex: $O(n)$ (homework)
+\end{itemize}
+
+\paragraph{Left turn/right turn: } For $(p_0, p_1, p_2)$. Can be decided using ${CCW}$/cross products.
+
+\begin{myproposition}
+A simple polygon $(p_1, \ldots, p_n)$ is convex iff all consecutive triples, including $(p_n-1, p_n, p_1)$ and $(p_n, p_1, p_2)$ are left turns or all consecutive triples are right turns.	
+\end{myproposition}
+
+\begin{mydefinition}
+The \emph{convex hull} of a point set $Q$ is the smallest convex polygon $P$ such that $Q \subseteq \bar{P}$.
+\end{mydefinition}
+
+\paragraph{Problem:} Given $Q$, compute $(q_1, \ldots, q_n) \subseteq Q$ that induces ${CH}(Q)$.
+
+\paragraph{Applications:} Shape approximation, preprocessing, farthest pair problem.
+
+\subsection{Graham's Scan (late 1960's)}
+
+Assume that no 3 points in $Q$ are collinear.
+The algorithm uses a stack $S$ of points with operations: \emph{push}, \emph{pop}, \emph{top} and \emph{next-to-top}.
+
+\begin{lstlisting}[mathescape]
+${Graham\_scan}(Q):$
+	$p_0 \gets$ bottom-most point. (In case of a tie, choose rightmost one).
+	Let $(p_1, \ldots, p_n)$ be the other points sorted by polar angle from $p_0$.
+	${push}(S,p_0)$, ${push}(S,p_1)$, ${push}(S,p_2)$
+	for $i \gets 3$ to $n$ do:
+		while(${next-to-top}(S),{top}(S),p_i$) makes right turn, ${pop}(S)$.
+		${push}(S,p_i)$
+	return $S$
+\end{lstlisting}
+
+\paragraph{Correctness (main ideas):}
+\begin{itemize}
+	\item When a point is popped from $S$, it lies in the interior of ${CH}(Q)$.
+	\item Throughout the algorithms, points on $S$ are sorted by polar angle $\rightarrow$ induced polygon is simple.
+	\item Throughout the algorithm, consecutive triples on $S$ form left turns $\rightarrow$ induced polygon is convex.
+\end{itemize}
+
+\paragraph{Running Time:}
+\begin{itemize}
+\item Sorting by polar angle: $O(n \log n)$ (homework)
+\item Every point is pushed on $S$ exactly once.
+\item Every point is popped from $S$ at most once.
+\item Every iteration of the while loop can be charged to a ${pop}$ (if right-turn) or to a ${push}$ (if left-turn).
+\item All stack operations take constant time.
+\item $\implies O(n \log n)$
+\end{itemize}
+
+\subsection{Can we do better?}
+
+No, because sorting can be reduced to computing the convex hull.
+
+\begin{lstlisting}[mathescape]
+CH-sort($a_1, \ldots, a_n$):
+	Define $p_i = (a_i, a_i^2)$
+	Compute CH $\{0, p_1, \ldots, p_n\}$
+	The $x$-coordinates of the result, starting from $0$, give the sorted sequence.
+\end{lstlisting}
+
+Since sorting (based on comparisons) is $\Omega (n \log n)$, so does computing the convex hull.
+
+\subsection{Jarvis's March (gift wrapping)}
+
+\begin{lstlisting}[mathescape]
+	Let $p_-, p_+$ be the bottom-most, top-most points.
+	Construct right-chain from $p_-$.
+		Set $p \gets p_-$
+		Find input point $p'$ with minimal polar angle from $p$
+		Add $p'$ to the right chain
+		Set $p \gets p'$ and repeat, until $p_+$ is reached.
+	Similar for the left-chain, using negative polar angle.
+\end{lstlisting}
+
+\paragraph{Running Time:} $O(n \cdot h)$ where $h$ is the number of points on the convex hull.
+
+\subsection{Chan's Algorithm}Complexity of $O(n \log h)$. Assume first that $h$ is known (unrealistic!), and set $m \gets h$.
+
+\begin{enumerate}
+	\item Split $Q$ into $1 = \frac{n}{m}$ subsets of size $\gets m$ (arbitrarily).
+	\item Compute convex hull for all subsets using Graham's scan.
+	\item Perform ``improved gift wrapping'':
+	\begin{enumerate}
+		\item Start with bottom-most point.
+		\item For each subset, find ``candidate point'' with smallest polar angle
+		\item Find candidate point with smallest polar angle as our next point.
+		\item Repeat $m$ times or until convex hull is found.
+	\end{enumerate}
+\end{enumerate}
+
+\paragraph{Running Time}
+\begin{itemize}
+	\item Step (2): $O(\frac{n}{m} \cdot m \log m) = O(n \log m)$.
+	\item Step (b): A candidate point can be computed in $O(\log m)$ time
+	\begin{itemize}
+		\item The candidate point must lie on the convex hull of the subset. 
+		\item Use ``binary search'' on convex hull.
+	\end{itemize}
+	$\rightarrow O(\frac{n}{m} \cdot \log m)$ per iteration
+\end{itemize}
+$\implies O(\underbrace{n \log m}_\text{(2)} + m \cdot ( \underbrace{\frac{n}{m} \log m}_\text{(b)} + \underbrace{\frac{n}{m}}_\text{(c)} )) = O(n \log m)$
+
+\begin{enumerate}
+	\item Start with $m\gets 4$
+	\item If algorithm does not compute the convex hull, set $m \gets m^2$ and start over.
+\end{enumerate}
+
+Algorithm runs for $m=2^{2^t}$, with $t = 1,\ldots,\lceil \log \log h \rceil$.  We can bound the running time as follows:
+
+$$\sum\limits_{t=1}^{\lceil \log \log h \rceil} O(n \log 2^{2^t}) = \sum\limits_{t=1}^{\lceil \log \log h \rceil} O(n \cdot 2^t) = O(n \cdot \sum\limits_{t=1}^{\lceil \log \log h \rceil} 2^t) = O(n \cdot 2^{\lceil \log \log h\rceil + 1})$$
+
+$$ = O(n \cdot 2^{\log \log h + 2}) = O(4n\cdot 2^{\log \log h}) = O(n \log h).$$
+ 
+
+
+\paragraph{Problem:} Given a cyclic sequence $(a_1, \ldots, a_n)$ of numbers with one local minimum, find this minimum in $O(\log m)$.
+
+\begin{enumerate}
+	\item cyclic array $\rightarrow$ non-cyclic array: Check whether $a_1$ or $a_m$ are minima. If yes, we are done. Otherwise, $a_1 > a_2$ or $a_m > a_{m-1}$. Assume that $n \log a_1 > a_2$. 
+	\item Binary Search: Look at $a_k = a \lfloor \frac{m}{2} \rfloor$.
+	\begin{enumerate}
+		\item If $a_k > a_1$, then minimum in $(a_1, \ldots, a_k)$.
+		\item If $a_k < a_1$, check whether $a_k$ is minimum, increasing, or decreasing. If increasing, minimum in $(a_1, \ldots, a_k)$. If decreasing, minimum in $(a_k, \ldots, a_m)$.
+	\end{enumerate}
+\end{enumerate}
+
