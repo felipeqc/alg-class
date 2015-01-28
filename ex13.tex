@@ -1,0 +1,120 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}	% for pdf image
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=,    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=,       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={forall, to, else, then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=,     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape,
+  belowskip=-\baselineskip,
+}
+
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\Sref}[1]{\hyperref[#1]{\S\ref*{#1}}}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+\newcommand{\edge}{\longrightarrow}
+\newcommand{\redge}{\longleftarrow}
+
+\title{Exercise Sheet 11---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+
+\section*{Exercise 1 (10 pts)}
+The polar angle of a point $p_1$ with respect to $p_0$ is the angle that the vector $p_1 − p_0$ forms in the usual polar coordinate system. For instance, the polar angle of $(3, 5)$ with respect to $(2, 4)$ is the angle of $(1, 1)$, which is 45 degrees, or $\pi/4$. The polar angle of $(3, 3)$ with respect to $(2, 4)$ is the angle of $(1, −1)$, which is 315 degrees or $7\pi/4$. Design an $O(n \log n)$-algorithm that sorts a sequence of $n$ points $p_1, \ldots, p_n$ according to the polar angles with respect to a given origin $p_0$. Your algorithm should avoid computing the angles explicitly.
+
+\section*{Exercise 2 (10 pts)}
+A disk consists of a circle and its interior and is represented by its center point and (positive) radius. Two disks intersect if they have any point in common. Give an $O(n \log n)$-algorithm to determine whether any two disks in a set of $n$ disks intersect.
+
+\section*{Exercise 3 (10 pts)}
+For a set of $n$ segments, give an algorithm that lists all pairs of intersecting segments, sorted by the $x$-coordinate of the intersection point. You can suppose the same simplifying assumptions as in the lecture. With $k$ the number of intersection pairs, your algorithm should run in $O((k + n) \log n)$ time.
+
+\section*{Exercise 4 (10 pts)}
+
+Show by a counterexample that even if all consecutive triples in the (cyclic) sequence $(p_1, \ldots, p_n)$ form left turns, the induced polygon might not be convex. Give an $O(n)$-algorithm to decide whether $(p_1, \ldots, p_n)$ induces a convex polygon.
+
+\section*{Exercise 5 (10 pts)}
+
+In the online convex hull problem, we are given the set $Q$ of $n$ points one point at a time. After receiving each point, we have to compute the convex hull of the points seen so far. Obviously, we could re-run Graham’s scan every time, yielding a total running time of $O(n^2 \log n)$. Show how to solve the online convex hull problem in $O(n^2)$ time.
+
+\paragraph{Answer.}
+
+\end{document}
