@@ -68,6 +68,7 @@
   belowskip=-\baselineskip,
 }
 
+\newcommand{\swap}{\leftrightarrow}
 \DeclareMathOperator{\prob}{prob}
 \DeclareMathOperator{\dom}{dom}
 \DeclareMathOperator{\rank}{rank}
@@ -228,5 +229,60 @@ We also need to guarantee that the sum of the internal angles of the polygon is 
 In the online convex hull problem, we are given the set $Q$ of $n$ points one point at a time. After receiving each point, we have to compute the convex hull of the points seen so far. Obviously, we could re-run Graham’s scan every time, yielding a total running time of $O(n^2 \log n)$. Show how to solve the online convex hull problem in $O(n^2)$ time.
 
 \paragraph{Answer.}
+
+Both Graham's scan and our online algorithm assumes $|Q| \ge 3$.
+Recall how Graham's scan spends its time.
+Given a set $Q$ of $n$ points, it spends
+\begin{enumerate}
+
+\item \label{grahamsearch} $O(n)$ hunting for a point $p_0$ with minimal $y$-coordinate (and minimal $x$-coordinate in case of ties),
+
+\item \label{grahamsort} $O(n \log n)$ time sorting the remaining $n-1$ points by polar angle in counterclockwise order around $p_0$ (discarding points closer to $p_0$ in case of ties), and
+
+\item \label{grahamCH} $O(n)$ time with its clever stack-and-turn-right trick.
+
+\end{enumerate}
+\newcommand{\below}{<}%
+\newcommand*{\ccw}[1]{\lhd_{#1}}%
+Let $\below$ denote the order used in step~\eqref{grahamsearch} and $\ccw{p_0}$ the order induced by $p_0$ and used in step~\eqref{grahamsort}.
+The idea behind our algorithm is simple:
+Remember the $\below$-minimal point $p_0$ and the $\ccw{p_0}$-sorted list $L$ between calls.
+Representation invariant:
+\begin{mathpar}
+	p_0 \below p_i\quad \forall p_i \in L \and
+	L \text{ sorted by $\ccw{p_0}$ with no ties} \and
+\end{mathpar}
+Given three initial points, it takes $O(1)$ time to establish the invariant and compute their convext hull.
+We omit the details.
+On receiving a new point $p$, we proceed as follows.
+\begin{itemize}
+
+	\item $O(1)$: If $p \not= p_0$, then
+	
+	\begin{itemize}
+		\item $O(1)$: If $p \below p_0$, then swap $p \swap p_0$.
+		
+		(By the following lemma, since $L$ had been sorted according to the initial $p_0$, it is now sorted according to both $p$ and $p_0$.
+		Thus the following step does not go wrong.)
+
+		\item $O(\log n)$: Update $L$ by inserting $p$ according to order $\ccw{p_0}$ (discarding points closer to $p_0$ in case of ties).
+	\end{itemize}
+	
+	\item $O(n)$: Run step~\eqref{grahamCH} of Graham's scan using $p_0$ and $L$.
+	
+\end{itemize}
+Each new point takes time $O(n)$ so our algorithm takes $O(n^2)$ time for $n$ points.
+For correctness, we rely on the following lemma.
+Intuitively, it says that if we add a new point $p$ that's below $p_0$ (\ie $p \below p_0$ in the code), then the list $L$ is \emph{already sorted} according to $\ccw{p}$.
+
+\begin{mylemma}
+	If $p \below p_0$ and $a \ccw{p_0} b$, then $a \ccw{p} b$.
+\end{mylemma}
+
+\begin{proof}[Proof by picture (draw it yourself)]
+	Our second hypothesis says $a$ precedes $b$ in counterclockwise order according to $p_0$.
+	Our second says that $p$ is below and to the right of $p_0$.
+	Thus, $a$ precedes $b$ in ccw order according to $p$.
+\end{proof}
 
 \end{document}
