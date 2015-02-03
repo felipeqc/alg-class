@@ -257,21 +257,18 @@ We omit the details.
 On receiving a new point $p$, we proceed as follows.
 \begin{itemize}
 
-	\item $O(1)$: If $p \not= p_0$, then
+	\item If $p \not= p_0$, then
 	
-	\begin{itemize}
-		\item $O(1)$: If $p \below p_0$, then swap $p \swap p_0$.
+	\begin{enumerate}[(a)]
+		\item If $p \below p_0$, then swap $p \swap p_0$.
 		
-		(By the following lemma, since $L$ had been sorted according to the initial $p_0$, it is now sorted according to both $p$ and $p_0$.
-		Thus the following step does not go wrong.)
-
-		\item $O(\log n)$: Update $L$ by inserting $p$ according to order $\ccw{p_0}$ (discarding points closer to $p_0$ in case of ties).
-	\end{itemize}
+		\item \label{onlineL} Update $L$ by inserting $p$ according to order $\ccw{p_0}$ (discarding points closer to $p_0$ in case of ties).
+		
+	\end{enumerate}
 	
-	\item $O(n)$: Run step~\eqref{grahamCH} of Graham's scan using $p_0$ and $L$.
+	\item Run step~\eqref{grahamCH} of Graham's scan using $p_0$ and $L$.
 	
 \end{itemize}
-Each new point takes time $O(n)$ so our algorithm takes $O(n^2)$ time for $n$ points.
 For correctness, we rely on the following lemma.
 Intuitively, it says that if we add a new point $p$ that's below $p_0$ (\ie $p \below p_0$ in the code), then the list $L$ is \emph{already sorted} according to $\ccw{p}$.
 
@@ -284,5 +281,8 @@ Intuitively, it says that if we add a new point $p$ that's below $p_0$ (\ie $p \
 	Our second says that $p$ is below and to the right of $p_0$.
 	Thus, $a$ precedes $b$ in ccw order according to $p$.
 \end{proof}
+
+Since $L$ sorted, step~\ref{onlineL} takes time $O(\log n)$.
+Thus each new point takes time $O(n)$ and our algorithm takes time $O(n^2)$ for $n$ points.
 
 \end{document}
