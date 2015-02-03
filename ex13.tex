@@ -176,6 +176,62 @@ Then, we can define a total-order relation between points using the function abo
 A disk consists of a circle and its interior and is represented by its center point and (positive) radius. Two disks intersect if they have any point in common. Give an $O(n \log n)$-algorithm to determine whether any two disks in a set of $n$ disks intersect.
 
 \paragraph{Answer.}
+\newcommand{\CHANGE}{\color{red}}%
+\newcommand{\orderAt}{\text{orderAt}}%
+\newcommand{\Tinsert}{\text{insert}}%
+\newcommand{\Tremove}{\text{remove}}%
+\newcommand{\Tabove}{\text{above}}%
+\newcommand{\Tbelow}{\text{below}}%
+\newcommand{\sep}{\mathrel{\#}}%
+\newcommand{\IF}{\mathrel{\text{if}}}%
+\newcommand{\OR}{\mathrel{\text{or}}}%
+\newcommand{\AND}{\mathrel{\text{and}}}%
+\newcommand{\intersect}{\text{intersect}}%
+\newcommand{\targ}{\tau}%
+We adapt the sweep-line technique given in lecture, {\CHANGE using color to indicate significant changes.}
+As in the lecture, we ignore special cases.
+
+The algorithm maintains a vertically sorted list of discs that intersect an (imaginary) \emph{sweep line} that moves from left to right.
+If two discs intersect, they are neighbors in this \emph{vertical ordering} just before the intersection.
+The algorithm uses two data structures:
+\begin{itemize}
+
+\item The \emph{sweep-line status}, $T$, stores discs sorted in vertical order at the current sweep-line position.
+
+\item The \emph{event schedule}, $E$, stores points where the vertical ordering changes, called \emph{event points}, sorted by $x$-coordinate.
+{\CHANGE The event points for a disc $((x,y), r)$ are $x-r$ and $x+r$.}
+
+\end{itemize}
+For a fixed $x$-coordinate $x_0$ we define an order relation on discs, $\orderAt(D, D', x_0)$, by:
+\begin{itemize}
+	\item If $D \cap D' \not= \emptyset$, then return $0$.
+
+	\item If the line $y = x_0$ does not intersect \emph{both} $D$ and $D'$, then return $\bot$.
+	
+	\item {\CHANGE If $\targ(D, x_0) < \targ(D', x_0)$, then return $-1$; otherwise return $+1$.}
+\end{itemize}
+{\CHANGE
+	where $\targ(D, x_0)$ is $D$'s \emph{target point} at $x_0$; \ie the point in $D$ with least $y$-coordinate that hits $L(x_0)$.
+	(We need target points in order to make $\orderAt$ well-defined:
+	A given disc $D$ can hit $L(x_0)$ at zero, one, or two points.)}
+We can implement $\orderAt$ in constant time.
+
+We also need the following operations for maintaining the sweep-line status.
+\begin{itemize}
+\item $\Tinsert(T, D, x_0)$: Add new disc $D$ (at appropriate position) for the given $x$-coordinate
+\item $\Tremove(T,D)$: Remove disc $D$ from $T$
+\item $\Tabove(T,D,x_0)$ and $\Tbelow(T,D,x_0)$: Return the disc immediately above or below $d$ in $T$ (if any) at the given $x$-coordinate.
+\end{itemize}
+These operations can be implemented in $O(\log n)$ time using a balanced tree to represent $T$.
+To compare discs, we use $\orderAt$.
+(As it runs, the algorithm removes discs from $T$ before changes in $x_0$ can ruin the tree's balance.)
+If $\orderAt$ returns zero---indicating an intersection---we immediately abort the entire algorithm, reporting the intersection.
+{\CHANGE We use a constant-time intersection operation for pairs of discs, $\intersect(D, D')$.}
+
+With these new primitives in place, let the set $S$ of $n$ discs be given.
+We implement anyDiscsIntersect$(S)$ using precisely the same pseudocode as given for segment intersection in lecture.
+(We omit the code.)
+The running time and proof of correctness also do not change.
 
 \section*{Exercise 3 (10 pts)}
 For a set of $n$ segments, give an algorithm that lists all pairs of intersecting segments, sorted by the $x$-coordinate of the intersection point. You can suppose the same simplifying assumptions as in the lecture. With $k$ the number of intersection pairs, your algorithm should run in $O((k + n) \log n)$ time.
@@ -235,7 +291,7 @@ Recall how Graham's scan spends its time.
 Given a set $Q$ of $n$ points, it spends
 \begin{enumerate}
 
-\item \label{grahamsearch} $O(n)$ hunting for a point $p_0$ with minimal $y$-coordinate (and minimal $x$-coordinate in case of ties),
+\item \label{grahamsearch} $O(n)$ time hunting for a point $p_0$ with minimal $y$-coordinate (and minimal $x$-coordinate in case of ties),
 
 \item \label{grahamsort} $O(n \log n)$ time sorting the remaining $n-1$ points by polar angle in counterclockwise order around $p_0$ (discarding points closer to $p_0$ in case of ties), and
 
@@ -278,7 +334,7 @@ Intuitively, it says that if we add a new point $p$ that's below $p_0$ (\ie $p \
 
 \begin{proof}[Proof by picture (draw it yourself)]
 	Our second hypothesis says $a$ precedes $b$ in counterclockwise order according to $p_0$.
-	Our second says that $p$ is below and to the right of $p_0$.
+	Our first says that $p$ is below and to the right of $p_0$.
 	Thus, $a$ precedes $b$ in ccw order according to $p$.
 \end{proof}
 
