@@ -230,8 +230,7 @@ If $\orderAt$ returns zero---indicating an intersection---we immediately abort t
 
 With these new primitives in place, let the set $S$ of $n$ discs be given.
 We implement anyDiscsIntersect$(S)$ using precisely the same pseudocode as given for segment intersection in lecture.
-(We omit the code.)
-The running time and proof of correctness also do not change.
+(We omit the code, but note the running time $O(n \log n)$.)
 
 \section*{Exercise 3 (10 pts)}
 For a set of $n$ segments, give an algorithm that lists all pairs of intersecting segments, sorted by the $x$-coordinate of the intersection point. You can suppose the same simplifying assumptions as in the lecture. With $k$ the number of intersection pairs, your algorithm should run in $O((k + n) \log n)$ time.
