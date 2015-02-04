@@ -1,0 +1,157 @@
+\section{Range Searching}
+
+\paragraph{Problem:} Given a point set $Q$, design a data structure for the following queries:
+
+\begin{itemize}
+	\item For an arbitrary rectangle $R = [x,x']\times[y,y']$, return all points in $Q \cap R$.
+\end{itemize}
+
+\paragraph{Warm-up:} Given real numbers $\{x_1, \ldots, x_n\}$ and interval $I = [x, x']$, report all numbers in $I$.
+
+Use Binary Search tree (BST):
+\begin{itemize}
+	\item Balanced (e.g., red-black-tree) $\rightarrow$ $O(\log n)$
+	\item Points stored in leaves
+	\item Leaves are \emph{not} connected by a list!
+\end{itemize}
+
+\begin{lstlisting}[mathescape]
+${Find\_split\_node}(T, [x,x'])$:
+	v \gets ${root}(T)$
+	while $v$ is not a leaf and ($x' \le x_v$ or $x > x_v$):
+		if $x' \le x_v$:
+			$v \gets v_{left}$
+		else:
+			$v \gets v_{right}$
+	return $v$
+
+${Report\_subtree}(v)$: Report all leaves in the subtree rooted at $v$.
+
+${1D\_range\_query}(T, [x,x']):$
+	$v_{SPLIT} \gets {Find\_split\_node}(T, [x,x'])$
+	if $v_{SPLIT}$ is a leaf, check whether point stored in leaf is in interval.
+	$v \gets$ left child of $v_{SPLIT}$
+	while $V$ is not a leaf:
+		if $x \le x_v$:
+			${Report\_subtree}(v_{right})$ (*)
+			$v \gets v_{left}$
+		else:
+			$v \gets v_{right}$
+	Check whether the point in leaf $v$ must be reported.
+	Same for right child of $v_{SPLIT}$ and $x'$
+\end{lstlisting}
+
+\begin{mylemma}
+A query runs in $O(k + \log n)$, where $k$ is the number of points to be reported.	
+\end{mylemma}
+\begin{proof}
+Except for (*), a query runs in $O(\log n)$. Let $W$ be the set of nodes for which ${Report\_subtree}$ is called. The subtrees are disjoint. With $k_v$ as the nuber of leaves in a subtree, we have $\sum_{v \in W} k_v \le k$, so the running time is $O(k)$.
+\end{proof}
+
+\begin{itemize}
+	\item {Preprocessing:} $O(n \log n)$
+	\item {Storage: } $O(n)$
+	\item {Query:} $O(k + \log n)$
+\end{itemize}
+
+\section{Range Trees}
+
+What if we consider only $x$-coordinates?
+
+\paragraph{Idea:} For points in $x$-range, we do a range query for $y$-coordinates.
+
+\begin{mydefinition}
+A \emph{range tree} $T$ for $Q$ is a BST storing the points in leaves and being sorted with respect to $x$-coordinate.
+	
+	For a node $v$ in $T$, we let $Q(v)$ denote the subset if points stored in the subtree rooted at $v$ (\emph{canonical subset} of $v$).
+	
+	Each internal node $v$ of $T$ stores a BST $T'(v)$ for $Q(v)$ storing the points in leaves sorted by $y$-coordinate (\emph{associated structure} of $v$).	
+\end{mydefinition}
+
+\begin{mylemma}
+A range tree for $n$ points has size $O(n \log n)$.	
+\end{mylemma}
+\begin{proof}
+	The size is the sum of the sizes of all associated structures. They are linear in the number of elements stored. A fixed point only belongs to $O(\log n)$ many associated structures.
+\end{proof}
+
+\paragraph{Construction:} Assume that points in $Q$ are sorted by $x$-coordinate.
+
+\begin{lstlisting}[mathescape]
+${Build\_Range\_Tree}(Q)$:
+	If $|Q| = 1$, create a leaf node $v$ and store the point. Return $v$.
+	Create node $v$ and set $T'(v)$ to a BST for $Q$ w.r.t. $y$-coordinate.
+	Split $Q$ into $Q_{left}$, $Q_{right}$ of (roughly) same size
+	$v_{left} \gets {Build\_Range\_Tree}(Q_{left})$ 
+	$v_{right} \gets {Build\_Range\_Tree}(Q_{right})$
+	return $v$	
+\end{lstlisting}
+
+\paragraph{Running Time:} $O(n \log ^2 n)$. But it can be improved to $O(n \log n)$ (skipped).
+
+\paragraph{Query:} Same as 1D, but replace ${report\_subtree}$ by ${1D\_Range\_Query}$.
+
+\begin{lstlisting}[mathescape]
+${2D\_range\_query}(T, [x,x'] \times [y,y']):$
+	$v_{SPLIT} \gets {Find\_split\_node}(T, [x,x'])$
+	if $v_{SPLIT}$ is a leaf, check whether point stored in leaf is in interval.
+	$v \gets$ left child of $v_{SPLIT}$
+	while $V$ is not a leaf:
+		if $x \le x_v$:
+			${1D\_range\_query}(T'(v), [y,y'])$
+			$v \gets v_{left}$
+		else:
+			$v \gets v_{right}$
+	Check whether the point in leaf $v$ must be reported.
+	Same for right child of $v_{SPLIT}$ and $x'$
+\end{lstlisting}
+
+\begin{mylemma}
+${2D\_range\_query}$ runs in $O(k + \log^2 n)$.
+\end{mylemma}
+\begin{proof}
+	$O(\log n)$ except of (*). Let $W$ be the set of nodes on which ${1D\_range\_query}$ is called. Let $k_v$ with $v \in W$ be the number of points reported from the canonical set $Q(v)$.
+	
+	Since $\sum_{v \in W} k_v \le k$, and one 1D-query takes $O(k_v + \log n)$ time, we have total cost $O(\sum_{v \in W} k_v + \log n) = O(k + \sum_{v \in W} \log n) = O(k + \log^2 n)$, because $|W| \le 2 \cdot {depth}(T) = O(\log n)$.
+\end{proof}
+
+\subsection{Fractional Cascading}
+
+\paragraph{Goal:} Reduce query time to $O(k + \log n)$.
+
+Given two sorted arrays, $A_1, A_2$ with $A_2 \subset A_1$, find all elements in $A_1$ and $A_2$that lie in some interval $I$.
+
+We do binary search in $A_1$. But during preprocessing, we add points from $A_1$ to $A_2$ to the smallest element that is not smaller than the entry.
+
+In range trees, $Q(v)$ is a superset of $Q(v_{left})$ and $Q(v_{right})$.
+
+\paragraph{Layered Range Tree:} BST $T$ for $x$-coordinate, as before.
+
+\paragraph{Associated Structure:} An array of points sorted by $y$-coordinate. Each entry has two pointers: one to the associated structure of the left child and one to the right child, pointing to the smallest element larger than or equal to the value of the entry.
+
+\begin{lstlisting}[mathescape]
+${Query}([x,x'] \times [y,y'])$:
+	Find $v_{split}$ as before. Find entry $i$ in associated structure that contains the smallest value $\ge y$ (binary search).
+	Follow search path for $x$ as before, and while descending follow pointers in the associated structure. When a 1D range query for $[y,y']$ is called, start reporting points beginning at the pointer until finding a value $> y$.
+\end{lstlisting}
+
+\paragraph{Running Time}: $O(1 + k_v)$ time per 1D-query on $[y,y']$ $\rightarrow$ $O(k + \log n)$ in total.
+
+\subsection{Higher Dimensions}
+
+For $n$ points in $d$ dimensions:
+\begin{itemize}
+	\item Construction: $O(n \log^{d-1} n)$
+	\item Storage: $O(n \log^{d-1} n)$
+	\item Query: $O(k + \log^d n)$ or $O(k + \log^{d-1} n)$ using fractional cascading
+\end{itemize}
+
+\paragraph{Alternative (kd-trees)}
+
+One search tree, alternating splitting in $x$- and $y$-coordinate.
+
+\begin{itemize}
+	\item Construction: $O(n \log n)$ (2D), $O(n \log n)$ (general)
+	\item Storage: $O(n)$ (2D), $O(n)$ (general)
+	\item Query: $O(k + \sqrt{n})$ (2D), $O(k + n^{1 - \frac{1}{d}})$ (general)
+\end{itemize}

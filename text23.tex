@@ -1,0 +1,156 @@
+\section{Diametral Pair and Closest Pair}
+
+\paragraph{Problem:} Given a point set $Q$ in the plane,
+\begin{itemize}
+\item find the pair of points with maximum distance (diametral pair)
+\item find the pair of distinct points with minimum distance (closest pair)	
+\end{itemize}
+
+\paragraph{Distance: } $d(p_1, p_2) = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}$
+
+\subsection{Diametral Pair (Smid's lecture notes)}
+
+\begin{mylemma}
+Let $(p,q)$ be a diametral pair. Then, $p$ and $q$ are convex hull vertices.	
+\end{mylemma}
+\begin{proof}
+	Consider the two points $p$ and $q$ in an horizontal line. Consider the half-space $H$ to the right of $q$. $H$ does not contain any point except $q$, therefore the points must be in the convex hull.
+\end{proof}
+
+Let $(p_1, \ldots, p_m)$ be the convex hull.
+
+Can we use binary search to find point with max distance to $p_1$? No, because there can be more than one local maximum. In fact, there exist polygons with $\Omega(n)$ local maxima (HOMEWORK!).
+
+\begin{mylemma}
+Let $e = \overline{p_i p_{i+1}}$ and $L_e$ be the line through $e$. Then, the sequence
+
+$$d(p_{i+1}, L_e), d(p_{i+2}, L_e), \ldots, d(p_n, L_e), \ldots, d(p_{1}, L_e), \ldots, d(p_{i}, L_e)$$
+
+is unimodal, that is, has exactly one local maximum.
+\end{mylemma}
+\begin{proof}
+	Assume that this sequence has 2 local maxima $p_i, p_{i+1}$. Then, there must be a local minimum $p_j$. This contradicts convexity. (Check the notes...)
+\end{proof}
+
+Now, we define $L \subseteq Q \times Q$ as follows:
+
+\begin{lstlisting}[mathescape]
+	$L \gets \emptyset$
+	for each $e = \overline{p_i p_{i+1}}$:
+		compute $M_e = \{p_j | \forall p \in Q, d(p_j, L_e) \ge d(p, L_e)\}$
+		for any $P_j \in M_e$:
+			add $(p_i, p_j)$ and $(p_{i+1}, p_j)$ to $L$
+\end{lstlisting}
+
+Let's analyze the size of the set. Note that $|M_e| \le 2$, because we can remove ``interior'' points on the convex hull. Since we have 2n iterations, $|L| \le 4n$.
+
+\begin{mylemma}
+	If $(p,q)$ is a diametral pair, then $(p,q) \in L$.
+\end{mylemma}
+\begin{proof}
+	Let $(p,q)$ be diametral. Consider the perpendicular lines $L_p$ and $L_q$. Note that there are no points in the half-spaces. Now, we rotate the two lines simultaneously in clock-wise direction. Either $L_p$ or $L_q$ will hit point $r$. Then $\overline{p_r}$ is a convex hull edge, and $q$ is in max distance to line $L_p$. So $q \in M_{\overline{pr}}$, and $(p,q)\in L$.
+\end{proof}
+
+\paragraph{Algorithm:}
+\begin{enumerate}
+	\item Compute convex hull ($O(n \log n)$).
+	\item Compute $L$ ($O(n \log n)$ using binary search for each edge).
+	\item Find max-distance-pair in $L$ ($O(n)$).
+\end{enumerate}
+
+
+Step (2) can be done in $O(n)$ (Check notes...).
+
+
+\paragraph{Approach:} (assume no two convex hull edges are parallel)
+
+\begin{lstlisting}[mathescape]
+	$j \gets 3$
+	for $i$ from $1$ to $n$:
+		$e \gets \overline{p_i p_{i+1}}$
+		while ($d(p_j, L_e) < d(p_{i+1}, L_e)$
+			$j \gets j+1$
+		Add $(p_i, p_j)$ and $(p_{i+1}, p_j)$ to $L$.
+\end{lstlisting}
+
+$P_j$ is moving around the polygon at most twice. In total, we have $O(n)$ running time.
+
+\subsection{Grids}
+
+Consider a square grid $G_\alpha$, with size $\alpha$. For a point $p=(x,y)$ we define ${id}(p) = \left ( \lfloor \frac{x}{\alpha} \rfloor, \lfloor \frac{y}{\alpha} \rfloor \right )$. Points $p,q$ have same if iff they are in the same grid cell.
+
+We maintain a data structure containing the grid, and for each cell we have a linked list of points:
+
+\begin{itemize}
+	\item (2,1) $\rightarrow$ $<p_1, p_4>$
+	\item (2,3) $\rightarrow$ $<p_2, p_5, p_6>$
+	\item (3,1) $\rightarrow$ $<p_3>$
+\end{itemize}
+
+We implement $G_\alpha(Q)$ with a hash table (with chaining), using the id-function as a key. This allows insert in $O(1)$, amortized.
+
+\begin{lstlisting}[mathescape]
+${compute\_cp}(Q)$:
+	$cp \gets (p_1, p_2)$
+	$\alpha \gets d(p_1,p_2)$
+	$G \gets G_\alpha (\{p_1,p_2\})$
+	for $k \gets 3$ to $n$:
+		Let $X \subset Q$ be the points in $\{p_1, \ldots, p_{k-1}\}$ that lie either in same grid cell as $p_k$ or in an adjacent grid cell. ($O(|X|)$)
+		if $X$ is not empty:
+			Find $p_j \in X$ that is closest to $p_k$ ($O(|X|)$)
+			Let $\beta \gets d(p_j, p_k)$
+			If $\beta < \alpha$:
+				Rebuild grid $G \gets G_\beta (\{p_1, \ldots, p_{k-1}\})$ ($O(k)$)
+				$\alpha \gets \beta$
+				$cp \gets (p_j, p_k)$
+		Add $p_j$ to $G$
+\end{lstlisting}
+
+\paragraph{Correctness:} Set ${CPD}(Q) = d(p,q)$ with $(p,q)$ closest pair.
+
+\paragraph{Invariant:} After iteration $k$, $cp$ contains a closest pair of $Q_k = \{p_1, \ldots, p_k\}$, and $\alpha = {CPD}(Q_k)$.
+
+For $k = 2$, since there are only two points, this holds trivially.
+
+For $k > 2$, we call a point $q$ \emph{critical} with respect to $Q_k$ if ${CPD}(Q_k \setminus \{q\}) > {CPD}(Q_k)$.
+
+If $p_k$ is not critical for $Q_k$, $\beta \ge {CPD}(Q_{k-1}) = \alpha$, so $\alpha$ and $cp$ remain unchanged as required.
+
+If $p_k$ is critical, let $p_i$ be the closest point to $p_k$ in $Q_{k-1}$. $(p_i, p_k)$ is closest pair. The $\alpha$-disk around $p_k$ is contained in the 9 cells around $p_k$. Since $d(p_i, p_k) < \alpha$, $p_i$ is inside the disk and therefore in $X$. 
+
+\paragraph{Running Time}
+\begin{mylemma}
+$|X| \le 36.$	
+\end{mylemma}
+\begin{proof}
+	We show that no grid cell contains more than 4 points (packing argument).
+	Fix a grid cell $S$. Split it into $S_1, \ldots, S_4$.
+	Assume that $S$ contains 5 points. So, there is some $S_i$ with 2 points $p$ and $q$. Since ${diam}(S_i) = \sqrt{2} \cdot \frac{\alpha}{2} < \alpha$. This implies that $d(p,q) < \alpha$. However $\alpha$ is the closest pair distance of the grid. Contradiction.
+\end{proof}
+
+Define, for $k=3, \ldots, n$, the variable $X_k = 1$ if $p_k$ is critical for $Q_k$, or 0 otherwise.
+Then, the running time is:
+
+\begin{align*}
+O \left ( \sum\limits_{k=3}^n \left ( 1 + X_k \cdot k\right ) \right ) \\
+\end{align*}
+
+We apply the algorithm on a random permutation of $Q$.
+
+\begin{mylemma}
+For a random permutation, $E[X_k] \le \frac{2}{k}$.	
+\end{mylemma}
+\begin{proof}
+	There are at most 2 critical points in $Q_k$.
+\end{proof}
+
+\paragraph{Expected running time:}
+
+\begin{align*}
+	E \left [O \left (\sum\limits_{k=3}^n \left (1 + k \cdot X_k \right ) \right ) \right ] = O \left (\sum\limits_{k=3}^n \left (1 + k \cdot E [X_k] \right ) \right ) = O(n).
+\end{align*}
+
+
+
+
+
