@@ -312,4 +312,59 @@ In this case, one would like to avoid the additive term of $O(k)$ in the query t
 
 \paragraph{Answer.}
 
+\begin{enumerate}[a)]
+
+\item
+Except for the calls to reportSubtree$(v)$, 1DRangeQuery run in time $O(\log n)$.
+We seek to replace reportSubtree with an $O(1)$ operation.
+
+The trick is to augment the tree, storing, at each internal node $v$, the size of $Q(v)$.
+Maintaining these counts is trivial.
+
+We also change 1DRangeQuery, adding an accumulator.
+Initially zero, the accumulator gets bumped on every call to reportSubtreeCount$(v)$ (the obvious $O(1)$ operation) and gets returned when 1DRangeQuery terminates.
+
+\item
+It's the same trick:
+The associated structure, $T'(v)$, stored in an internal node of the range tree contains augmented trees, as described in part~(a).
+
+1DRangeQuery now only bumps the accumulator.
+It's 2DRangeQuery's job is to clear it initially and return it on termination.
+
+\item
+First, recall how fractional cascading works.
+
+Motivating problem:
+Given two sorted arrays $A_1$, $A_2$ with $A_2 \subseteq A_1$, and an interval $I$, report all elements in $A_1 \cap I$ and all elements in $A_1 \cap I$.
+If we point each $a \in A_1$ to the smallest $b \in A_2$ s.t.\ $b \ge a$, then we can solve the motivating problem by doing a single binary search in $A_1$, followed by reading off the answers for both $A_1$ and $A_2$.
+This is relevant to range trees since
+\[
+	Q(v) \supseteq Q(v_\mathsf{left}) \uplus Q(v_\mathsf{right})
+\]
+for every internal node $v$.
+
+A \emph{layered range tree} is a BST $T$ for $x$-coordinates (as before).
+The associated structure for an internal node, $v$, is an array of the points $Q(v)$, sorted by $y$-coordinate s.t.
+\begin{itemize}
+	\item Each entry in the array contains a point, $(x,y)$, and two pointers, $\ell$ and $r$.
+	
+	\item $\ell$ (resp.\ $r$) points into the associated structure for $v$'s left (resp.\ right) child, each aiming at the smallest element in the target structure that's larger or equal to $y$.
+	
+	\item As 2DRangeQuery traverses the range tree, it also follows the corresponding associated structure pointers.
+	Rather than call 1DRangeQuery for $[y, y']$, it starts reporting using its current auxiliary structure pointer, stopping when it finds a point $(\any, y')$ s.t.\ $y' > y$.
+	
+\end{itemize}
+Consider a typical reporting problem that arises when following left pointers from $v_\textsf{split}$.
+We have an internal node $v$ s.t.\ $x \le x_v$, a reference $A$ to the auxiliary structure $A'(v_\textsf{right})$, and an index $i$ into $A$ s.t.\ $A[i]$ is the first entry that's larger or equal to $y$.
+Observe that $|A| - i$ counts the number of entries in $A'(v)$ that are larger or equal to $y$.
+If we also had the index $j$ into $A$ of the last entry that's smaller or equal to $y'$, then we would be done:
+We could bump our accumulator by $j-i$ in $O(1)$ time.
+
+To achive this, we augment the arrays described above with another pair of pointers:
+$\ell'$ (resp.\ $r'$) points into the associated structure for $v$'s left (resp.\ right) child, each aiming at the largest element that's smaller or equal to the entry's $y$-coordinate.
+As we traverse the range tree, we update $A$, $i$, and $j$ using these pointers.
+To report counts, we bump an accumulator by $j-i$.
+
+\end{enumerate}
+
 \end{document}
