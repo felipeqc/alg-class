@@ -1,0 +1,315 @@
+\documentclass[a4paper]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage{mathtools}	% pulls in amsmath
+	\mathtoolsset{centercolon}
+\usepackage{tikz}
+	\usetikzlibrary{automata}
+	\usepackage{tikz-qtree}
+\usepackage{mathpartir}
+\usepackage{amsthm}
+\usepackage{amsxtra}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{semantic}
+	\reservestyle{\declarevars}{\texttt}
+	\reservestyle{\declareops}{\texttt}
+	\reservestyle{\declarestates}{\text}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}	% for pdf image
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm}
+
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{myexample}{\textbf{Example}}
+\newtheorem{mylemma}{\textbf{Lemma}}
+\newtheorem{myproof}{\textbf{Proof}}
+\newtheorem{myinvariant}{\textbf{Invariant}}
+\newtheorem{mytheorem}{\textbf{Theorem}}
+\newtheorem{mycorollary}{\textbf{Corollary}}
+\newtheorem{myapproach}{Approach}
+\newtheorem{myproperty}{Property}
+\newtheorem{mydefinition}{Definition}
+
+\newtheorem{mycase}{Case}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=,    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ % frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=fullflexible,	% not monospace
+  keywordstyle=,       % keyword style
+  language=Octave,                 % the language of the code
+  morekeywords={forall, to, else, then, end, and, or, assign, increment, decrement, jump, jump_if, store, *, +},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=,     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  mathescape,
+  belowskip=-\baselineskip,
+}
+
+\newcommand{\swap}{\leftrightarrow}
+\DeclareMathOperator{\prob}{prob}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\key}{key}
+\newcommand*{\floor}[1]{\left\lfloor{#1}\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil{#1}\right\rceil}
+\newcommand{\any}{{\rule[-.2ex]{1ex}{.4pt}}}	% Less hideous than \_.
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RP}{\RR_{\ge 0}}
+\newcommand*{\dave}[1]{{\color{red}\textbf{PDS: #1}}}
+\newcommand{\ie}{\emph{i.e.,} }
+\newcommand{\eg}{\emph{e.g.,} }
+\usepackage{hyperref}
+\newcommand*{\Sref}[1]{\hyperref[#1]{\S\ref*{#1}}}
+\newcommand*{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+\newcommand{\edge}{\longrightarrow}
+\newcommand{\redge}{\longleftarrow}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\ROOT}{root}
+\DeclareMathOperator{\LEFT}{left}
+\DeclareMathOperator{\RIGHT}{right}
+
+\title{Exercise Sheet 12---Algorithms and Data Structures}
+\author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
+
+\begin{document}
+
+\maketitle
+
+Tutorial time: Monday 14:00
+
+
+\section*{Exercise 1 (10 pts)}
+
+\begin{enumerate}[a)]
+
+\item Let $C := \{ (\cos \alpha, \sin \alpha) \mid \alpha \in [0, \pi/2] \}$ be the quarter of the unit circle within the positive quadrant.
+Show that there exists a convex polygon $P$ with $n$ vertices such that the origin is a vertex of $P$, no vertex of $P$ lies on $C$, and $C$ and $P$ intersect $\Omega(n)$ times.
+
+\item Argue that the first part implies that the sequence $d(p_1, p_2)$, $d(p_1, p_3)$, \ldots, $d(p_1, p_n)$ can have $\Omega(n)$ local maxima for a convex polygon $(p_1, \ldots, p_n)$.
+
+\end{enumerate}
+
+\paragraph{Answer.}
+
+
+\section*{Exercise 2 (10 pts)}
+
+Give an $O(n)$-algorithm for computing a 2-approximation of the diameter of a point set $Q$.
+More precisely, your algorithm should return a number $\delta$ such that
+\[
+	\diam(Q)/2 \le \delta \le \diam(Q)
+\]
+where $\diam(Q)$ denotes the diameter of the point set (\ie the distance of a diameteral pair).
+
+\paragraph{Answer.}
+
+
+\section*{Exercise 3 (10 pts)}
+
+Consider the decision problem for the closest pair:
+Given a point set $Q$ and some $\alpha > 0$, return whether the closest pair of $Q$ has distance smaller than $\alpha$, equal to $\alpha$, or larger than $\alpha$.
+Give a (deterministic) $O(n)$-algorithm for this problem.
+
+\paragraph{Answer.}
+
+
+\section*{Exercise 4 (10 pts)}
+
+Describe an algorithm to insert and delete points from a range tree.
+You do not have to take care of rebalancing the structure.
+
+\paragraph{Answer.}
+
+Recall that a \emph{range tree} $T$ for a point set $Q \subseteq \QQ^2$ is a balanced search tree~(BST) such that:
+\begin{itemize}
+	\item The points of $Q$ are stored in the leaves of $T$ and $T$ is sorted wrt $x$-coordinate.
+	
+	\item In each internal node $v$ of $T$, we store a BST $T'(v)$ containing the \emph{canonical subset,} $Q(v)$, of $v$; \ie the set of points in the subtree of $T$ rooted at $v$.
+	
+	\item The points of $Q(v)$ are stored in the leaves of $T'(v)$ and $T'(v)$ is sorted wrt $y$-coordinate.
+	
+\end{itemize}
+We call $T'(v)$ the \emph{associated structure} of $v$.
+
+\newcommand{\AEMP}{\mathsf{AEmp}}%
+\newcommand{\AINT}{\mathsf{AInt}}%
+\newcommand{\ALEAF}{\mathsf{ALeaf}}%
+\newcommand{\Akey}{\text{Akey}}%
+\newcommand{\Ainsert}{\text{Ainsert}}%
+\newcommand{\Adelete}{\text{Adelete}}%
+\newcommand{\Arepair}{\text{Arepair}}%
+\newcommand{\IF}{\mathrel{\text{if}}}%
+\newcommand{\AND}{\mathrel{\text{and}}}%
+\newcommand{\WHERE}{\mathrel{\text{where}}}%
+
+\paragraph{Implementing $T'(v)$.}
+First, we sketch an implementation of associated structures as (unbalanced) binary trees.
+For additional simplicity, we assume that no two points have the same $y$-coordinate.
+\begin{itemize}
+
+\item
+Representation:
+\[
+	A ::= \AEMP \mid \AINT(A_1, k, A_2) \mid \ALEAF(x,y)
+\]
+Here, $\AEMP$ represents the empty tree; $\AINT(A_1, k, A_2)$ an interior node with left subtree $A_1$, key $k$, and right subtree $A_2$; and $\ALEAF(x,y)$ a leaf node storing point $(x,y)$.
+We omit the concrete representation.
+
+\item
+Representation invariant:
+For every interior node $\AINT(A_1,k,A_2)$, neither $A_1$ nor $A_2$ is $\AEMP$ and:
+\begin{align*}
+	y < k \quad &\text{when $\ALEAF(\any,y)$ under $A_1$} &	k < y \quad &\text{when $\ALEAF(\any,y)$ under $A_2$} \\
+	k' < k \quad &\text{when $\AINT(\any,k',\any)$ under $A_1$} & k < k' \quad &\text{when $\AINT(\any,k',\any)$ under $A_2$}
+\end{align*}
+
+\item
+Insertion is straightforward.
+The recursive function $\Ainsert'(A, \ell)$ inserts a new leaf $\ell$ into tree $A$.
+The helper function $\Akey(y, A)$ returns a key suitable for separating (a leaf containing) $y$ from $A$.
+Both $\Ainsert$ and $\Ainsert'$ return new trees.
+(An imperative variant---that fiddles with pointers to update the original tree---would be straightforward.)
+\begin{align*}
+	\Ainsert(A, (x,y)) &:= \Ainsert'(A, \ALEAF(x,y)) \\
+	\begin{array}[t]{@{}c@{}} \Ainsert'(A, \ell) \\ (\ell =: \ALEAF(\any,y)) \end{array} &:= \begin{cases}
+		\ell	&\IF A = \AEMP \\
+		\AINT(A, (y + y')/2, \ell)	&\IF A = \ALEAF(x',y') \AND y' <  y \\
+		\text{analogous}	&\IF A = \ALEAF(x',y') \AND y' > y \\
+		\AINT(\Ainsert'(A_1, \ell), k, A_2)	&\IF A = \AINT(A_1, k, A_2) \AND y < k \\
+		\text{analogous}	&\IF A = \AINT(A_1, k, A_2) \AND y > k \\
+		\AINT(\Ainsert'(A_1, \ell), \hat k, A_2)	&\IF A = \AINT(A_1,k, A_2) \AND y = k \\
+		&\WHERE \hat k := \Akey(y, A_2)
+	\end{cases} \\
+	\Akey(y, A) &:= \begin{cases}
+		(y+y')/2	&\IF A = \ALEAF(\any, y') \\
+		(y+k)/2	&\IF A = \AINT(\any, k, \any)
+	\end{cases}
+\end{align*}
+Note that $\Akey(\any, A)$ assumes $A \not= \AEMP$, and the invariant ensures this is always the case.
+
+\item Deletion is slightly more complicated, as usual.
+We permit at most one invariant violation:
+An internal node might contain the subtree $\AEMP$ during a successful deletion.
+We bubble such violations up toward the root, where they cease to exist.
+As with insertion, deletion is recursive and returns a new tree rather than fiddle with pointers:
+\begin{align*}
+	\Adelete(A, (x,y)) &:= \begin{cases}
+		\AEMP	&\IF A = \AEMP \\
+		A	&\IF A = \ALEAF(x',y') \AND (x',y') \not= (x,y) \\
+		\AEMP	&\IF A = \ALEAF(x,y) \\
+		\Arepair(\Adelete(A_1, (x,y)), k, A_2)	&\IF A = \AINT(A_1, k, A_2) \AND y < k \\
+		\text{analogous}	&\IF A = \AINT(A_1, k, A_2) \AND y > k \\
+		A	&\IF A = \AINT(\any, k, \any) \AND y = k
+	\end{cases} \\
+	\Arepair(A_1, k, A_2) &:= \begin{cases}
+		\AINT(A_1, k, A_2)	&\IF A_1, A_2 \not= \AEMP \\
+		A_2	&\IF A_1 = \AEMP \AND A_2 \not= \AEMP \\
+		A_1	&\IF A_1 \not= \AEMP \AND A_2 = \AEMP \\
+	\end{cases}
+\end{align*}
+The auxiliary function $\Arepair(A_1, k, A_2)$ assumes that at most one of $A_1$ or $A_2$ is $\AEMP$.
+This holds since the invariant held before $\Adelete$ started.
+
+\end{itemize}
+
+\paragraph{Implementing $T$.}
+\newcommand{\TEMP}{\mathsf{TEmp}}%
+\newcommand{\TINT}{\mathsf{TInt}}%
+\newcommand{\TLEAF}{\mathsf{TLeaf}}%
+\newcommand{\Tinsert}{\text{Tinsert}}%
+\newcommand{\Tdelete}{\text{Tdelete}}%
+\newcommand{\Trepair}{\text{Trepair}}%
+\newcommand{\Tkey}{\text{Tkey}}%
+We'll be brief about range trees, since many of the ideas (and the code, in an actual implementation) carry over from associated structures.
+
+\begin{itemize}
+
+\item Representation:
+\[
+	T ::= \TEMP \mid \TINT(T_1, k, A, T_2) \mid \TLEAF(x,y)
+\]
+Internal nodes carry an associated structure $A$ (and a key $k$).
+
+\item Representation invariant:
+For any internal node $v = \TINT(T_1, k, A, T_2)$,
+\[
+	\floor{A} = Q(v) := \floor{T_1} \cup \floor{T_2}
+\]
+where $\floor{A}$ and $\floor{T}$ denote the set of points stored in leaf nodes of $A$ and $T$, respectively.
+
+The rest is completely analogous to associated structures, except that range trees are ordered by $x$-coordinate rather than $y$-coordinate.
+
+\item
+Insertion:
+We update associated structures on the path from the new leaf to the root.
+\begin{align*}
+	\Tinsert(T, (x,y)) &:= \Tinsert'(T, \TLEAF(x,y)) \\
+	\begin{array}[t]{@{}c@{}} \Tinsert'(T, \ell) \\ (\ell =: \TLEAF(x,y)) \end{array} &:= \begin{cases}
+		\ell	&\IF T = \TEMP \\
+		\TINT(T, (x+x')/2, A'', \ell)	&\IF T = \TLEAF(x',y') \AND x' <  x \\
+			&\WHERE A' := \Ainsert(\AEMP, (x',y')) \\
+			&\AND A'' := \Ainsert(A', (x,y)) \\
+		\text{analogous}	&\IF T = \TLEAF(x',y') \AND x' > x \\
+		\TINT(T'_1, k, A', T_2)	&\IF T = \TINT(T_1, k, A, T_2) \AND x < k \\
+			&\WHERE T'_1 := \Tinsert'(T_1, \ell) \\
+			&\AND A' := \Ainsert(A, (x,y)) \\
+		\text{analogous}	&\IF T = \TINT(T_1, k, A, T_2) \AND x > k \\
+		\TINT(T'_1, \hat k, A', T_2)	&\IF T = \TINT(T_1, k, A, T_2) \AND y = k \\
+			&\WHERE T'_1 := \Tinsert'(T_1, \ell) \\
+			&\AND A' := \Ainsert(A, (x,y)) \\
+			&\AND \hat k := \Tkey(x, T_2)
+	\end{cases} \\
+	\Tkey(x, T) &:= \text{analogous to $\Akey$}
+\end{align*}
+
+\item
+Deletion:
+There are no new insights.
+As with insertion, we update associated structures on the path to the root; otherwise, we use the same deletion algorithm as before.
+
+\end{itemize}
+
+\section*{Exercise 5 (10 pts)}
+
+Sometimes, one is only interested in the \emph{number} of points that lie in a query rectangle.
+This problem is called \emph{range counting query}.
+In this case, one would like to avoid the additive term of $O(k)$ in the query time.
+\begin{enumerate}[a)]
+
+\item Describe how to adapt 1-dimensional range trees to support range counting queries in $O(\log n)$ time.
+
+\item Describe how to obtain $O(\log^2 n)$ query time for points in $\RR^2$.
+
+\item Use fractional cascading to improve the query time to $O(\log n)$ in $\RR^2$.
+
+\end{enumerate}
+
+\paragraph{Answer.}
+
+\end{document}
