@@ -1,0 +1,126 @@
+\section{String Matching}
+
+\paragraph{Problem:} Given a text $T$ and search pattern $P$, find all occurrences of $P$ in $T$.
+
+\paragraph{Formal Definition:} $T[1, \ldots, n], P[1, \ldots, m]$ are \emph{strings}, that is, arrays with entries from a finite alphabet $\Sigma$ (entries are the \emph{characters} of the string). We assume $m \le n$.
+
+$P$ occurs in $t$ with shift $S$, if for all $1\le j \le m$, $P[i] = T[i+s]$. In this case, $S$ is called a \emph{valid shift}. Otherwise, $s$ is \emph{invalid shift}.
+
+\paragraph{Problem (formal version):} Given $T$, $P$ strings, find all valid shifts.
+
+\subsection{Simple Solution}
+
+\paragraph{Equality Test}: Decide $``x = y?''$ for two strings of same length $\\rightarrow O(m) (m = |x|)$ (trivial).
+
+\begin{lstlisting}[mathescape]
+	${Naive\_String\_Matcher}(T,P)$
+	$n \gets |T|, m \gets |P|$
+	for $s$ from $0$ to $n-m$:
+		if $P[1,\ldots,m] = T[s+1, \ldots, s+m]$:
+			Report $s$ as valid shift
+\end{lstlisting}
+
+\paragraph{Running Time:} $O(\underbrace{(n-m+1)}_\text{Number of iterations} \cdot \underbrace{m}_\text{Cost of string comparison})$. Tight bound!
+
+However, the algorithm is not optimal. There is no information exchange between iterations.
+
+\subsection{Simple Improvement}
+
+If all characters in $P$ are pairwise distinct, we can solve the problem in $O(n)$ time. If $k$ characters match, we can jump $k$ steps forward.
+
+\subsection{Rabin-Karp Algorithm (1987)}
+
+Denote $d = |\Sigma|$. Without loss of generality, assume $\sigma = \{0, \ldots, d-1\}$. A string $S[1,\ldots,k]$ is mapped uniquely to an integer $\overline{S}$ with
+
+$\overline{S} = \sum\limits_{i=1}^k S[i] \cdot d^{k-i}.$
+
+\paragraph{Example:} $\Sigma={0,\ldots, 9}$. The string $``13375''$ maps to $1\cdot 10^4 + 3 \cdot 10^3 + 3 \cdot 10^2 + 7 \cdot 10^1 + 5 \cdot 10^0 = 13375$.
+
+From now, assume that $\Sigma = \{0,\ \ldots, 9\}$ (can be easily generalized).
+
+\paragraph{Idea:} Let $p = \overline{P}$, $t_s = \overline{T[s+1, \ldots, s+m]}$, for $s = 0, \ldots, n-m$.
+	\begin{itemize}
+		\item Observe that $s$ is valid shift iff $p = t_s$.
+		\item We can compute $t_{s+1}$ from $t_s$ \emph{efficiently}.
+	\end{itemize}
+
+\begin{enumerate}
+	\item \textbf{Computing $p$:} Horner's rule, in $O(n)$ time.
+	
+	$$p = P[m] + 10 \cdot (P[m-1] + 10\cdot(P[m-2] + \cdots + 10 \cdot P[1]) \cdots)$$
+	
+	\item \textbf{Computing $t_0$:} Same.
+	\item \textbf{Computing $t_{s+1}$ from $t_s$:}
+	
+	$$t_{s+1} = 10\cdot(t_s - 10^{m-1} \cdot T[s+1]) + t[s + m + 1]$$
+\end{enumerate}
+
+\paragraph{Running Time:} Precompute $10^{m-1}$ in $O(m)$ time ($O(\log m)$ is also possible). Then, update $t_s \rightarrow t_{s+1}$ in constant time. Total complexity is
+
+$$\underbrace{O(m)}_\text{Precompute $p$,$t_0$,$10^{m-1}$} + \underbrace{(n-m) \cdot O(1)}_\text{Computing $t_1, \ldots, t_{n-m}$} = O(n)?$$
+
+\paragraph{Problem:} Numbers get as large as $d^m$. Therefore, assumption that arithmetic is in constant time is unrealistic.
+
+\paragraph{Fix:} Choose prime number $q$ and compute $p, t_0, \ldots, t_{n-m} \mod q$.
+
+\paragraph{Practical choice:} Choose $q$ such that $d \cdot q$ fits into one machine word. We know that if $s$ is a valid shift, then $p = t_s \mod q$. However, the converse is not true. For example, ``13375'' and ``24389'' match for $q=11$. We call this \emph{spurious hit} (false positive).
+
+We deal with that by checking $``p=t_s''$ as a \emph{heuristic} to filter out invalid shifts quickly.
+
+\begin{lstlisting}[mathescape]
+${Rabin\_Karp\_Matcher(T,P,d,q)}$:
+	$n \gets |T|, m \gets |P|$
+	$h \gets d^{m-1} \mod q$
+	$p \gets 0, t_0 \gets 0$
+	for $i$ from $1$ to $m$:
+		$p \gets P[i] + d \cdot p$
+		$t_0 \gets T[i] + d \cdot t_0$
+	for $s$ from $0$ to $n-m$:
+		if $t_s = p$:
+			if $p[1,\ldots,m] = T[s+1, \ldots, s+m]$:
+				report $s$
+			if $s < n-m$:
+				$t_{s+1} \gets T[s+m+1] + d \cdot (t_s - h \cdot T[s+1]) \mod q$
+\end{lstlisting}
+
+\paragraph{Running Time:} $O((n-m+1) \cdot m)$ worst-case, as before. More precisely,
+
+$$O(\underbrace{m}_\text{Preprocessing} + \underbrace{(n-m+1) \cdot 1}_\text{update $t_{s+1}$} + (v + e)\cdot m)$$
+
+with $v = \#$ valid shifts and $e = \#$ spurious hits.
+
+How to bound $e$? Assume that $q$ is chosen u.a.r. from a set of primes such that for any two distinct strings $x \neq y$ of size $m$, ${prob}(\overline{x}=\overline{y} \mod q) \le \frac{1}{q}$ (universal hashing). Then, $E[e] \le \frac{n-m}{q} < \frac{n}{q}$. So, the expected complexity is
+
+$$O(m + (n - m + 1) + (v + \frac{n}{q}) \cdot m) = O(n + v \cdot m + \frac{n \cdot m}{q}) = O(n + v \cdot m)$$
+
+if $q \ge m$ is chosen.
+
+
+\subsection{Extension}
+
+Look for a (large) set of search patterns $P_1, \ldots, P_k$. Assume they all have size $m$. Return all pairs $(s,i)$ such that $s$ is a valid shift for $P_i$.
+
+\paragraph{Direct Solution:} Precompute $p_1, \ldots, p_k$ with $p_i = \overline{P_i} \mod q$ in $O(k \cdot m)$ time. Check for each $s$ whether $t_s = p_i$ for some $i$. Then, we have $O((n+m) \cdot k) = O(n \cdot k)$.
+
+\paragraph{Improvement:}  Put $\{P_1, \ldots, P_k\}$ in hash table with ${key}(P_i)=p_i \mod q$. Construction takes $O(k)$ expected time. A lookup whether $t_s \in \{p_1, \ldots, p_k\}$ takes constant time and yields $P_i$, such that $\overline{P_i} = t_s$.
+
+\subsection{Finite Automata}
+
+\paragraph{Approach}: Preprocess $P$ to produce a finite automaton. Find valid shifts in $O(n)$ time by scanning the text $T$ once and ``following transitions'' in the automaton.
+
+\begin{mydefinition}[Automaton (simplified version)]
+States: $Q = \{0, \ldots, m\}$ with $0$ \emph{starting state} and $m$ is the \emph{accepting state}.
+
+Transition function: $\sigma: Q \times \Sigma \rightarrow Q$, that is, $\sigma(q,a) = q'$ when in state $q$ and reading $a$, we move to state $q'$.
+\end{mydefinition}
+
+The transition function can be stored in a table using $O(m \cdot |\Sigma|)$ space.
+
+\begin{lstlisting}[mathescape]
+{Finite\_Automaton\_Matcher}(T, \sigma, m):
+	$n \gets |T|$
+	$q \gets 0$
+	for $i$ from $1$ to $n$:
+		$q \gets \delta(q, T[i])$
+		if $q = m$, report $(i - m)$
+\end{lstlisting}
