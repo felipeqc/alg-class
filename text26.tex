@@ -1,0 +1,252 @@
+\subsection{Definining $\sigma$}
+
+\paragraph{Notations:}
+
+\begin{itemize}
+	\item $\Sigma^\ast$ is the set of all strings of finite length, including the \emph{empty string} $\epsilon$ of length~0.
+	\item Write $P_k = P[1,\ldots, k]$ for $k \le m$ (prefix of length $k$), $P_0 = \epsilon$, $P_m=P$.
+	\item Concatenation of strings: $x = ``aba'', y ``bbc'' \rightarrow xy = ``ababbc''$.
+	\item $x \in \Sigma^\ast$ is \emph{suffix} of $y \in \Sigma^\ast$, if $y = zx$ with some $z \in \Sigma^\ast$.
+\end{itemize}
+
+\paragraph{Simple Properties:}
+\begin{itemize}
+	\item (S1) $x \sqsupset y \iff xz \sqsupset yz $
+	\item (S2) $x \sqsupset y$ and $y \sqsupset z \implies x \sqsupset z$
+	\item (S3) $x \sqsupset z, y \sqsupset z, |x| \le |y| \implies x \sqsupset y$
+\end{itemize}
+
+\begin{mydefinition}[Suffix Function]
+	For a fixed $P$, define
+	
+	$$\sigma: \Sigma^\ast \rightarrow \{0,\ldots,m\}, x \mapsto \max \{ P_k : P_k \sqsupset x\}.$$
+	
+	That is, $\sigma(x)$ is the length of the longest prefix of $P$ that is a suffix of $x$.
+\end{mydefinition}
+
+For example, $P = ``aba''$. $\sigma(acaa) = 1$, $\sigma(acaab) = 2$, $\sigma(acaabc) = 0$, $\sigma(acaaba) = 3$. For $|P| = m$, $\sigma(x) =m \iff P \sqsupset x$.
+
+
+\noindent Note that $s$ is valid shift $\iff P \sqsupset T_{s+m} \iff \sigma(T_{s+m}) = m$.
+
+\begin{mylemma}[A]
+For any pattern $P$, $x \in \Sigma^\ast$ and $a \in \Sigma$, $\sigma(xa) \le \sigma(x) + 1$	
+\end{mylemma}
+\begin{proof}
+	If $\sigma(xa) = 0$, then the statement follows from $\sigma(x) \ge 0$. Else, let $\sigma(xa) = r$, $r>0$. By definition, $P_r \sqsupset xa$. So, $P_r = P_{r-1} a$ and $P_{r-1}\sqsupset x$ (by S1). It follows that $\sigma(x) \ge r-1$, so $\sigma(xa) = r = r -1 + 1 \le \sigma(x) + 1$.
+\end{proof}
+
+For pattern $P$ of length $m$, define automaton:
+
+\begin{itemize}
+	\item $Q = \{0, \ldots, m\}$
+	\item $\sigma(q,a) = \sigma(P_q a)$
+\end{itemize}
+
+For example, for $P=``ababaca''$, $\sigma(5,b) = \sigma(ababab)=4$. $\sigma(5,a) = \sigma(ababaa)=1$. $\sigma(5,c) = \sigma(ababac)=6$.
+
+\bigskip
+
+Then, we run ${Finite\_Automata\_Matcher}$ using this $\delta$.
+
+\paragraph{Correctness:} Define $\phi: \Sigma^\ast \rightarrow Q$ recursively:
+
+\begin{align*}
+	\phi(\epsilon) &= 0 \\
+	\forall x \in \Sigma^\ast, a \in \Sigma, \phi(xa) &= \sigma(\phi(x), a)
+\end{align*}
+
+When starting at state 0 and reading $x$, the automaton defined by $\sigma$ ends in state $\phi(x)$. We show that $\phi(T_i) = \sigma(T_i)$. This implies correctness:
+
+\begin{align*}
+	& s \text{ is a valid shift} \\
+	&\iff \sigma(T_{s+m} = m) \\
+	&\iff \phi(T_{s+m}) = m \\
+	&\iff \text{Algorithm reports $(s+m) - m = s$}.
+\end{align*}
+
+\begin{mylemma}[B]
+For $x \in \Sigma^\ast$, $a \in \Sigma$, and $q = \sigma(x)$, $\sigma(xa) = \sigma(P_q a)$.	
+\end{mylemma}
+\begin{proof}
+	Since $P_q \sqsupset x, P_q a \sqsupset xa$, so $\sigma(xa) \ge \sigma(P_q a)$.
+	
+	For the other direction, write $r = \sigma(xa)$. By Lemma A, $r = \sigma(xa) \le \sigma(x) + 1 = q + 1$, so $|P_r| \le |P_q a|$.
+	
+	Moreover, $P_r \sqsupset xa$ by definition of $r$, and $P_q a \sqsupset xa$, because $P_q \sqsupset x$. By property S3, $P_r \sqsupset P_q a$, so $\sigma(xa) = r \le \sigma(P_q a)$.
+\end{proof}
+
+\begin{theorem}
+	$\forall i=0,\ldots, n: \phi(T_i) = \sigma(T_i)$.
+\end{theorem}
+\begin{proof}
+	By induction on $i$.
+	\begin{enumerate}
+		\item For $i=0$, $\phi(T_0) = 0 = \sigma(T_0)$.
+		\item Assume that the statement holds for $i$.
+		
+		Write $T_{i+1} = T_i a$, with $a \in \Sigma$. and $q = \phi(t_i)$.
+		
+		By I.H., we know that $q = \sigma(T_i)$. So,
+		
+		\begin{align*}
+		\phi(T_{i+1}) &= \phi(T_i a) \\
+		&= \delta(\phi(T_i), a) \\
+		&= \delta(q,a) \\
+		&= \sigma(P_q a) \\
+		&= \sigma(T_i a) && \text{[By Lemma B, with $x = T_i$]}\\
+		&= \sigma(T_{i+1}).
+		\end{align*}
+	\end{enumerate}
+\end{proof}
+
+\paragraph{Running Time:}
+
+$$\underbrace{\text{Compute $\delta$}}_{O(m^3 |\Sigma|)} + \underbrace{\text{Find valid shifts}}_{O(n)}$$
+
+\begin{lstlisting}[mathescape]
+For each $q\in Q$, $a \in \Sigma$:
+	Compute $\delta(q,a)$ in $O(m^2)$ time:
+		$k \gets m$
+		while ($\underbrace{P_k \not \sqsupset P_q a}_{O(k)}$):
+			$k \gets k - 1$
+\end{lstlisting}
+
+\subsection{Prefix Function}
+
+For $T = bacb[ababa]bcbab$ and $P = [ababa]ca$, we can see that:
+
+\begin{itemize}
+	\item 5 characters match.
+	\item Shift by 1 cannot be valid, independently of other characters in the text.
+	\item Shift by 2 might be valid.
+\end{itemize}
+
+Generally, given that $P[1,\ldots,q]$ match $t[s+1,\ldots, s+q]$, what is the smallest $s' > s$, such that $P[1, \ldots, k] = T[s'+1, \ldots, s'+k]$, with $s' + k = s + q$?
+
+\begin{mydefinition}[Prefix Function]
+	For a fixed $P$, with $|P|=m$, we define $\Pi: \{1, \ldots, m\} \rightarrow \{0, \ldots, m-1\}$ as follows:
+	
+	$$q \mapsto \max \{k : k < q \wedge P_k \sqsupset P_q\}$$
+\end{mydefinition}
+
+For example, for $P = ababababca$, we obtain the following function $\Pi$:
+
+\begin{tabular}{l|cccccccccc}
+  $q$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+  \hline
+  $\Pi[q]$ & 0 & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 0 & 1 
+\end{tabular}
+
+\bigskip
+
+For $P=abcd$,
+
+\begin{tabular}{l|cccc}
+  $q$ & 1 & 2 & 3 & 4 \\
+  \hline
+  $\Pi[q]$ & 0 & 0 & 0 & 0 
+\end{tabular}
+
+\bigskip
+
+\noindent The prefix function allows the following improved implementation for the naive matcher:
+
+\newpage
+
+\begin{lstlisting}[mathescape]
+${Naive\_Matcher\_Improved}($T,P$)$:
+	$n \gets |T|$, $m \gets |P|$
+	$T \gets {compute\_prefix\_function}(P)$
+	$S \gets 0$
+	while $s \le n-m$:
+		$q \gets 0$ /* # of matching characters */
+		while $q < m$ and $P[q+1] = T[s + q + 1]$:
+			$q \gets q + 1$
+		if $q=m$:
+			report $s$
+		if $q = 0$:
+			$s \gets s + 1$
+		else:
+			$s \gets s + q - \Pi[q]$
+\end{lstlisting}
+
+\paragraph{More Applications:}
+\begin{itemize}
+	\item Compute automaton in $O(m \cdot |\Sigma|)$
+	\item Knuth-Morris-Pratt algorithm $\rightsquigarrow$ String matching in $O(m+n) = O(n)$
+\end{itemize}
+
+\bigskip
+
+\noindent Now we show how to compute the prefix function in linear time:
+
+\begin{lstlisting}[mathescape]
+${Compute\_Prefix\_Function}(P):$
+	$m \gets |P|$
+	$\Pi[1] \gets 0$
+	$k \gets 0$
+	for $q = 2, \ldots, m$: /* $k = \Pi[q-1]$ */
+		while $k>0$ and $P[k+1] \neq P[q]$:
+			$k \gets \Pi[k]$
+		if $P[k+1] = P[q]$:
+			$k \gets k + 1$ (*)
+		$\Pi[q] \gets k$
+	return $\Pi$
+\end{lstlisting}
+
+\paragraph{Running Time:} Observe that $\Pi[q] < q$, so line (*) decreases $k$. Also, $k \ge 0$ throughout. But $k$ increases at most $m$ times, which implies that $k$ decreases at most $m$ times. Therefore, the time of all (*)-steps is bounded by $O(m)$.
+
+\paragraph{Correctness:} Define for $q = 2, \ldots, m$,
+
+$$E_{q-1} = \{k : k < q-1 \wedge P_{k+1} \sqsupset P_q\} = \{k: k < q - 1 \wedge P_k \sqsupset P_{q-1} \wedge P[k+1] = P[q]\}.$$
+
+\begin{mylemma}
+$\Pi[q] = \begin{cases} 0 &\mbox{if } E_{q-1} = \emptyset \\
+1 + \max E_{q-1} & \mbox{if } E_{q-1} \neq \emptyset . \end{cases}$
+\end{mylemma}
+\begin{proof}
+	If $E_{q-1} = \emptyset$, $P_1 \not \sqsupset P_q, P_2 \not \sqsupset P_q, \ldots, P_{q-1} \not \sqsupset P_q \implies \Pi[q] = 0$.
+	
+	For $E_{q-1} \neq \emptyset$, let $k= \max E_{q-1}$. We have $P_{k+1} \sqsupset P_q$. So, $\Pi[q] \ge k+1$.
+	
+	In particular, $\Pi[q] > 0$, so $\Pi[q] = r + 1$ for some $r \ge 0$.
+	
+	By definition, $r = \Pi[q]-1 < q-1$ and $P_{r+1} \sqsupset P_q$, so $r \in E_{q-1}$.
+	
+	It follows that $\Pi[q] = r + 1 \le 1 + k$, because $k \ge r$.
+\end{proof}
+
+\paragraph{Strategy for computing $\Pi[q]$ from $\Pi[q-1]$:}
+\begin{itemize}
+	\item Compute elements of $\{k: k < q-1 \wedge P_k \sqsupset P_{q-1}\}$ in decreasing order.
+	\item For each $k$, check whether $P[k+1] = P[q]$.
+	\item If such $k$ exists, $\Pi[q] \gets k+1$.
+	\item If no such $k$ exists, $\Pi[q] \gets 0$.
+\end{itemize}
+
+\begin{mydefinition}
+For $q \ge 2$, define $\Pi^\star [q] = \{\Pi[q], \Pi[\Pi[q]], \ldots, \Pi^{(t)}[q]\}$ with $t$ is the least value such that $\Pi^{(t)}[q] = 0$.	
+\end{mydefinition}
+
+\begin{mylemma}
+	$\Pi^\star [q] = \underbrace{\{k : k < q \wedge P_k \sqsupset P_q\}}_{=M}$.
+\end{mylemma}
+\begin{proof}
+	$``\subseteq''$. Show $\Pi^{(u)}[q] \in M$ by induction on $u$:
+	\begin{itemize}
+		\item For $u=1$, $\Pi[q] \in M$ by definition.
+		\item $u \rightsquigarrow u+1$: $\underbrace{\Pi^{u+1}[q]}_{=q''} = \Pi[\underbrace{\Pi^{(u)}[q]}_{=q'}]$.
+		
+		Note that $q' \in M$ by I.H., so $P_{q'} \sqsupset P_q$. Also, $q'' = \Pi[q']$, so $P_{q''} \sqsupset P_{q'}$ and $P_{q''} \sqsupset P_{q}$. Thus, $q'' \in M$.
+	\end{itemize}
+
+	$``\supseteq''$. By contradiction. Let $j < q$ with $j \in M$ but $j \notin \Pi^\star[q]$. Since $\Pi[q] = \max M$, $j < \Pi[q]$. So, there is some $u > 0$, such that
+	
+	$$j' = \Pi^{(u)}[q] > j > \Pi^{(u+1)}[q] = \Pi[j'].$$
+	
+	By $``\subseteq''$, $j' \in M$, so $P_{j'} \sqsupset P_q$, and $P_j \sqsupset P_q$, because $j \in M$.
+	
+	By (S3), we have $P_j \sqsupset P_{j'}$, so $\Pi[j'] \ge j$. Contradiction. 
+\end{proof}
+
