@@ -93,6 +93,7 @@
 \DeclareMathOperator{\ROOT}{root}
 \DeclareMathOperator{\LEFT}{left}
 \DeclareMathOperator{\RIGHT}{right}
+\DeclareMathOperator{\CH}{CH}
 
 \title{Exercise Sheet 12---Algorithms and Data Structures}
 \author{Felipe Cerqueira \\ 2547787 \and David Swasey \\ 2542105}
@@ -129,6 +130,65 @@ where $\diam(Q)$ denotes the diameter of the point set (\ie the distance of a di
 
 \paragraph{Answer.}
 
+We saw in lecture that, given $\CH(Q)$, we can determine $\diam(Q)$ in time $O(n)$.
+We thus seek an approximation to the convex hull that, when plugged into the diameter algorithm, yields a $2$-approximation, $\delta$, of the diameter.
+
+We briefly describe the planar algorithm from
+\begin{quote}
+	J.L.~Bentley, M.G.~Faust, and F.P.~Preparata.\\
+	Approximation algorithms for convex hulls.\\
+	In \emph{CACM} 25(1), 1982.
+\end{quote}
+Fix $k$.
+\begin{itemize}
+	\item Set $S \gets \emptyset$.
+	
+	\item $O(n)$:
+	Find $x_0$ (resp.\ $x_1$), the minimal (resp.\ maximal) $x$-coordinate of points in $Q$.
+	
+	\item
+	Imagine vertical lines at $x_0$ and $x_1$ and divde the area between them into $k$ equal width strips.
+	
+	\item $O(n)$: For each strip, find a point with maximal $y$-coordinate and add it to $S$.
+	Do the same for minimal $y$-coordinates.
+	($S$ contains at most $2k$ points.)
+	
+	\item 
+	If there's only one point in $Q$ with $x$-coordinate $x_0$, then add it to $S$; otherwise, add two such points, one with minimal and one with maximal $y$-coordinate.
+	Do the same for $x_1$.
+	($S$ contains at most $2k+4$ points.)
+	
+	\item $O(1)$: Compute $\CH(S)$ and return it.
+\end{itemize}
+The total running time is $O(n)$, as $k$ is fixed.
+Bentley et al.\ then go on to analyze the diameter approximation obtained using their $k$-approximate hull.
+
+Let $D := \diam(Q)$ be the diameter and $\delta := \diam(\CH(S))$ the $k$-approximate diameter.
+Then:
+\begin{enumerate}
+	\item\label{eq:under} We have an under-approximation: $\delta \le D$.
+	
+	This is easy easily seen.
+	By construction, $S \subseteq Q$, so $\CH(S) \subseteq \CH(Q)$, so $\delta \le D$.
+
+	\item\label{eq:dist} If $p \in Q$ is not in $\CH(S)$, then the distance from $p$ to $\CH(S)$ is at most $D/k$.
+	
+	See the paper for proof.
+	
+	\item\label{eq:over}
+	If $p, p' \in Q$ achieve the diameter $D$, then by~\eqref{eq:dist}, each is at most $D/k$ distance from $\CH(S)$.
+	By the triangle inequality, $D - \delta \le 2D/k$.
+	
+	\item\label{eq:approx}
+	Combining~\eqref{eq:under} and~\eqref{eq:over}, we have
+	\[
+		D - \frac{2D}{k} \le \delta \le D
+	\]
+\end{enumerate}
+In particular, if we set $k=4$, then~\eqref{eq:approx} yields the desired bound:
+\[
+	\diam(Q)/2 = D - 2D/4 \le \delta \le D = \diam(Q)
+\]
 
 \section*{Exercise 3 (10 pts)}
 
